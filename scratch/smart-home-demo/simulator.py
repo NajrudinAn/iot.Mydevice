@@ -7,10 +7,10 @@ import sys
 # ─────────────────────────────────────────────
 #  Configuration
 # ─────────────────────────────────────────────
-BROKER       = "localhost"
+BROKER       = "mydevice.in"
 PORT         = 1883
-DEVICE_ID    = "DEV-001-F47C"
-SECRET_KEY   = "bba6d3e4ec0d5d8c5c5a9b51ae3d9efec0fa5ce13cd79220689d1df7310b1fee"
+DEVICE_ID    = "DEV-001-03BA"
+SECRET_KEY   = "d38beb4d947df2366117c206ea95bf6044d285dab518c4d24c1da7d542c2c05e"
 
 # Topics (matching what the platform actually expects)
 TOPIC_DATA     = f"devices/{DEVICE_ID}/data"

@@ -97,15 +97,17 @@ export default function HostResolver({ children }) {
     const checkHost = async () => {
       const currentHost = window.location.hostname;
       
+      const platformDomain = import.meta.env.VITE_PLATFORM_DOMAIN || 'mydevice.in';
+      
       // If we're on localhost or standard domain, skip resolving and show standard platform
-      if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost.includes('ngrok') || currentHost === 'platform.local') {
+      if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost.includes('ngrok') || currentHost === 'platform.local' || currentHost === platformDomain || currentHost === `www.${platformDomain}`) {
         setIsPlatform(true);
         setLoading(false);
         return;
       }
 
       try {
-        const res = await externalClient.get(`/resolve-host/${currentHost}`);
+        const res = await externalClient.get(`/applications/resolve-host?hostname=${currentHost}`);
         if (res.data.application) {
           setResolvedAppId(res.data.application.id);
         } else {

@@ -14,7 +14,7 @@ const syncDeviceCredential = async (deviceId, secretKey) => {
             execSync(`docker exec mqtt_broker mosquitto_passwd -b /mosquitto/config/mosquitto.passwd ${deviceId} ${secretKey} 2>/dev/null`);
         } catch (dockerErr) {
             const pwdPath = path.join(__dirname, '../../../mosquitto/config/mosquitto.passwd');
-            execSync(`mosquitto_passwd -b ${pwdPath} ${deviceId} ${secretKey}`);
+            execSync(`sudo mosquitto_passwd -b ${pwdPath} ${deviceId} ${secretKey}`);
         }
 
         // 2. Regenerate ACL
@@ -34,7 +34,8 @@ const removeDeviceCredential = async (deviceId) => {
             execSync(`docker exec mqtt_broker mosquitto_passwd -D /mosquitto/config/mosquitto.passwd ${deviceId} 2>/dev/null`);
         } catch (dockerErr) {
             const pwdPath = path.join(__dirname, '../../../mosquitto/config/mosquitto.passwd');
-            execSync(`mosquitto_passwd -D ${pwdPath} ${deviceId}`);
+            // Use sudo to avoid permission denied on native linux installations
+            execSync(`sudo mosquitto_passwd -D ${pwdPath} ${deviceId}`);
         }
         
         await regenerateACL();
@@ -73,7 +74,7 @@ const reloadMosquitto = () => {
         try {
             execSync('docker exec mqtt_broker kill -HUP 1 2>/dev/null');
         } catch(e) {
-            execSync('pkill -HUP mosquitto');
+            execSync('sudo pkill -HUP mosquitto');
         }
     } catch (error) {
         console.error("Failed to reload Mosquitto via SIGHUP:", error.message);

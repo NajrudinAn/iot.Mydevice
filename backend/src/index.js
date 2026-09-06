@@ -21,6 +21,18 @@ const app = express();
 
 app.use(express.json());
 
+// Ensure backend_admin is authorized in mosquitto automatically on startup
+try {
+    const pwdPath = require('path').join(__dirname, '../../mosquitto/config/mosquitto.passwd');
+    const mqttUser = process.env.MQTT_USERNAME || 'backend_admin';
+    const mqttPass = process.env.MQTT_PASSWORD || 'super_secret_backend';
+    const { execSync } = require('child_process');
+    execSync(`sudo mosquitto_passwd -b ${pwdPath} ${mqttUser} ${mqttPass} && sudo pkill -HUP mosquitto`);
+    console.log(`Successfully verified ${mqttUser} in Mosquitto and reloaded broker!`);
+} catch (error) {
+    console.log('Skipping auto-mosquitto_passwd (Docker env or no sudo):', error.message);
+}
+
 // Init MQTT
 initMqttClient();
 

@@ -452,6 +452,13 @@ exports.resolveHost = async (req, res) => {
         const { hostname } = req.query;
         if (!hostname) return res.status(400).json({ error: "Hostname required" });
         
+        const platformDomain = process.env.PLATFORM_DOMAIN || 'mydevice.in';
+        
+        // Suppress 404 errors for the main platform domains to keep the browser console clean
+        if (hostname === platformDomain || hostname === `www.${platformDomain}` || hostname === 'localhost') {
+            return res.json({ application: null, isPlatform: true });
+        }
+        
         const ApplicationDomain = require('../models/applicationDomain');
         const domain = await ApplicationDomain.findByHostname(hostname);
         
