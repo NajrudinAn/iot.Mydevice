@@ -1,0 +1,41 @@
+{
+  "name": "iot-platform-backend",
+  "version": "1.0.0",
+  "description": "Backend for IoT Device Management Platform",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
+    "db:init": "node src/utils/initDb.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.0",
+    "autocannon": "^8.0.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "eventsource": "^5.1.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.7.0",
+    "jsonwebtoken": "^9.0.0",
+    "mqtt": "^5.15.2",
+    "multer": "^2.3.0",
+    "nodemailer": "^10.0.0",
+    "pg": "^8.11.0",
+    "pidusage": "^4.0.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globalSetup": "<rootDir>/tests/globalSetup.js",
+    "setupFilesAfterEnv": [
+      "<rootDir>/tests/setup.js"
+    ]
+  }
+}

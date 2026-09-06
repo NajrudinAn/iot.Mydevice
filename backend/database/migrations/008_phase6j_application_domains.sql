@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS application_domains (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    hostname VARCHAR(255) UNIQUE NOT NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('PLATFORM_SUBDOMAIN', 'CUSTOM_DOMAIN')),
+    status VARCHAR(50) NOT NULL CHECK (status IN ('PENDING', 'VERIFIED', 'ACTIVE', 'DISABLED')),
+    is_primary BOOLEAN DEFAULT false,
+    verification_token VARCHAR(255),
+    verified_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

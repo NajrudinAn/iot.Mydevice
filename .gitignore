@@ -1,0 +1,18 @@
+node_modules/
+.env*
+.DS_Store
+dist/
+build/
+*.log
+
+# Backend specific
+backend/uploads/
+backend/hosted_apps/
+backend/bench_*.js
+
+# Python specific
+__pycache__/
+*.pyc
+
+# Mac specific
+.DS_Store

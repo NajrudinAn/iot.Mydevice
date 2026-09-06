@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Control</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Platform Injection Will Happen Here -->
+</head>
+<body>
+    <!-- Background Elements for Aesthetics -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div id="app">
+        <!-- Auth View -->
+        <div id="auth-view" class="view active glass-panel">
+            <div class="header">
+                <h2>Smart Home Access</h2>
+                <p>Login to control your environment</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" value="owner@iot.com" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" value="password123" required />
+                </div>
+                <button type="submit" id="loginBtn" class="btn primary-btn">Authenticate</button>
+                <div class="auth-links">
+                    <a href="#" id="showSignupLink">Create an account</a> | 
+                    <a href="#" id="showForgotLink">Forgot password?</a>
+                </div>
+            </form>
+            <div id="loginError" class="error-msg hidden"></div>
+        </div>
+
+        <!-- Signup View -->
+        <div id="signup-view" class="view hidden glass-panel">
+            <div class="header">
+                <h2>Create Account</h2>
+                <p>Register for Smart Home Access</p>
+            </div>
+            <form id="signup-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" required />
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signup-email" required />
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-password" required />
+                </div>
+                <button type="submit" id="signupBtn" class="btn primary-btn">Register</button>
+                <div class="auth-links">
+                    <a href="#" id="showLoginFromSignup">Back to Login</a>
+                </div>
+            </form>
+            <div id="signupError" class="error-msg hidden"></div>
+        </div>
+
+        <!-- Forgot Password View -->
+        <div id="forgot-view" class="view hidden glass-panel">
+            <div class="header">
+                <h2>Reset Password</h2>
+                <p>We'll send you a reset link</p>
+            </div>
+            <form id="forgot-form">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="forgot-email" required />
+                </div>
+                <button type="submit" id="forgotBtn" class="btn primary-btn">Send Reset Link</button>
+                <div class="auth-links">
+                    <a href="#" id="showLoginFromForgot">Back to Login</a>
+                </div>
+            </form>
+            <div id="forgotError" class="error-msg hidden"></div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view hidden">
+            <div class="dashboard-header glass-panel">
+                <div class="title">
+                    <h2>Living Room Controller</h2>
+                    <span id="connection-status" class="status-badge connecting">Connecting...</span>
+                </div>
+                <button id="logoutBtn" class="btn ghost-btn">Logout</button>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Environment Sensors -->
+                <div class="glass-panel sensor-card">
+                    <div class="sensor-icon">🌡️</div>
+                    <div class="sensor-info">
+                        <h3>Temperature</h3>
+                        <div class="sensor-value" id="temp-val">-- °C</div>
+                    </div>
+                </div>
+
+                <div class="glass-panel sensor-card">
+                    <div class="sensor-icon">💧</div>
+                    <div class="sensor-info">
+                        <h3>Humidity</h3>
+                        <div class="sensor-value" id="hum-val">-- %</div>
+                    </div>
+                </div>
+
+                <!-- Actuators -->
+                <div class="glass-panel control-card">
+                    <div class="control-header">
+                        <div class="control-icon" id="light-icon">💡</div>
+                        <h3>Main Light</h3>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="lightToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="glass-panel control-card">
+                    <div class="control-header">
+                        <div class="control-icon" id="fan-icon" style="transition: transform 0.2s;">🌀</div>
+                        <h3>Ceiling Fan</h3>
+                    </div>
+                    <div class="fan-controls">
+                        <input type="range" id="fanSlider" min="0" max="3" value="0" step="1">
+                        <div class="fan-labels">
+                            <span>Off</span>
+                            <span>Low</span>
+                            <span>Med</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal / Event Log -->
+            <div class="glass-panel terminal-card">
+                <div class="terminal-header">
+                    <div class="dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <h3>System Logs</h3>
+                </div>
+                <div class="terminal-body" id="event-log">
+                    <div class="log-entry system">System initialized. Awaiting connection...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

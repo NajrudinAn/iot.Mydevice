@@ -1,0 +1,374 @@
+user backend_admin
+topic readwrite #
+
+user DEV-001-AE42
+topic read devices/DEV-001-AE42/command
+topic write devices/DEV-001-AE42/data
+topic write devices/DEV-001-AE42/status
+topic write devices/DEV-001-AE42/capabilities
+topic write devices/DEV-001-AE42/command/ack
+
+user DEV-002-0FA6
+topic read devices/DEV-002-0FA6/command
+topic write devices/DEV-002-0FA6/data
+topic write devices/DEV-002-0FA6/status
+topic write devices/DEV-002-0FA6/capabilities
+topic write devices/DEV-002-0FA6/command/ack
+
+user DEV-003-1C2E
+topic read devices/DEV-003-1C2E/command
+topic write devices/DEV-003-1C2E/data
+topic write devices/DEV-003-1C2E/status
+topic write devices/DEV-003-1C2E/capabilities
+topic write devices/DEV-003-1C2E/command/ack
+
+user DEV-001-9B2D
+topic read devices/DEV-001-9B2D/command
+topic write devices/DEV-001-9B2D/data
+topic write devices/DEV-001-9B2D/status
+topic write devices/DEV-001-9B2D/capabilities
+topic write devices/DEV-001-9B2D/command/ack
+
+user DEV-1-1788649520634
+topic read devices/DEV-1-1788649520634/command
+topic write devices/DEV-1-1788649520634/data
+topic write devices/DEV-1-1788649520634/status
+topic write devices/DEV-1-1788649520634/capabilities
+topic write devices/DEV-1-1788649520634/command/ack
+
+user DEV-2-1788649520635
+topic read devices/DEV-2-1788649520635/command
+topic write devices/DEV-2-1788649520635/data
+topic write devices/DEV-2-1788649520635/status
+topic write devices/DEV-2-1788649520635/capabilities
+topic write devices/DEV-2-1788649520635/command/ack
+
+user DEV-001-3A49
+topic read devices/DEV-001-3A49/command
+topic write devices/DEV-001-3A49/data
+topic write devices/DEV-001-3A49/status
+topic write devices/DEV-001-3A49/capabilities
+topic write devices/DEV-001-3A49/command/ack
+
+user DEV-001-F47C
+topic read devices/DEV-001-F47C/command
+topic write devices/DEV-001-F47C/data
+topic write devices/DEV-001-F47C/status
+topic write devices/DEV-001-F47C/capabilities
+topic write devices/DEV-001-F47C/command/ack
+
+user DEV-001-5FFF
+topic read devices/DEV-001-5FFF/command
+topic write devices/DEV-001-5FFF/data
+topic write devices/DEV-001-5FFF/status
+topic write devices/DEV-001-5FFF/capabilities
+topic write devices/DEV-001-5FFF/command/ack
+
+user DEV-001-F32D
+topic read devices/DEV-001-F32D/command
+topic write devices/DEV-001-F32D/data
+topic write devices/DEV-001-F32D/status
+topic write devices/DEV-001-F32D/capabilities
+topic write devices/DEV-001-F32D/command/ack
+
+user DEV-001-98C7
+topic read devices/DEV-001-98C7/command
+topic write devices/DEV-001-98C7/data
+topic write devices/DEV-001-98C7/status
+topic write devices/DEV-001-98C7/capabilities
+topic write devices/DEV-001-98C7/command/ack
+
+user DEV-001-BDD2
+topic read devices/DEV-001-BDD2/command
+topic write devices/DEV-001-BDD2/data
+topic write devices/DEV-001-BDD2/status
+topic write devices/DEV-001-BDD2/capabilities
+topic write devices/DEV-001-BDD2/command/ack
+
+user DEV-001-ACF2
+topic read devices/DEV-001-ACF2/command
+topic write devices/DEV-001-ACF2/data
+topic write devices/DEV-001-ACF2/status
+topic write devices/DEV-001-ACF2/capabilities
+topic write devices/DEV-001-ACF2/command/ack
+
+user DEV-001-005D
+topic read devices/DEV-001-005D/command
+topic write devices/DEV-001-005D/data
+topic write devices/DEV-001-005D/status
+topic write devices/DEV-001-005D/capabilities
+topic write devices/DEV-001-005D/command/ack
+
+user DEV-002-0108
+topic read devices/DEV-002-0108/command
+topic write devices/DEV-002-0108/data
+topic write devices/DEV-002-0108/status
+topic write devices/DEV-002-0108/capabilities
+topic write devices/DEV-002-0108/command/ack
+
+user DEV-001-EC46
+topic read devices/DEV-001-EC46/command
+topic write devices/DEV-001-EC46/data
+topic write devices/DEV-001-EC46/status
+topic write devices/DEV-001-EC46/capabilities
+topic write devices/DEV-001-EC46/command/ack
+
+user DEV-003-8B77
+topic read devices/DEV-003-8B77/command
+topic write devices/DEV-003-8B77/data
+topic write devices/DEV-003-8B77/status
+topic write devices/DEV-003-8B77/capabilities
+topic write devices/DEV-003-8B77/command/ack
+
+user DEV-001-C742
+topic read devices/DEV-001-C742/command
+topic write devices/DEV-001-C742/data
+topic write devices/DEV-001-C742/status
+topic write devices/DEV-001-C742/capabilities
+topic write devices/DEV-001-C742/command/ack
+
+user DEV-1-1788649537178
+topic read devices/DEV-1-1788649537178/command
+topic write devices/DEV-1-1788649537178/data
+topic write devices/DEV-1-1788649537178/status
+topic write devices/DEV-1-1788649537178/capabilities
+topic write devices/DEV-1-1788649537178/command/ack
+
+user DEV-2-1788649537179
+topic read devices/DEV-2-1788649537179/command
+topic write devices/DEV-2-1788649537179/data
+topic write devices/DEV-2-1788649537179/status
+topic write devices/DEV-2-1788649537179/capabilities
+topic write devices/DEV-2-1788649537179/command/ack
+
+user DEV-001-7132
+topic read devices/DEV-001-7132/command
+topic write devices/DEV-001-7132/data
+topic write devices/DEV-001-7132/status
+topic write devices/DEV-001-7132/capabilities
+topic write devices/DEV-001-7132/command/ack
+
+user DEV-001-1912
+topic read devices/DEV-001-1912/command
+topic write devices/DEV-001-1912/data
+topic write devices/DEV-001-1912/status
+topic write devices/DEV-001-1912/capabilities
+topic write devices/DEV-001-1912/command/ack
+
+user DEV-001-3861
+topic read devices/DEV-001-3861/command
+topic write devices/DEV-001-3861/data
+topic write devices/DEV-001-3861/status
+topic write devices/DEV-001-3861/capabilities
+topic write devices/DEV-001-3861/command/ack
+
+user DEV-001-9755
+topic read devices/DEV-001-9755/command
+topic write devices/DEV-001-9755/data
+topic write devices/DEV-001-9755/status
+topic write devices/DEV-001-9755/capabilities
+topic write devices/DEV-001-9755/command/ack
+
+user DEV-002-6DEA
+topic read devices/DEV-002-6DEA/command
+topic write devices/DEV-002-6DEA/data
+topic write devices/DEV-002-6DEA/status
+topic write devices/DEV-002-6DEA/capabilities
+topic write devices/DEV-002-6DEA/command/ack
+
+user DEV-003-A3ED
+topic read devices/DEV-003-A3ED/command
+topic write devices/DEV-003-A3ED/data
+topic write devices/DEV-003-A3ED/status
+topic write devices/DEV-003-A3ED/capabilities
+topic write devices/DEV-003-A3ED/command/ack
+
+user DEV-001-166E
+topic read devices/DEV-001-166E/command
+topic write devices/DEV-001-166E/data
+topic write devices/DEV-001-166E/status
+topic write devices/DEV-001-166E/capabilities
+topic write devices/DEV-001-166E/command/ack
+
+user DEV-001-5CBD
+topic read devices/DEV-001-5CBD/command
+topic write devices/DEV-001-5CBD/data
+topic write devices/DEV-001-5CBD/status
+topic write devices/DEV-001-5CBD/capabilities
+topic write devices/DEV-001-5CBD/command/ack
+
+user DEV-1-1788649553785
+topic read devices/DEV-1-1788649553785/command
+topic write devices/DEV-1-1788649553785/data
+topic write devices/DEV-1-1788649553785/status
+topic write devices/DEV-1-1788649553785/capabilities
+topic write devices/DEV-1-1788649553785/command/ack
+
+user DEV-2-1788649553786
+topic read devices/DEV-2-1788649553786/command
+topic write devices/DEV-2-1788649553786/data
+topic write devices/DEV-2-1788649553786/status
+topic write devices/DEV-2-1788649553786/capabilities
+topic write devices/DEV-2-1788649553786/command/ack
+
+user DEV-001-BCBC
+topic read devices/DEV-001-BCBC/command
+topic write devices/DEV-001-BCBC/data
+topic write devices/DEV-001-BCBC/status
+topic write devices/DEV-001-BCBC/capabilities
+topic write devices/DEV-001-BCBC/command/ack
+
+user DEV-001-91A3
+topic read devices/DEV-001-91A3/command
+topic write devices/DEV-001-91A3/data
+topic write devices/DEV-001-91A3/status
+topic write devices/DEV-001-91A3/capabilities
+topic write devices/DEV-001-91A3/command/ack
+
+user DEV-001-3AC6
+topic read devices/DEV-001-3AC6/command
+topic write devices/DEV-001-3AC6/data
+topic write devices/DEV-001-3AC6/status
+topic write devices/DEV-001-3AC6/capabilities
+topic write devices/DEV-001-3AC6/command/ack
+
+user DEV-001-C685
+topic read devices/DEV-001-C685/command
+topic write devices/DEV-001-C685/data
+topic write devices/DEV-001-C685/status
+topic write devices/DEV-001-C685/capabilities
+topic write devices/DEV-001-C685/command/ack
+
+user DEV-001-80B8
+topic read devices/DEV-001-80B8/command
+topic write devices/DEV-001-80B8/data
+topic write devices/DEV-001-80B8/status
+topic write devices/DEV-001-80B8/capabilities
+topic write devices/DEV-001-80B8/command/ack
+
+user DEV-002-67AE
+topic read devices/DEV-002-67AE/command
+topic write devices/DEV-002-67AE/data
+topic write devices/DEV-002-67AE/status
+topic write devices/DEV-002-67AE/capabilities
+topic write devices/DEV-002-67AE/command/ack
+
+user DEV-003-3E7E
+topic read devices/DEV-003-3E7E/command
+topic write devices/DEV-003-3E7E/data
+topic write devices/DEV-003-3E7E/status
+topic write devices/DEV-003-3E7E/capabilities
+topic write devices/DEV-003-3E7E/command/ack
+
+user DEV-001-2DDF
+topic read devices/DEV-001-2DDF/command
+topic write devices/DEV-001-2DDF/data
+topic write devices/DEV-001-2DDF/status
+topic write devices/DEV-001-2DDF/capabilities
+topic write devices/DEV-001-2DDF/command/ack
+
+user DEV-001-84A8
+topic read devices/DEV-001-84A8/command
+topic write devices/DEV-001-84A8/data
+topic write devices/DEV-001-84A8/status
+topic write devices/DEV-001-84A8/capabilities
+topic write devices/DEV-001-84A8/command/ack
+
+user DEV-1-1788650304151
+topic read devices/DEV-1-1788650304151/command
+topic write devices/DEV-1-1788650304151/data
+topic write devices/DEV-1-1788650304151/status
+topic write devices/DEV-1-1788650304151/capabilities
+topic write devices/DEV-1-1788650304151/command/ack
+
+user DEV-2-1788650304151
+topic read devices/DEV-2-1788650304151/command
+topic write devices/DEV-2-1788650304151/data
+topic write devices/DEV-2-1788650304151/status
+topic write devices/DEV-2-1788650304151/capabilities
+topic write devices/DEV-2-1788650304151/command/ack
+
+user DEV-001-22A1
+topic read devices/DEV-001-22A1/command
+topic write devices/DEV-001-22A1/data
+topic write devices/DEV-001-22A1/status
+topic write devices/DEV-001-22A1/capabilities
+topic write devices/DEV-001-22A1/command/ack
+
+user DEV-001-57E3
+topic read devices/DEV-001-57E3/command
+topic write devices/DEV-001-57E3/data
+topic write devices/DEV-001-57E3/status
+topic write devices/DEV-001-57E3/capabilities
+topic write devices/DEV-001-57E3/command/ack
+
+user DEV-001-3BEA
+topic read devices/DEV-001-3BEA/command
+topic write devices/DEV-001-3BEA/data
+topic write devices/DEV-001-3BEA/status
+topic write devices/DEV-001-3BEA/capabilities
+topic write devices/DEV-001-3BEA/command/ack
+
+user DEV-001-E24A
+topic read devices/DEV-001-E24A/command
+topic write devices/DEV-001-E24A/data
+topic write devices/DEV-001-E24A/status
+topic write devices/DEV-001-E24A/capabilities
+topic write devices/DEV-001-E24A/command/ack
+
+user DEV-002-9DEE
+topic read devices/DEV-002-9DEE/command
+topic write devices/DEV-002-9DEE/data
+topic write devices/DEV-002-9DEE/status
+topic write devices/DEV-002-9DEE/capabilities
+topic write devices/DEV-002-9DEE/command/ack
+
+user DEV-001-3F25
+topic read devices/DEV-001-3F25/command
+topic write devices/DEV-001-3F25/data
+topic write devices/DEV-001-3F25/status
+topic write devices/DEV-001-3F25/capabilities
+topic write devices/DEV-001-3F25/command/ack
+
+user DEV-002-842C
+topic read devices/DEV-002-842C/command
+topic write devices/DEV-002-842C/data
+topic write devices/DEV-002-842C/status
+topic write devices/DEV-002-842C/capabilities
+topic write devices/DEV-002-842C/command/ack
+
+user DEV-003-6A07
+topic read devices/DEV-003-6A07/command
+topic write devices/DEV-003-6A07/data
+topic write devices/DEV-003-6A07/status
+topic write devices/DEV-003-6A07/capabilities
+topic write devices/DEV-003-6A07/command/ack
+
+user DEV-001-FFC8
+topic read devices/DEV-001-FFC8/command
+topic write devices/DEV-001-FFC8/data
+topic write devices/DEV-001-FFC8/status
+topic write devices/DEV-001-FFC8/capabilities
+topic write devices/DEV-001-FFC8/command/ack
+
+user DEV-001-67A4
+topic read devices/DEV-001-67A4/command
+topic write devices/DEV-001-67A4/data
+topic write devices/DEV-001-67A4/status
+topic write devices/DEV-001-67A4/capabilities
+topic write devices/DEV-001-67A4/command/ack
+
+user DEV-1-1788652004676
+topic read devices/DEV-1-1788652004676/command
+topic write devices/DEV-1-1788652004676/data
+topic write devices/DEV-1-1788652004676/status
+topic write devices/DEV-1-1788652004676/capabilities
+topic write devices/DEV-1-1788652004676/command/ack
+
+user DEV-2-1788652004677
+topic read devices/DEV-2-1788652004677/command
+topic write devices/DEV-2-1788652004677/data
+topic write devices/DEV-2-1788652004677/status
+topic write devices/DEV-2-1788652004677/capabilities
+topic write devices/DEV-2-1788652004677/command/ack
+
