@@ -18,7 +18,9 @@ if [ ! -f .env ]; then
 fi
 
 echo "✅ Found .env file, loading credentials..."
-export $(grep -v '^#' .env | xargs)
+set -a
+source .env
+set +a
 
 MQTT_USER=${MQTT_USERNAME:-backend_admin}
 MQTT_PASS=${MQTT_PASSWORD:-super_secret_backend}
