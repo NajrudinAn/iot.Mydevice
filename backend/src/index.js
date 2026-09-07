@@ -21,39 +21,16 @@ const app = express();
 
 app.use(express.json());
 
-// Ensure backend_admin is authorized in mosquitto automatically on startup
-try {
-    const pwdPath = require('path').join(__dirname, '../../mosquitto/config/mosquitto.passwd');
-    const aclPath = require('path').join(__dirname, '../../mosquitto/config/mosquitto.acl');
-    const mqttUser = process.env.MQTT_USERNAME || 'backend_admin';
-    const mqttPass = process.env.MQTT_PASSWORD || 'super_secret_backend';
-    
-    const fs = require('fs');
-    const { execSync } = require('child_process');
-    
-    // 1. Force password into mosquitto.passwd
-    execSync(`sudo mosquitto_passwd -b ${pwdPath} ${mqttUser} ${mqttPass}`);
-    
-    // 2. Ensure ACL file has backend_admin at the top
-    let aclContent = `user ${mqttUser}\ntopic readwrite #\n\n`;
-    try {
-        let currentAcl = fs.readFileSync(aclPath, 'utf8');
-        if (!currentAcl.includes(`user ${mqttUser}`)) {
-            fs.writeFileSync(aclPath, aclContent + currentAcl);
-        }
-    } catch (e) {
-        fs.writeFileSync(aclPath, aclContent);
-    }
-    
-    // 3. Reload Mosquitto to apply both
-    execSync(`sudo pkill -HUP mosquitto`);
-    console.log(`Successfully verified ${mqttUser} in Mosquitto and reloaded broker!`);
-} catch (error) {
-    console.log('Skipping auto-mosquitto_passwd:', error.message);
-}
+const MqttProvisioner = require('./services/MqttProvisioner');
 
-// Init MQTT
-initMqttClient();
+// Ensure backend_admin is authorized in mosquitto automatically on startup
+MqttProvisioner.ensureBackendAccess().then(() => {
+    // Init MQTT after securing access
+    initMqttClient();
+}).catch(err => {
+    console.error("Failed to provision MQTT access on startup", err);
+    initMqttClient(); // try anyway
+});
 
 // Init Retention Job (runs every 1 hour)
 if (process.env.NODE_ENV !== 'test') {
