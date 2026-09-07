@@ -2,7 +2,7 @@ const Application = require('../models/application');
 const Workspace = require('../models/workspace');
 const Device = require('../models/device');
 const crypto = require('crypto');
-const mqttProvisioning = require('../services/mqttProvisioning');
+const MqttProvisioner = require('../services/MqttProvisioner');
 
 // Simple global counter for device ID prototype generation
 let deviceCounter = 1;
@@ -359,7 +359,7 @@ exports.registerAndAssignDevice = async (req, res) => {
         const device = await Device.create(deviceId, secretKey, name, device_type, userId, workspaceId);
 
         try {
-            await mqttProvisioning.syncDeviceCredential(device.device_id, secretKey);
+            await MqttProvisioner.syncDeviceCredential(device.device_id, secretKey);
         } catch (error) {
             // Rollback device creation
             await Device.deleteByIdAndUserId(device.id, userId);

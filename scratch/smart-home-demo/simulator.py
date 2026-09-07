@@ -9,8 +9,8 @@ import sys
 # ─────────────────────────────────────────────
 BROKER       = "mydevice.in"
 PORT         = 1883
-DEVICE_ID    = "DEV-001-ADD5"
-SECRET_KEY   = "afda7cc10f360a37f201f851999565fc3ab5a3d7857ab9adb1af6fba1a5a9980"
+DEVICE_ID    = "DEV-001-3547"
+SECRET_KEY   = "1089f554315e3de10446df647adf069309f0fcd3f02a40af8f8efde21ff33a76"
 
 # Topics (matching what the platform actually expects)
 TOPIC_DATA     = f"devices/{DEVICE_ID}/data"
