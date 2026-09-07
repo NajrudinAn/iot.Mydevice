@@ -10,8 +10,8 @@ const initMqttClient = () => {
     // Connect to MQTT Broker
     mqttClient = mqtt.connect(brokerUrl, {
         reconnectPeriod: 5000, // Attempt reconnect every 5s if disconnected
-        username: process.env.MQTT_USERNAME,
-        password: process.env.MQTT_PASSWORD
+        username: (process.env.MQTT_USERNAME || 'backend_admin').trim(),
+        password: (process.env.MQTT_PASSWORD || 'super_secret_backend').trim()
     });
 
     mqttClient.on('connect', () => {

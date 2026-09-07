@@ -14,8 +14,8 @@ class MqttProvisioner {
      * credentials are in the password file before the MQTT client connects.
      */
     async ensureBackendAccess() {
-        const mqttUser = process.env.MQTT_USERNAME || 'backend_admin';
-        const mqttPass = process.env.MQTT_PASSWORD || 'super_secret_backend';
+        const mqttUser = (process.env.MQTT_USERNAME || 'backend_admin').trim();
+        const mqttPass = (process.env.MQTT_PASSWORD || 'super_secret_backend').trim();
 
         try {
             // Ensure the password file exists natively
@@ -73,7 +73,7 @@ class MqttProvisioner {
      * Regenerate the entire ACL file from the database
      */
     async regenerateACL() {
-        const mqttUser = process.env.MQTT_USERNAME || 'backend_admin';
+        const mqttUser = (process.env.MQTT_USERNAME || 'backend_admin').trim();
         let aclContent = `user ${mqttUser}\ntopic readwrite #\n\n`;
 
         try {
