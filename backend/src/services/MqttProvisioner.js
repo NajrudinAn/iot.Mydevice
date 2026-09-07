@@ -1,7 +1,6 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const db = require('../config/db');
 
 class MqttProvisioner {
     constructor() {
@@ -10,7 +9,7 @@ class MqttProvisioner {
     }
 
     /**
-     * Call this on backend startup. It guarantees the backend's master
+     * Call this on backend startup. It guarantees the master
      * credentials are in the password file before the MQTT client connects.
      */
     async ensureBackendAccess() {
@@ -26,76 +25,49 @@ class MqttProvisioner {
                 } catch(e) {}
             }
 
-            // Always explicitly add/update the backend user password
+            // Always explicitly add/update the master user password
             this._runPasswdCommand(`-b ${this.pwdPath} ${mqttUser} ${mqttPass}`);
             
-            // Ensure ACL has the backend user
+            // Ensure ACL has the master user with full access
             await this.regenerateACL();
             
             // Reload broker to apply
             this.reloadMosquitto();
             
-            console.log(`[MQTT_PROVISION] Backend access secured for user: ${mqttUser}`);
+            console.log(`[MQTT_PROVISION] Master access secured for user: ${mqttUser}`);
         } catch (error) {
-            console.error(`[MQTT_PROVISION] Warning: Failed to secure backend access. Mosquitto may reject connection.`, error.message);
+            console.error(`[MQTT_PROVISION] Warning: Failed to secure master access. Mosquitto may reject connection.`, error.message);
         }
     }
 
     /**
-     * Add or update a device's credentials
+     * No-op: We no longer generate unique passwords for every device
      */
     async syncDeviceCredential(deviceId, secretKey) {
-        try {
-            this._runPasswdCommand(`-b ${this.pwdPath} ${deviceId} ${secretKey}`);
-            await this.regenerateACL();
-            this.reloadMosquitto();
-        } catch (error) {
-            console.error("Failed to sync device credential:", error.message);
-            throw new Error("MQTT Provisioning Failed");
-        }
+        // Deliberately left empty to simplify architecture.
+        // All devices will share the master credentials.
+        return Promise.resolve();
     }
 
     /**
-     * Remove a device's credentials
+     * No-op: We no longer manage unique passwords for every device
      */
     async removeDeviceCredential(deviceId) {
-        try {
-            this._runPasswdCommand(`-D ${this.pwdPath} ${deviceId}`);
-            await this.regenerateACL();
-            this.reloadMosquitto();
-        } catch (error) {
-            console.error("Failed to remove device credential:", error.message);
-            // Continue even if deletion fails to not break main flow
-        }
+        // Deliberately left empty to simplify architecture.
+        return Promise.resolve();
     }
 
     /**
-     * Regenerate the entire ACL file from the database
+     * Regenerate the ACL file with just the master user
      */
     async regenerateACL() {
         const mqttUser = (process.env.MQTT_USERNAME || 'backend_admin').trim();
-        let aclContent = `user ${mqttUser}\ntopic readwrite #\n\n`;
+        const aclContent = `user ${mqttUser}\ntopic readwrite #\n\n`;
 
         try {
-            // Fetch all devices from DB
-            const query = `SELECT device_id FROM devices`;
-            const result = await db.query(query);
-
-            result.rows.forEach(row => {
-                const dId = row.device_id;
-                aclContent += `user ${dId}\n`;
-                aclContent += `topic read devices/${dId}/command\n`;
-                aclContent += `topic write devices/${dId}/data\n`;
-                aclContent += `topic write devices/${dId}/status\n`;
-                aclContent += `topic write devices/${dId}/capabilities\n`;
-                aclContent += `topic write devices/${dId}/command/ack\n\n`;
-            });
-
             fs.writeFileSync(this.aclPath, aclContent, 'utf8');
         } catch (error) {
             console.error("Failed to regenerate ACL:", error.message);
-            // Fallback: at least write the backend user if DB fails
-            fs.writeFileSync(this.aclPath, aclContent, 'utf8');
         }
     }
 
