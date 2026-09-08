@@ -17,12 +17,19 @@ class MqttProvisioner {
         const mqttPass = (process.env.MQTT_PASSWORD || 'super_secret_backend').trim();
 
         try {
-            // Ensure the password file exists natively
             if (!fs.existsSync(this.pwdPath)) {
                 fs.writeFileSync(this.pwdPath, '', 'utf8');
-                try {
-                    execSync(`sudo chmod 666 ${this.pwdPath}`);
-                } catch(e) {}
+            }
+            if (!fs.existsSync(this.aclPath)) {
+                fs.writeFileSync(this.aclPath, '', 'utf8');
+            }
+            
+            try {
+                // Always force permissions so Node.js can write to these files
+                execSync(`sudo chmod 666 ${this.pwdPath}`);
+                execSync(`sudo chmod 666 ${this.aclPath}`);
+            } catch(e) {
+                console.error("[MQTT_PROVISION] Warning: Could not chmod mosquitto files", e.message);
             }
 
             // Always explicitly add/update the master user password
