@@ -50,7 +50,7 @@ class MqttProvisioner {
 
             // Securely stream the secret via stdin and close it
             if (action === 'add' && secretKey) {
-                child.stdin.write(secretKey);
+                child.stdin.write(`${secretKey}\n`);
             }
             child.stdin.end();
         });

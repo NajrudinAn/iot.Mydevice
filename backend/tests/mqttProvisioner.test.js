@@ -110,7 +110,8 @@ describe('MqttProvisioner Privileged Helper Wrapping', () => {
         );
 
         // Secret MUST be streamed to stdin, not passed as args
-        expect(mockStdin.write).toHaveBeenCalledWith('secret1234567890123');
+        // Also it MUST have a newline because `read` in bash with `set -e` will fail at EOF without a newline
+        expect(mockStdin.write).toHaveBeenCalledWith('secret1234567890123\n');
         expect(mockStdin.end).toHaveBeenCalled();
     });
 
