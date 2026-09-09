@@ -26,6 +26,8 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
   // Data
   const [availableApis, setAvailableApis] = useState([]);
 
+  const [showSlugField, setShowSlugField] = useState(false);
+
   useEffect(() => {
     fetchApis();
   }, [workspaceId]);
@@ -42,8 +44,8 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
   };
 
   useEffect(() => {
-    if (!formData.slug) {
-        setSlugStatus({ state: 'IDLE', reason: null });
+    if (!showSlugField || !formData.slug) {
+        if (!showSlugField) setSlugStatus({ state: 'IDLE', reason: null });
         return;
     }
     
@@ -61,7 +63,7 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
         }
     }, 400);
     return () => clearTimeout(timer);
-  }, [formData.slug]);
+  }, [formData.slug, showSlugField]);
 
   const generateSlug = (name) => {
       return name.toString().toLowerCase()
@@ -92,8 +94,36 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
   const authApis = availableApis.filter(api => api.auth_mode === 'APPLICATION_SESSION');
   const accessApis = availableApis;
 
-  const handleNext = () => {
-    if (step === 1 && (!formData.name || !formData.slug || slugStatus.state !== 'AVAILABLE')) return;
+  const handleNext = async () => {
+    if (step === 1) {
+        if (!formData.name) return;
+        
+        // If they already typed a valid slug and it's visible/checked, we can just proceed.
+        // But let's safely re-verify via backend just to be sure, or rely on state.
+        if (showSlugField && slugStatus.state === 'AVAILABLE') {
+            setStep(s => s + 1);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const slugToCheck = formData.slug || generateSlug(formData.name);
+            const res = await platformClient.get(`/applications/slug-availability?slug=${encodeURIComponent(slugToCheck)}`);
+            if (res.data.available) {
+                setFormData(prev => ({ ...prev, slug: res.data.slug }));
+                setSlugStatus({ state: 'AVAILABLE', reason: null });
+                setStep(s => s + 1);
+            } else {
+                setSlugStatus({ state: 'UNAVAILABLE', reason: res.data.reason });
+                setShowSlugField(true);
+            }
+        } catch (err) {
+            setSlugStatus({ state: 'UNAVAILABLE', reason: err.response?.data?.reason || 'Error checking availability' });
+            setShowSlugField(true);
+        }
+        setLoading(false);
+        return;
+    }
     if (step === 2) {
         if (!authType) return;
         if (authType === 'LOGIN' && !formData.authentication_api_id) return;
@@ -164,50 +194,53 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
                 />
               </div>
               
-              <div className="form-group">
-                <label className="form-label">Application Slug (Subdomain) <span className="text-red">*</span></label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    className={`form-input pl-4 pr-10 ${slugStatus.state === 'UNAVAILABLE' ? 'border-red-500 bg-red-50' : slugStatus.state === 'AVAILABLE' ? 'border-green-500 bg-green-50' : ''}`}
-                    value={formData.slug}
-                    onChange={handleSlugChange}
-                    placeholder="e.g. farm-monitor"
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
-                    {slugStatus.state === 'CHECKING' && <div className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-blue-500 animate-spin" />}
-                    {slugStatus.state === 'AVAILABLE' && <CheckCircle size={16} className="text-green-500" />}
-                    {slugStatus.state === 'UNAVAILABLE' && <X size={16} className="text-red-500" />}
+              {showSlugField && (
+                <div className="form-group animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="form-label">Application Subdomain <span className="text-red">*</span></label>
+                  <p className="text-muted text-[12px] mb-2">The auto-generated subdomain for this name is unavailable. Please customize it below:</p>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className={`form-input pl-4 pr-10 ${slugStatus.state === 'UNAVAILABLE' ? 'border-red-500 bg-red-50' : slugStatus.state === 'AVAILABLE' ? 'border-green-500 bg-green-50' : ''}`}
+                      value={formData.slug}
+                      onChange={handleSlugChange}
+                      placeholder="e.g. farm-monitor"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                      {slugStatus.state === 'CHECKING' && <div className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-blue-500 animate-spin" />}
+                      {slugStatus.state === 'AVAILABLE' && <CheckCircle size={16} className="text-green-500" />}
+                      {slugStatus.state === 'UNAVAILABLE' && <X size={16} className="text-red-500" />}
+                    </div>
                   </div>
+                  {slugStatus.state === 'AVAILABLE' && (
+                    <div className="text-[12px] mt-1 text-green-600 font-medium">
+                      Available! Your app will be hosted at: <b>https://{formData.slug}.mydevice.in</b>
+                    </div>
+                  )}
+                  {slugStatus.state === 'UNAVAILABLE' && (
+                    <div className="text-[12px] mt-1 text-red-500 font-medium flex flex-col gap-1">
+                      <span>
+                        {slugStatus.reason === 'RESERVED_SUBDOMAIN' && 'This subdomain is reserved by the platform.'}
+                        {slugStatus.reason === 'ALREADY_IN_USE' && 'This subdomain is already taken.'}
+                        {slugStatus.reason === 'INVALID_FORMAT' && 'Slugs must be 2-63 lowercase alphanumeric characters or hyphens.'}
+                        {!['RESERVED_SUBDOMAIN', 'ALREADY_IN_USE', 'INVALID_FORMAT'].includes(slugStatus.reason) && slugStatus.reason}
+                      </span>
+                      {slugStatus.reason === 'ALREADY_IN_USE' && (
+                         <span 
+                           className="text-blue-500 cursor-pointer hover:underline"
+                           onClick={() => {
+                              const suggested = formData.slug + '-' + Math.floor(Math.random() * 100);
+                              setFormData({...formData, slug: suggested});
+                              setSlugTouched(true);
+                           }}
+                         >
+                           Need a suggestion? Click here to generate one.
+                         </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {slugStatus.state === 'AVAILABLE' && (
-                  <div className="text-[12px] mt-1 text-green-600 font-medium">
-                    Available! Your app will be hosted at: <b>https://{formData.slug}.mydevice.in</b>
-                  </div>
-                )}
-                {slugStatus.state === 'UNAVAILABLE' && (
-                  <div className="text-[12px] mt-1 text-red-500 font-medium flex flex-col gap-1">
-                    <span>
-                      {slugStatus.reason === 'RESERVED_SUBDOMAIN' && 'This subdomain is reserved by the platform.'}
-                      {slugStatus.reason === 'ALREADY_IN_USE' && 'This subdomain is already taken.'}
-                      {slugStatus.reason === 'INVALID_FORMAT' && 'Slugs must be 2-63 lowercase alphanumeric characters or hyphens.'}
-                      {!['RESERVED_SUBDOMAIN', 'ALREADY_IN_USE', 'INVALID_FORMAT'].includes(slugStatus.reason) && slugStatus.reason}
-                    </span>
-                    {slugStatus.reason === 'ALREADY_IN_USE' && (
-                       <span 
-                         className="text-blue-500 cursor-pointer hover:underline"
-                         onClick={() => {
-                            const suggested = formData.slug + '-' + Math.floor(Math.random() * 100);
-                            setFormData({...formData, slug: suggested});
-                            setSlugTouched(true);
-                         }}
-                       >
-                         Need a suggestion? Click here to generate one.
-                       </span>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Description</label>
