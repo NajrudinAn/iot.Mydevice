@@ -11,6 +11,8 @@
 # - Validates device ID strictness.
 # - Refuses to modify the backend service account.
 # - Append-only ACL design (no full file rewrites).
+# - Uses file locking to prevent race conditions.
+# - Explicitly enforces permissions to prevent ownership drift.
 # ----------------------------------------------------------------------------
 
 set -euo pipefail
@@ -20,6 +22,7 @@ MOSQUITTO_PASSWD="/usr/bin/mosquitto_passwd"
 PASSWD_FILE="/home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.passwd"
 ACL_FILE="/home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.acl"
 SYSTEMCTL="/bin/systemctl"
+LOCK_FILE="/tmp/mosquitto_provision.lock"
 
 # Verify infrastructure exists
 if [ ! -f "$PASSWD_FILE" ]; then
@@ -51,38 +54,37 @@ if [[ "$DEVICE_ID" == "mydevice_backend" || "$DEVICE_ID" == "backend_admin" ]]; 
     exit 5
 fi
 
-# 2. Execution Routing
-if [ "$ACTION" == "add" ]; then
-    # Read secret from stdin securely
-    read -r -s SECRET_KEY
-    
-    if [ -z "$SECRET_KEY" ]; then
-        echo "ERROR: Empty secret provided via stdin." >&2
-        exit 6
-    fi
-    
-    if [ "${#SECRET_KEY}" -lt 16 ]; then
-        echo "ERROR: Secret is too short." >&2
-        exit 6
-    fi
+# 2. Execution Routing (Wrapped in flock to prevent race conditions)
+(
+    # Obtain exclusive lock on FD 200
+    flock -x 200
 
-    # Step 1: Add Authentication (Securely without exposing args to ps)
-    # Remove any existing duplicate entries safely
-    $MOSQUITTO_PASSWD -D "$PASSWD_FILE" "$DEVICE_ID" 2>/dev/null || true
-    
-    # Append the plaintext user:password to the real file securely
-    echo "$DEVICE_ID:$SECRET_KEY" >> "$PASSWD_FILE"
-    
-    # Use -U to securely hash the new plaintext entry in-place natively
-    $MOSQUITTO_PASSWD -U "$PASSWD_FILE"
+    if [ "$ACTION" == "add" ]; then
+        # Read secret from stdin securely
+        read -r -s SECRET_KEY
+        
+        if [ -z "$SECRET_KEY" ]; then
+            echo "ERROR: Empty secret provided via stdin." >&2
+            exit 6
+        fi
+        
+        if [ "${#SECRET_KEY}" -lt 16 ]; then
+            echo "ERROR: Secret is too short." >&2
+            exit 6
+        fi
 
-    # Step 2: Add Authorization (Idempotent Append)
-    # We check if the user block already exists to prevent duplicate rules.
-    if grep -q "^user $DEVICE_ID$" "$ACL_FILE"; then
-        echo "INFO: ACL block for $DEVICE_ID already exists. Skipping append."
-    else
-        # Append only the allowed topics safely
-        cat <<EOF >> "$ACL_FILE"
+        # Step 1: Add Authentication
+        # We pipe the password twice to mosquitto_passwd to avoid process arguments 
+        # and avoid plaintext touching the disk at all.
+        (echo -n "$SECRET_KEY"; echo; echo -n "$SECRET_KEY"; echo) | $MOSQUITTO_PASSWD "$PASSWD_FILE" "$DEVICE_ID" >/dev/null 2>&1
+
+        # Step 2: Add Authorization (Idempotent Append)
+        # We check if the user block already exists to prevent duplicate rules.
+        if grep -q "^user $DEVICE_ID$" "$ACL_FILE"; then
+            echo "INFO: ACL block for $DEVICE_ID already exists. Skipping append."
+        else
+            # Append only the allowed topics safely
+            cat <<EOF >> "$ACL_FILE"
 
 user $DEVICE_ID
 topic read devices/$DEVICE_ID/command
@@ -91,24 +93,34 @@ topic write devices/$DEVICE_ID/status
 topic write devices/$DEVICE_ID/capabilities
 topic write devices/$DEVICE_ID/command/ack
 EOF
+        fi
+
+        # Step 3: Enforce permissions
+        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE" || true
+        chmod 0640 "$PASSWD_FILE" "$ACL_FILE" || true
+
+        # Step 4: Reload Broker
+        $SYSTEMCTL reload mosquitto
+        echo "SUCCESS: Device $DEVICE_ID provisioned and broker reloaded."
+        exit 0
+
+    elif [ "$ACTION" == "remove" ]; then
+        # Step 1: Revoke Authentication
+        $MOSQUITTO_PASSWD -D "$PASSWD_FILE" "$DEVICE_ID"
+
+        # Step 2: Enforce permissions
+        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE" || true
+        chmod 0640 "$PASSWD_FILE" "$ACL_FILE" || true
+
+        # Step 3: Reload Broker
+        # Note: The ACL block is intentionally left untouched as an inert rule.
+        $SYSTEMCTL reload mosquitto
+        echo "SUCCESS: Device $DEVICE_ID revoked and broker reloaded."
+        exit 0
+
+    else
+        echo "ERROR: Invalid action: $ACTION" >&2
+        exit 3
     fi
 
-    # Step 3: Reload Broker
-    $SYSTEMCTL reload mosquitto
-    echo "SUCCESS: Device $DEVICE_ID provisioned and broker reloaded."
-    exit 0
-
-elif [ "$ACTION" == "remove" ]; then
-    # Step 1: Revoke Authentication
-    $MOSQUITTO_PASSWD -D "$PASSWD_FILE" "$DEVICE_ID"
-
-    # Step 2: Reload Broker
-    # Note: The ACL block is intentionally left untouched as an inert rule.
-    $SYSTEMCTL reload mosquitto
-    echo "SUCCESS: Device $DEVICE_ID revoked and broker reloaded."
-    exit 0
-
-else
-    echo "ERROR: Invalid action: $ACTION" >&2
-    exit 3
-fi
+) 200>"$LOCK_FILE"
