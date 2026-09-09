@@ -31,8 +31,11 @@ router.get('/:slug*', async (req, res) => {
             appDir = path.join(UPLOADS_BASE_DIR, app.workspace_id, app.id);
         }
 
-        // Always resolve the base href for this app for the base tag injection
-        const baseHref = `/hosted/${slug}/`;
+        const platformDomain = process.env.PLATFORM_DOMAIN || 'mydevice.in';
+        let baseHref = `/hosted/${slug}/`;
+        if (req.hostname !== platformDomain && req.hostname !== `www.${platformDomain}`) {
+            baseHref = '/';
+        }
 
         const rawPath = req.params[0] || '';
         const relativePath = rawPath.replace(/^\//, '');
