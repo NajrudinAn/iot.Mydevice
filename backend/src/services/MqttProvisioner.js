@@ -1,121 +1,86 @@
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-const db = require('../config/db');
+const { spawn } = require('child_process');
 
 class MqttProvisioner {
     constructor() {
-        this.pwdPath = path.join(__dirname, '../../../mosquitto/config/mosquitto.passwd');
-        this.aclPath = path.join(__dirname, '../../../mosquitto/config/mosquitto.acl');
+        // This is the strict path configured in /etc/sudoers.d/
+        this.helperPath = '/usr/local/bin/mqtt_provision_helper.sh';
     }
 
     /**
-     * Helper to safely execute mosquitto_passwd natively
+     * Executes the privileged helper script with the given action and deviceId.
+     * Securely pipes the secretKey via stdin to prevent command-line snooping.
      */
-    _runPasswdCommand(args) {
-        // We assume sudo is required for mosquitto_passwd. If the server is correctly configured,
-        // it shouldn't prompt for a password. If it fails, we throw so the caller knows.
-        try {
-            execSync(`sudo mosquitto_passwd ${args}`);
-        } catch (err) {
-            throw new Error(`Failed to execute mosquitto_passwd: ${err.message}`);
-        }
+    _executeHelper(action, deviceId, secretKey = null) {
+        return new Promise((resolve, reject) => {
+            // Strict regex validation at the Node.js boundary before even calling sudo
+            if (!/^DEV-[0-9]{3,}-[0-9A-F]{4,}$/.test(deviceId)) {
+                return reject(new Error(`Invalid device ID format: ${deviceId}`));
+            }
+
+            if (deviceId === 'mydevice_backend' || deviceId === 'backend_admin') {
+                return reject(new Error('Refusing to provision backend service account dynamically.'));
+            }
+
+            const child = spawn('sudo', ['-n', this.helperPath, action, deviceId], {
+                stdio: ['pipe', 'pipe', 'pipe'] // Pipe stdin, stdout, stderr
+            });
+
+            let stdoutData = '';
+            let stderrData = '';
+
+            child.stdout.on('data', (data) => {
+                stdoutData += data.toString();
+            });
+
+            child.stderr.on('data', (data) => {
+                stderrData += data.toString();
+            });
+
+            child.on('close', (code) => {
+                if (code === 0) {
+                    resolve(stdoutData);
+                } else {
+                    reject(new Error(`Provisioning helper failed with code ${code}. Stderr: ${stderrData.trim()}`));
+                }
+            });
+
+            child.on('error', (err) => {
+                reject(new Error(`Failed to spawn privileged helper: ${err.message}`));
+            });
+
+            // Securely stream the secret via stdin and close it
+            if (action === 'add' && secretKey) {
+                child.stdin.write(secretKey);
+            }
+            child.stdin.end();
+        });
     }
 
     /**
-     * Add or update a device's credentials
+     * Add or update a device's credentials safely using the helper.
      */
     async syncDeviceCredential(deviceId, secretKey) {
+        if (!secretKey || secretKey.length < 16) {
+            throw new Error('Invalid secret key for provisioning');
+        }
+
         try {
-            this._runPasswdCommand(`-b ${this.pwdPath} ${deviceId} ${secretKey}`);
-            await this.regenerateACL();
-            this.reloadMosquitto();
+            await this._executeHelper('add', deviceId, secretKey);
         } catch (error) {
-            console.error("Failed to sync device credential:", error.message);
+            console.error('[MQTT Provisioner] syncDeviceCredential failed:', error.message);
             throw new Error("MQTT Provisioning Failed");
         }
     }
 
     /**
-     * Remove a device's credentials
+     * Remove a device's credentials safely using the helper.
      */
     async removeDeviceCredential(deviceId) {
         try {
-            this._runPasswdCommand(`-D ${this.pwdPath} ${deviceId}`);
-            await this.regenerateACL();
-            this.reloadMosquitto();
+            await this._executeHelper('remove', deviceId);
         } catch (error) {
-            console.error("Failed to remove device credential:", error.message);
-            // Continue even if deletion fails to not break main flow
-        }
-    }
-
-    /**
-     * Regenerate the entire ACL file from the database atomically
-     */
-    async regenerateACL() {
-        const mqttUser = (process.env.MQTT_USERNAME || 'backend_admin').trim();
-        let aclContent = `user ${mqttUser}\ntopic readwrite #\n\n`;
-
-        try {
-            // Fetch all devices from DB
-            const query = `SELECT device_id FROM devices`;
-            const result = await db.query(query);
-
-            result.rows.forEach(row => {
-                const dId = row.device_id;
-                aclContent += `user ${dId}\n`;
-                aclContent += `topic read devices/${dId}/command\n`;
-                aclContent += `topic write devices/${dId}/data\n`;
-                aclContent += `topic write devices/${dId}/status\n`;
-                aclContent += `topic write devices/${dId}/capabilities\n`;
-                aclContent += `topic write devices/${dId}/command/ack\n\n`;
-            });
-
-            // Write atomically to prevent mosquitto from reading partial files during reload
-            const tmpAclPath = '/tmp/mosquitto.acl.tmp';
-            fs.writeFileSync(tmpAclPath, aclContent, 'utf8');
-            execSync(`sudo mv ${tmpAclPath} ${this.aclPath}`);
-            // Ensure permissions are correct after move
-            execSync(`sudo chmod 666 ${this.aclPath}`);
-            
-        } catch (error) {
-            console.error("Failed to regenerate ACL atomically:", error.message);
-            throw error; // Fail loudly
-        }
-    }
-
-    /**
-     * Explicit, one-time provisioning of the master backend credentials.
-     * This is only intended to be called by manual CLI scripts.
-     */
-    async provisionMasterCredentials() {
-        const mqttUser = (process.env.MQTT_USERNAME || 'backend_admin').trim();
-        const mqttPass = (process.env.MQTT_PASSWORD || 'super_secret_backend').trim();
-        
-        console.log(`Provisioning master credentials for ${mqttUser}...`);
-        
-        if (!fs.existsSync(this.pwdPath)) {
-            fs.writeFileSync(this.pwdPath, '', 'utf8');
-            try { execSync(`sudo chmod 666 ${this.pwdPath}`); } catch(e) {}
-        }
-        
-        this._runPasswdCommand(`-b ${this.pwdPath} ${mqttUser} ${mqttPass}`);
-        await this.regenerateACL();
-        this.reloadMosquitto();
-        console.log(`Master credentials successfully provisioned for ${mqttUser}`);
-    }
-
-    /**
-     * Reload the Mosquitto broker to pick up password/ACL changes.
-     * Uses systemctl rather than sending naked signals.
-     */
-    reloadMosquitto() {
-        try {
-            execSync('sudo systemctl reload mosquitto');
-        } catch (error) {
-            console.error("Failed to reload Mosquitto via systemctl:", error.message);
-            throw error;
+            console.error('[MQTT Provisioner] removeDeviceCredential failed:', error.message);
+            throw new Error("MQTT Credential Revocation Failed");
         }
     }
 }

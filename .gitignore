@@ -16,3 +16,9 @@ __pycache__/
 
 # Mac specific
 .DS_Store
+
+# Mosquitto Infrastructure (Never commit real credentials)
+mosquitto.passwd
+mosquitto.acl
+!mosquitto.conf.example
+!mosquitto.acl.example

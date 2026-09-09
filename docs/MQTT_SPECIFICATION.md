@@ -1,19 +1,33 @@
 This document details the MQTT communication protocol used between the backend and IoT devices.
 
 ## Broker
-- **Software:** Eclipse Mosquitto (Docker)
+- **Software:** Eclipse Mosquitto (Native Ubuntu Install 1.6.9)
 - **Port:** 1883
 - **Configuration:** Authenticated access via `mosquitto.passwd` and `mosquitto.acl`.
 
 ## Connection
 The Node.js backend connects to the MQTT broker using the `mqtt.js` library.
-The broker URL is specified via `MQTT_BROKER_URL` in the `.env` file, alongside `MQTT_USERNAME` and `MQTT_PASSWORD` which represent the backend service's admin credentials.
+The broker URL is specified via `MQTT_BROKER_URL` in the `.env` file, alongside `MQTT_USERNAME` (default `mydevice_backend`) and `MQTT_PASSWORD` which represent the backend service's admin credentials.
+
+## Production Provisioning Architecture
+Mosquitto is treated as an external infrastructure dependency. The Node.js application (`mydevice-api`) **never** rewrites the Mosquitto password database or ACL file at startup. 
+
+### Device Provisioning via Privileged Helper
+To ensure strict security and prevent file corruption, the Node.js API relies on a **Privileged Provisioning Helper Script**.
+- **Location**: `/usr/local/bin/mqtt_provision_helper.sh`
+- **Ownership**: `root:root`
+- **Permissions**: The Node.js PM2 user is granted passwordless `sudo` specifically for this script via `/etc/sudoers.d/mydevice_mqtt`.
+- **Workflow**:
+  1. The API validates the action and streams the generated device secret securely to the script via `stdin`.
+  2. The helper validates the device ID via regex.
+  3. The helper executes `mosquitto_passwd -b` to safely add the device authentication.
+  4. The helper appends the device-specific ACL block to `mosquitto.acl` (Idempotently skipping if it already exists).
+  5. The helper reloads the Mosquitto broker via `systemctl`.
+- **Limitation & Safety**: Because Mosquitto 1.6.9 lacks dynamic ACL APIs, full ACL rewriting is dangerous. When a device is deleted, the helper removes its password but leaves its historical ACL block intact. This makes the stale rules inert and perfectly safe, entirely bypassing the need for destructive `sed` file manipulation.
 
 ## Prototype Security Limitations
-- **MQTT Authentication is implemented:** Devices use their generated `Device ID` as the MQTT username, and `Secret Key` as the MQTT password.
 - **TLS:** The local prototype does not yet use TLS. All data is currently transmitted in plaintext over port 1883.
-- **ACLs:** Topic access is restricted. Devices can only read from their own command topics and publish to their own data/status topics.
-- **Production Warning:** Production systems should use encrypted transport (TLS/SSL), stronger credential lifecycle management, and potentially certificate-based device authentication.
+- **Production Warning:** Production systems should use encrypted transport (TLS/SSL).
 
 ## Topics and Message Direction
 

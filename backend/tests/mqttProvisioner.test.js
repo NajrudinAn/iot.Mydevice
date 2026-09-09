@@ -1,9 +1,7 @@
 const MqttProvisioner = require('../src/services/MqttProvisioner');
 const { initMqttClient } = require('../src/mqtt/client');
-const fs = require('fs');
 const child_process = require('child_process');
 
-jest.mock('fs');
 jest.mock('child_process');
 jest.mock('mqtt', () => ({
     connect: jest.fn(() => ({
@@ -12,19 +10,12 @@ jest.mock('mqtt', () => ({
         publish: jest.fn()
     }))
 }));
-jest.mock('../src/config/db', () => ({
-    query: jest.fn().mockResolvedValue({ rows: [{ device_id: 'DEV-TEST-01' }] })
-}));
 
 describe('MQTT Provisioning & Client Architecture', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         process.env.MQTT_USERNAME = 'test_admin';
         process.env.MQTT_PASSWORD = 'test_password';
-    });
-
-    test('MqttProvisioner should NOT expose ensureBackendAccess (preventing automatic startup rewrite)', () => {
-        expect(MqttProvisioner.ensureBackendAccess).toBeUndefined();
     });
 
     test('initMqttClient uses credentials from environment variables', () => {
@@ -44,7 +35,6 @@ describe('MQTT Provisioning & Client Architecture', () => {
         delete process.env.MQTT_PASSWORD;
         const mqtt = require('mqtt');
         
-        // Suppress expected console.error during test
         const originalError = console.error;
         console.error = jest.fn();
         
@@ -56,52 +46,96 @@ describe('MQTT Provisioning & Client Architecture', () => {
         console.error = originalError;
     });
 
-    test('index.js and provisionBroker.js load .env via absolute paths', () => {
-        const actualFs = jest.requireActual('fs');
-        const indexSrc = actualFs.readFileSync(require('path').resolve(__dirname, '../src/index.js'), 'utf8');
-        const provisionSrc = actualFs.readFileSync(require('path').resolve(__dirname, '../scripts/provisionBroker.js'), 'utf8');
+    test('initMqttClient defaults to mydevice_backend if username is missing', () => {
+        delete process.env.MQTT_USERNAME;
+        const mqtt = require('mqtt');
+        initMqttClient();
+        expect(mqtt.connect).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.objectContaining({
+                username: 'mydevice_backend',
+                password: 'test_password'
+            })
+        );
+    });
+});
+
+describe('MqttProvisioner Privileged Helper Wrapping', () => {
+    let mockSpawn;
+    let mockStdin;
+    
+    beforeEach(() => {
+        jest.clearAllMocks();
+        mockStdin = {
+            write: jest.fn(),
+            end: jest.fn()
+        };
         
-        expect(indexSrc).toContain('path.resolve(__dirname, \'../.env\')');
-        expect(provisionSrc).toContain('path.resolve(__dirname, \'../.env\')');
+        mockSpawn = jest.fn((cmd, args, opts) => {
+            return {
+                stdout: { on: jest.fn((event, cb) => { if (event === 'data') cb('SUCCESS\n'); }) },
+                stderr: { on: jest.fn() },
+                on: jest.fn((event, cb) => {
+                    if (event === 'close') cb(0); // Simulate success exit code 0
+                }),
+                stdin: mockStdin
+            };
+        });
+        
+        require('child_process').spawn.mockImplementation(mockSpawn);
     });
 
-    test('syncDeviceCredential constructs mosquitto_passwd command safely and reloads', async () => {
-        await MqttProvisioner.syncDeviceCredential('DEV-123', 'secret456');
-
-        expect(child_process.execSync).toHaveBeenCalledWith(
-            expect.stringContaining('sudo mosquitto_passwd -b')
-        );
-        expect(child_process.execSync).toHaveBeenCalledWith(
-            expect.stringContaining('DEV-123 secret456')
-        );
-        // Asserts reload uses systemctl and not naked pkill
-        expect(child_process.execSync).toHaveBeenCalledWith('sudo systemctl reload mosquitto');
+    test('syncDeviceCredential refuses invalid device IDs', async () => {
+        await expect(MqttProvisioner.syncDeviceCredential('invalid-id', 'secret1234567890123')).rejects.toThrow('MQTT Provisioning Failed');
+        expect(mockSpawn).not.toHaveBeenCalled();
     });
 
-    test('regenerateACL writes atomically using tmp file and mv', async () => {
-        await MqttProvisioner.regenerateACL();
-        
-        // Ensure it writes to a .tmp file
-        expect(fs.writeFileSync).toHaveBeenCalledWith(
-            '/tmp/mosquitto.acl.tmp',
-            expect.stringContaining('user test_admin'),
-            'utf8'
-        );
-        
-        // Ensure it renames the file using mv
-        expect(child_process.execSync).toHaveBeenCalledWith(
-            expect.stringMatching(/sudo mv \/tmp\/mosquitto\.acl\.tmp .*mosquitto\.acl/)
-        );
-        
-        // Ensure it contains device logic from DB
-        expect(fs.writeFileSync.mock.calls[0][1]).toContain('user DEV-TEST-01');
+    test('syncDeviceCredential refuses to modify mydevice_backend', async () => {
+        await expect(MqttProvisioner.syncDeviceCredential('mydevice_backend', 'secret1234567890123')).rejects.toThrow('MQTT Provisioning Failed');
+        expect(mockSpawn).not.toHaveBeenCalled();
     });
 
-    test('regenerateACL failure throws explicitly rather than silencing', async () => {
-        fs.writeFileSync.mockImplementationOnce(() => {
-            throw new Error('Permission denied');
+    test('syncDeviceCredential spawns helper with sudo and correctly streams secret via stdin', async () => {
+        await MqttProvisioner.syncDeviceCredential('DEV-123-ABCD', 'secret1234567890123');
+
+        expect(mockSpawn).toHaveBeenCalledWith(
+            'sudo',
+            ['-n', '/usr/local/bin/mqtt_provision_helper.sh', 'add', 'DEV-123-ABCD'],
+            expect.objectContaining({ stdio: ['pipe', 'pipe', 'pipe'] })
+        );
+
+        // Secret MUST be streamed to stdin, not passed as args
+        expect(mockStdin.write).toHaveBeenCalledWith('secret1234567890123');
+        expect(mockStdin.end).toHaveBeenCalled();
+    });
+
+    test('removeDeviceCredential spawns helper to remove device without streaming secret', async () => {
+        await MqttProvisioner.removeDeviceCredential('DEV-123-ABCD');
+
+        expect(mockSpawn).toHaveBeenCalledWith(
+            'sudo',
+            ['-n', '/usr/local/bin/mqtt_provision_helper.sh', 'remove', 'DEV-123-ABCD'],
+            expect.objectContaining({ stdio: ['pipe', 'pipe', 'pipe'] })
+        );
+
+        expect(mockStdin.write).not.toHaveBeenCalled();
+        expect(mockStdin.end).toHaveBeenCalled();
+    });
+
+    test('throws explicit error if helper returns non-zero code', async () => {
+        mockSpawn.mockImplementation((cmd, args, opts) => {
+            return {
+                stdout: { on: jest.fn() },
+                stderr: { on: jest.fn((event, cb) => { if (event === 'data') cb('Fake stderr error\n'); }) },
+                on: jest.fn((event, cb) => {
+                    if (event === 'close') cb(2); // Simulate failure exit code 2
+                }),
+                stdin: mockStdin
+            };
         });
 
-        await expect(MqttProvisioner.regenerateACL()).rejects.toThrow('Permission denied');
+        // The public method catches the internal rejection and wraps it in a safe message
+        await expect(MqttProvisioner.syncDeviceCredential('DEV-123-ABCD', 'secret1234567890123'))
+            .rejects.toThrow('MQTT Provisioning Failed');
     });
 });

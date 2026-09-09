@@ -1,0 +1,16 @@
+# Example Mosquitto ACL
+# DO NOT COMMIT REAL ACL FILES.
+# The real file should be deployed to /home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.acl
+
+# Master service account (has full access)
+user mydevice_backend
+topic readwrite #
+
+# Devices will have blocks appended below by the mqtt_provision_helper.sh script.
+# Example device block:
+# user DEV-000-EXAMPLE
+# topic read devices/DEV-000-EXAMPLE/command
+# topic write devices/DEV-000-EXAMPLE/data
+# topic write devices/DEV-000-EXAMPLE/status
+# topic write devices/DEV-000-EXAMPLE/capabilities
+# topic write devices/DEV-000-EXAMPLE/command/ack

@@ -1,0 +1,8 @@
+# Example Mosquitto Configuration
+# DO NOT COMMIT REAL CREDENTIALS.
+# The real file should be deployed to /home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.conf
+
+port 1883
+allow_anonymous false
+password_file /home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.passwd
+acl_file /home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.acl

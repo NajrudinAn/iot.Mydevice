@@ -105,16 +105,24 @@ Paste and update the following:
 PORT=3000
 DATABASE_URL=postgres://postgres:your_secure_password@localhost:5432/iot_platform
 JWT_SECRET=your_super_secret_jwt_key
-MQTT_BROKER_URL=mqtt://localhost:1883
-MQTT_USERNAME=backend_admin
-MQTT_PASSWORD=super_secret_backend
 
+# Mosquitto Infrastructure
+MQTT_BROKER_URL=mqtt://localhost:1883
+MQTT_USERNAME=mydevice_backend
+MQTT_PASSWORD=CHANGE_ME
+
+# Mail Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=devdeviceaccess@gmail.com
 SMTP_PASS=your_gmail_app_password
 SMTP_FROM=info@MyDevice.in
 ```
+
+### Mosquitto Security Architecture
+> **IMPORTANT:** Mosquitto is treated as an external infrastructure dependency. The Node.js application (`mydevice-api`) **never** rewrites the Mosquitto password database or ACL file at startup. 
+> 
+> Device provisioning is performed exclusively via the Privileged Provisioning Helper Script (`/usr/local/bin/mqtt_provision_helper.sh`), which must be configured in `sudoers` by the sysadmin. For instructions, refer to `MQTT_SPECIFICATION.md`.
 
 Start the backend with PM2, strictly limiting its memory to 350MB so it restarts automatically if a memory leak occurs:
 ```bash

@@ -7,7 +7,7 @@ let mqttClient = null;
 const initMqttClient = () => {
     const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883';
     
-    const username = (process.env.MQTT_USERNAME || 'backend_admin').trim();
+    const username = (process.env.MQTT_USERNAME || 'mydevice_backend').trim();
     const password = process.env.MQTT_PASSWORD ? process.env.MQTT_PASSWORD.trim() : null;
     
     if (!password) {
