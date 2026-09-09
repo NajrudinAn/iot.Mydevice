@@ -90,6 +90,11 @@ describe('MqttProvisioner Privileged Helper Wrapping', () => {
         expect(mockSpawn).not.toHaveBeenCalled();
     });
 
+    test('syncDeviceCredential accepts application real device format like DEV-A1B2C3', async () => {
+        await MqttProvisioner.syncDeviceCredential('DEV-A1B2C3', 'secret1234567890123');
+        expect(mockSpawn).toHaveBeenCalled();
+    });
+
     test('syncDeviceCredential refuses to modify mydevice_backend', async () => {
         await expect(MqttProvisioner.syncDeviceCredential('mydevice_backend', 'secret1234567890123')).rejects.toThrow('MQTT Provisioning Failed');
         expect(mockSpawn).not.toHaveBeenCalled();

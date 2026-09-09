@@ -41,7 +41,7 @@ ACTION="$1"
 DEVICE_ID="$2"
 
 # 1. Strict Validation
-if [[ ! "$DEVICE_ID" =~ ^DEV-[0-9]{3,}-[0-9A-F]{4,}$ ]]; then
+if [[ ! "$DEVICE_ID" =~ ^DEV-[a-zA-Z0-9\-]+$ ]]; then
     echo "ERROR: Invalid device ID format: $DEVICE_ID" >&2
     exit 4
 fi
@@ -66,9 +66,15 @@ if [ "$ACTION" == "add" ]; then
         exit 6
     fi
 
-    # Step 1: Add Authentication (Atomically updates single user)
-    # The output is suppressed unless it errors out.
-    $MOSQUITTO_PASSWD -b "$PASSWD_FILE" "$DEVICE_ID" "$SECRET_KEY"
+    # Step 1: Add Authentication (Securely without exposing args to ps)
+    # Remove any existing duplicate entries safely
+    $MOSQUITTO_PASSWD -D "$PASSWD_FILE" "$DEVICE_ID" 2>/dev/null || true
+    
+    # Append the plaintext user:password to the real file securely
+    echo "$DEVICE_ID:$SECRET_KEY" >> "$PASSWD_FILE"
+    
+    # Use -U to securely hash the new plaintext entry in-place natively
+    $MOSQUITTO_PASSWD -U "$PASSWD_FILE"
 
     # Step 2: Add Authorization (Idempotent Append)
     # We check if the user block already exists to prevent duplicate rules.

@@ -13,7 +13,7 @@ class MqttProvisioner {
     _executeHelper(action, deviceId, secretKey = null) {
         return new Promise((resolve, reject) => {
             // Strict regex validation at the Node.js boundary before even calling sudo
-            if (!/^DEV-[0-9]{3,}-[0-9A-F]{4,}$/.test(deviceId)) {
+            if (!/^DEV-[a-zA-Z0-9\-]+$/.test(deviceId)) {
                 return reject(new Error(`Invalid device ID format: ${deviceId}`));
             }
 
