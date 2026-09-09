@@ -58,14 +58,14 @@ describe('MQTT Provisioning & Client Architecture', () => {
         
         // Ensure it writes to a .tmp file
         expect(fs.writeFileSync).toHaveBeenCalledWith(
-            expect.stringContaining('.tmp'),
+            '/tmp/mosquitto.acl.tmp',
             expect.stringContaining('user test_admin'),
             'utf8'
         );
         
         // Ensure it renames the file using mv
         expect(child_process.execSync).toHaveBeenCalledWith(
-            expect.stringMatching(/sudo mv .*mosquitto\.acl\.tmp .*mosquitto\.acl/)
+            expect.stringMatching(/sudo mv \/tmp\/mosquitto\.acl\.tmp .*mosquitto\.acl/)
         );
         
         // Ensure it contains device logic from DB

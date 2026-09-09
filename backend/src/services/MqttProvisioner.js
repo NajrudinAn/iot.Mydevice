@@ -73,7 +73,7 @@ class MqttProvisioner {
             });
 
             // Write atomically to prevent mosquitto from reading partial files during reload
-            const tmpAclPath = this.aclPath + '.tmp';
+            const tmpAclPath = '/tmp/mosquitto.acl.tmp';
             fs.writeFileSync(tmpAclPath, aclContent, 'utf8');
             execSync(`sudo mv ${tmpAclPath} ${this.aclPath}`);
             // Ensure permissions are correct after move
