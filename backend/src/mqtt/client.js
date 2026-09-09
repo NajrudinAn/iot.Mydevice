@@ -7,10 +7,13 @@ let mqttClient = null;
 const initMqttClient = () => {
     const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://localhost:1883';
     
+    const username = (process.env.MQTT_USERNAME || 'backend_admin').trim();
+    console.log(`[MQTT] Connecting to broker at ${brokerUrl} as user: ${username}`);
+    
     // Connect to MQTT Broker
     mqttClient = mqtt.connect(brokerUrl, {
         reconnectPeriod: 5000, // Attempt reconnect every 5s if disconnected
-        username: (process.env.MQTT_USERNAME || 'backend_admin').trim(),
+        username: username,
         password: (process.env.MQTT_PASSWORD || 'super_secret_backend').trim()
     });
 

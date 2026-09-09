@@ -1,8 +1,9 @@
+require('dotenv').config();
+
 const deviceMonitor = require('./services/deviceMonitor');
 const commandMonitor = require('./services/commandMonitor');
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const deviceRoutes = require('./routes/devices');
@@ -21,16 +22,8 @@ const app = express();
 
 app.use(express.json());
 
-const MqttProvisioner = require('./services/MqttProvisioner');
-
-// Ensure backend_admin is authorized in mosquitto automatically on startup
-MqttProvisioner.ensureBackendAccess().then(() => {
-    // Init MQTT after securing access
-    initMqttClient();
-}).catch(err => {
-    console.error("Failed to provision MQTT access on startup", err);
-    initMqttClient(); // try anyway
-});
+// Init MQTT without automatic provisioning side-effects
+initMqttClient();
 
 // Init Retention Job (runs every 1 hour)
 if (process.env.NODE_ENV !== 'test') {
