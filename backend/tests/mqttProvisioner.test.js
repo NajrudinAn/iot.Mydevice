@@ -40,6 +40,31 @@ describe('MQTT Provisioning & Client Architecture', () => {
         );
     });
 
+    test('initMqttClient fails gracefully and aborts if MQTT_PASSWORD is not defined', () => {
+        delete process.env.MQTT_PASSWORD;
+        const mqtt = require('mqtt');
+        
+        // Suppress expected console.error during test
+        const originalError = console.error;
+        console.error = jest.fn();
+        
+        initMqttClient();
+        
+        expect(console.error).toHaveBeenCalledWith(expect.stringContaining('FATAL: MQTT_PASSWORD is not defined'));
+        expect(mqtt.connect).not.toHaveBeenCalled();
+        
+        console.error = originalError;
+    });
+
+    test('index.js and provisionBroker.js load .env via absolute paths', () => {
+        const actualFs = jest.requireActual('fs');
+        const indexSrc = actualFs.readFileSync(require('path').resolve(__dirname, '../src/index.js'), 'utf8');
+        const provisionSrc = actualFs.readFileSync(require('path').resolve(__dirname, '../scripts/provisionBroker.js'), 'utf8');
+        
+        expect(indexSrc).toContain('path.resolve(__dirname, \'../.env\')');
+        expect(provisionSrc).toContain('path.resolve(__dirname, \'../.env\')');
+    });
+
     test('syncDeviceCredential constructs mosquitto_passwd command safely and reloads', async () => {
         await MqttProvisioner.syncDeviceCredential('DEV-123', 'secret456');
 
