@@ -22,7 +22,8 @@ MOSQUITTO_PASSWD="/usr/bin/mosquitto_passwd"
 PASSWD_FILE="/home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.passwd"
 ACL_FILE="/home/ubuntu/iot.Mydevice/mosquitto/config/mosquitto.acl"
 SYSTEMCTL="/bin/systemctl"
-LOCK_FILE="/tmp/mosquitto_provision.lock"
+LOCK_DIR="/run/mydevice"
+LOCK_FILE="${LOCK_DIR}/mosquitto_provision.lock"
 
 # Verify infrastructure exists
 if [ ! -f "$PASSWD_FILE" ]; then
@@ -54,7 +55,13 @@ if [[ "$DEVICE_ID" == "mydevice_backend" || "$DEVICE_ID" == "backend_admin" ]]; 
     exit 5
 fi
 
-# 2. Execution Routing (Wrapped in flock to prevent race conditions)
+# 2. Preparation
+# Ensure the runtime lock directory exists securely
+mkdir -p "$LOCK_DIR"
+chown root:root "$LOCK_DIR"
+chmod 0755 "$LOCK_DIR"
+
+# 3. Execution Routing (Wrapped in flock to prevent race conditions)
 (
     # Obtain exclusive lock on FD 200
     flock -x 200
@@ -95,9 +102,9 @@ topic write devices/$DEVICE_ID/command/ack
 EOF
         fi
 
-        # Step 3: Enforce permissions
-        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE" || true
-        chmod 0640 "$PASSWD_FILE" "$ACL_FILE" || true
+        # Step 3: Enforce permissions strictly. Failure here will cause script to exit.
+        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE"
+        chmod 0640 "$PASSWD_FILE" "$ACL_FILE"
 
         # Step 4: Reload Broker
         $SYSTEMCTL reload mosquitto
@@ -108,9 +115,9 @@ EOF
         # Step 1: Revoke Authentication
         $MOSQUITTO_PASSWD -D "$PASSWD_FILE" "$DEVICE_ID"
 
-        # Step 2: Enforce permissions
-        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE" || true
-        chmod 0640 "$PASSWD_FILE" "$ACL_FILE" || true
+        # Step 2: Enforce permissions strictly. Failure here will cause script to exit.
+        chown mosquitto:mosquitto "$PASSWD_FILE" "$ACL_FILE"
+        chmod 0640 "$PASSWD_FILE" "$ACL_FILE"
 
         # Step 3: Reload Broker
         # Note: The ACL block is intentionally left untouched as an inert rule.
