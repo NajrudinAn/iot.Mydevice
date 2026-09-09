@@ -7,20 +7,64 @@ const MqttProvisioner = require('../services/MqttProvisioner');
 // Simple global counter for device ID prototype generation
 let deviceCounter = 1;
 
-// Helper to generate a slug from a name
-const generateSlug = (name) => {
-    return name.toString().toLowerCase()
-        .replace(/\s+/g, '-')           // Replace spaces with -
-        .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-        .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-        .replace(/^-+/, '')             // Trim - from start of text
-        .replace(/-+$/, '');            // Trim - from end of text
+const { generateSafeSlug, validateSlug } = require('../utils/slugValidator');
+
+exports.checkSlugAvailability = async (req, res) => {
+    try {
+        const { slug } = req.query;
+        if (!slug) {
+            return res.status(400).json({ error: 'Slug is required' });
+        }
+
+        const normalizedSlug = slug.trim().toLowerCase();
+        const validation = validateSlug(normalizedSlug);
+        
+        if (!validation.valid) {
+            return res.json({
+                available: false,
+                slug: normalizedSlug,
+                reason: validation.reason === 'RESERVED_SUBDOMAIN' ? 'RESERVED_SUBDOMAIN' : 'INVALID_FORMAT'
+            });
+        }
+
+        // 1. Check if slug exists in applications table
+        const existingApp = await Application.findBySlug(normalizedSlug);
+        if (existingApp) {
+            return res.json({
+                available: false,
+                slug: normalizedSlug,
+                reason: 'ALREADY_IN_USE'
+            });
+        }
+
+        // 2. Check if slug conflicts with an existing custom domain binding
+        const platformDomain = process.env.PLATFORM_DOMAIN || 'mydevice.in';
+        const expectedHostname = `${normalizedSlug}.${platformDomain}`;
+        const AppDomain = require('../models/applicationDomain');
+        const existingDomain = await AppDomain.findByHostname(expectedHostname);
+        
+        if (existingDomain) {
+            return res.json({
+                available: false,
+                slug: normalizedSlug,
+                reason: 'ALREADY_IN_USE'
+            });
+        }
+
+        return res.json({
+            available: true,
+            slug: normalizedSlug
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
 };
 
 exports.createApplication = async (req, res) => {
     try {
         const { workspace_id } = req.params;
-        const { name, description, authentication_api_id, deployment_mode, api_access_ids, registration_enabled } = req.body;
+        const { name, slug, description, authentication_api_id, deployment_mode, api_access_ids, registration_enabled } = req.body;
         const userId = req.user.id;
 
         if (!name) {
@@ -33,14 +77,32 @@ exports.createApplication = async (req, res) => {
             return res.status(404).json({ message: 'Workspace not found or unauthorized' });
         }
 
-        let slug = generateSlug(name);
+        let finalSlug = slug ? slug.trim().toLowerCase() : generateSafeSlug(name);
+        const validation = validateSlug(finalSlug);
         
-        // Let DB handle duplicate slug via UNIQUE constraint
+        if (!validation.valid) {
+            return res.status(400).json({ 
+                message: 'Invalid or reserved application slug.', 
+                reason: validation.reason 
+            });
+        }
+        
+        // Ensure slug doesn't conflict with custom domains
+        const platformDomain = process.env.PLATFORM_DOMAIN || 'mydevice.in';
+        const expectedHostname = `${finalSlug}.${platformDomain}`;
+        const AppDomain = require('../models/applicationDomain');
+        const existingDomain = await AppDomain.findByHostname(expectedHostname);
+        
+        if (existingDomain) {
+            return res.status(409).json({ message: 'Application slug already in use by a domain' });
+        }
+        
+        // Let DB handle duplicate slug via UNIQUE constraint for atomic concurrency protection
         try {
             const application = await Application.create(
                 workspace_id, 
                 name, 
-                slug, 
+                finalSlug, 
                 description, 
                 userId, 
                 authentication_api_id || null, 
@@ -54,7 +116,7 @@ exports.createApplication = async (req, res) => {
             res.status(201).json({ message: 'Application created successfully', application });
         } catch (dbErr) {
             if (dbErr.code === '23505') { // unique_violation in Postgres
-                return res.status(409).json({ message: 'Application slug already exists in this workspace' });
+                return res.status(409).json({ message: 'Application slug already in use' });
             }
             throw dbErr;
         }

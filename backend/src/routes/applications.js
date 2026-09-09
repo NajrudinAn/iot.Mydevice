@@ -24,6 +24,7 @@ router.post('/:id/auth/reset-password', authLimiter, applicationAuthController.r
 router.get('/:id/auth/settings', applicationAuthController.getSettings);
 
 // Public app slug resolution
+router.get('/slug-availability', applicationController.checkSlugAvailability);
 router.get('/slug/:slug', applicationController.getApplicationBySlug);
 router.get('/resolve-host', applicationController.resolveHost);
 

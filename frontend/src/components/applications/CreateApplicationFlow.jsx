@@ -11,6 +11,7 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
   // Form State
   const [formData, setFormData] = useState({
     name: '',
+    slug: '',
     description: '',
     authentication_api_id: '',
     api_access_ids: [],
@@ -18,6 +19,8 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
     registration_enabled: false
   });
   
+  const [slugStatus, setSlugStatus] = useState({ state: 'IDLE', reason: null }); // IDLE, CHECKING, AVAILABLE, UNAVAILABLE
+  const [slugTouched, setSlugTouched] = useState(false);
   const [authType, setAuthType] = useState('');
 
   // Data
@@ -38,11 +41,59 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
     }
   };
 
+  useEffect(() => {
+    if (!formData.slug) {
+        setSlugStatus({ state: 'IDLE', reason: null });
+        return;
+    }
+    
+    setSlugStatus({ state: 'CHECKING', reason: null });
+    const timer = setTimeout(async () => {
+        try {
+            const res = await platformClient.get(`/applications/slug-availability?slug=${encodeURIComponent(formData.slug)}`);
+            if (res.data.available) {
+                setSlugStatus({ state: 'AVAILABLE', reason: null });
+            } else {
+                setSlugStatus({ state: 'UNAVAILABLE', reason: res.data.reason });
+            }
+        } catch (err) {
+            setSlugStatus({ state: 'UNAVAILABLE', reason: err.response?.data?.reason || 'Error checking availability' });
+        }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [formData.slug]);
+
+  const generateSlug = (name) => {
+      return name.toString().toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\w\-]+/g, '')
+          .replace(/_/g, '-')
+          .replace(/\-\-+/g, '-')
+          .replace(/^-+/, '')
+          .replace(/-+$/, '');
+  };
+
+  const handleNameChange = (e) => {
+      const newName = e.target.value;
+      setFormData(prev => {
+          const updates = { name: newName };
+          if (!slugTouched) {
+              updates.slug = generateSlug(newName);
+          }
+          return { ...prev, ...updates };
+      });
+  };
+
+  const handleSlugChange = (e) => {
+      setSlugTouched(true);
+      setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') });
+  };
+
   const authApis = availableApis.filter(api => api.auth_mode === 'APPLICATION_SESSION');
   const accessApis = availableApis;
 
   const handleNext = () => {
-    if (step === 1 && !formData.name) return;
+    if (step === 1 && (!formData.name || !formData.slug || slugStatus.state !== 'AVAILABLE')) return;
     if (step === 2) {
         if (!authType) return;
         if (authType === 'LOGIN' && !formData.authentication_api_id) return;
@@ -107,11 +158,57 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
                   type="text"
                   className="form-input"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={handleNameChange}
                   placeholder="e.g. Farm Monitor Dashboard"
                   autoFocus
                 />
               </div>
+              
+              <div className="form-group">
+                <label className="form-label">Application Slug (Subdomain) <span className="text-red">*</span></label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    className={`form-input pl-4 pr-10 ${slugStatus.state === 'UNAVAILABLE' ? 'border-red-500 bg-red-50' : slugStatus.state === 'AVAILABLE' ? 'border-green-500 bg-green-50' : ''}`}
+                    value={formData.slug}
+                    onChange={handleSlugChange}
+                    placeholder="e.g. farm-monitor"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                    {slugStatus.state === 'CHECKING' && <div className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-blue-500 animate-spin" />}
+                    {slugStatus.state === 'AVAILABLE' && <CheckCircle size={16} className="text-green-500" />}
+                    {slugStatus.state === 'UNAVAILABLE' && <X size={16} className="text-red-500" />}
+                  </div>
+                </div>
+                {slugStatus.state === 'AVAILABLE' && (
+                  <div className="text-[12px] mt-1 text-green-600 font-medium">
+                    Available! Your app will be hosted at: <b>https://{formData.slug}.mydevice.in</b>
+                  </div>
+                )}
+                {slugStatus.state === 'UNAVAILABLE' && (
+                  <div className="text-[12px] mt-1 text-red-500 font-medium flex flex-col gap-1">
+                    <span>
+                      {slugStatus.reason === 'RESERVED_SUBDOMAIN' && 'This subdomain is reserved by the platform.'}
+                      {slugStatus.reason === 'ALREADY_IN_USE' && 'This subdomain is already taken.'}
+                      {slugStatus.reason === 'INVALID_FORMAT' && 'Slugs must be 2-63 lowercase alphanumeric characters or hyphens.'}
+                      {!['RESERVED_SUBDOMAIN', 'ALREADY_IN_USE', 'INVALID_FORMAT'].includes(slugStatus.reason) && slugStatus.reason}
+                    </span>
+                    {slugStatus.reason === 'ALREADY_IN_USE' && (
+                       <span 
+                         className="text-blue-500 cursor-pointer hover:underline"
+                         onClick={() => {
+                            const suggested = formData.slug + '-' + Math.floor(Math.random() * 100);
+                            setFormData({...formData, slug: suggested});
+                            setSlugTouched(true);
+                         }}
+                       >
+                         Need a suggestion? Click here to generate one.
+                       </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Description</label>
                 <textarea
