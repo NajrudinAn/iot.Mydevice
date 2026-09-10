@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { platformClient } from '../api/client';
 import { 
-  ArrowLeft, Server, Activity, Clock, Trash2, AlertCircle, CheckCircle2, Copy, Terminal, Edit2, Check, X, ChevronDown, ChevronRight, Upload, Download, Book, Code2, Package
+  ArrowLeft, Server, Activity, Clock, Trash2, AlertCircle, CheckCircle2, Copy, Terminal, Edit2, Check, X, ChevronDown, ChevronRight, Upload, Download, Book, Code2, Package, FileCode, Cpu, Hexagon
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { useSSE } from '../hooks/useSSE';
@@ -427,7 +427,7 @@ setInterval(() => {
           const sdkConfigs = {
             python: {
               label: 'Python',
-              icon: '🐍',
+              icon: FileCode,
               code: pythonExample,
               exampleFilename: `example_${did.toLowerCase()}.py`,
               libraryFilename: 'mydevice.py',
@@ -453,7 +453,7 @@ setInterval(() => {
             },
             arduino: {
               label: 'Arduino / C++',
-              icon: '⚙️',
+              icon: Cpu,
               code: arduinoExample,
               exampleFilename: `example_${did.toLowerCase()}.ino`,
               libraryFilename: 'MyDevice.h',
@@ -479,7 +479,7 @@ setInterval(() => {
             },
             nodejs: {
               label: 'Node.js',
-              icon: '🟩',
+              icon: Hexagon,
               code: nodejsExample,
               exampleFilename: `example_${did.toLowerCase()}.js`,
               libraryFilename: 'mydevice-sdk.js',
@@ -552,7 +552,7 @@ setInterval(() => {
                       display: 'flex', alignItems: 'center', gap: '6px',
                     }}
                   >
-                    <span style={{ fontSize: '15px' }}>{c.icon}</span>
+                    {React.createElement(c.icon, { size: 15, style: { color: sdkTab === key ? '#2563eb' : '#9ca3af' } })}
                     {c.label}
                   </button>
                 ))}
