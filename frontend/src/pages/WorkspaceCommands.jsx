@@ -280,9 +280,9 @@ export default function WorkspaceCommands() {
                     {historyError ? (
                         <div className="p-12 text-center text-red-500">{historyError}</div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-gray-600 dark:text-gray-300">
-                                <thead className="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <div className="table-container">
+                            <table className="ds-table">
+                                <thead>
                                     <tr>
                                         <th className="px-6 py-4 font-medium">Time</th>
                                         <th className="px-6 py-4 font-medium">Device</th>
@@ -292,7 +292,7 @@ export default function WorkspaceCommands() {
                                         <th className="px-6 py-4 font-medium">Duration</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                                <tbody>
                                     {historyLoading && commands.length === 0 ? (
                                         <tr><td colSpan="6" className="px-6 py-12 text-center">Loading...</td></tr>
                                     ) : commands.length === 0 ? (
@@ -307,7 +307,7 @@ export default function WorkspaceCommands() {
                                                 <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{cmd.command_type}</td>
                                                 <td className="px-6 py-4 text-xs">{cmd.requested_by_email}</td>
                                                 <td className="px-6 py-4">
-                                                    <span className={`px-2.5 py-1 rounded-md text-xs font-medium border ${getStatusBadge(cmd.status)}`}>{cmd.status}</span>
+                                                    <span className={`px-3 py-1 rounded-md text-xs font-medium border ${getStatusBadge(cmd.status)}`}>{cmd.status}</span>
                                                 </td>
                                                 <td className="px-6 py-4 font-mono text-xs text-gray-500">{calculateDuration(cmd)}</td>
                                             </tr>

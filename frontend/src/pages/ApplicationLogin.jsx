@@ -45,8 +45,8 @@ export default function ApplicationLogin() {
   };
 
   return (
-    <div className="app-container flex-center">
-      <div className="glass-card" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem' }}>
+    <div className="app-container flex-center p-4">
+      <div className="glass-card w-full max-w-[420px] p-6 sm:p-10 mx-auto">
         <div className="flex-center" style={{ marginBottom: '2rem', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ textAlign: 'center' }}>
             <h2>Application Portal</h2>

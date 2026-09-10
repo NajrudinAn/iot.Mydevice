@@ -142,11 +142,11 @@ export default function PlatformUsers() {
                     <td className="px-6 py-4 text-sm text-muted">{u.email}</td>
                     <td className="px-6 py-4">
                       {u.is_platform_admin ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-light text-purple">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-purple-light text-purple">
                           <Shield size={12} /> Platform Admin
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-muted">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-muted">
                           Standard User
                         </span>
                       )}

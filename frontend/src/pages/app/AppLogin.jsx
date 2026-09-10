@@ -28,7 +28,7 @@ export default function AppLogin() {
   if (platformToken && authError) {
     return (
       <div className="app-container flex-center">
-        <div className="login-box" style={{ textAlign: 'center' }}>
+        <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto" style={{ textAlign: 'center' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '50%' }}>
               <ShieldAlert size={48} color="#ef4444" />
@@ -53,7 +53,7 @@ export default function AppLogin() {
   if (!application.authentication_enabled) {
     return (
       <div className="app-container flex-center">
-        <div className="login-box">
+        <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto">
           <h2>Authentication Disabled</h2>
           <p style={{ color: 'var(--text-muted)' }}>This application does not require authentication.</p>
           <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => navigate(`/applications/${application.id}/dashboards`)}>
@@ -66,7 +66,7 @@ export default function AppLogin() {
 
   return (
     <div className="app-container flex-center">
-      <div className="login-box">
+      <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto">
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           {application.logo_url ? (
             <img src={application.logo_url} alt="Logo" style={{ maxHeight: '64px', borderRadius: '8px' }} />

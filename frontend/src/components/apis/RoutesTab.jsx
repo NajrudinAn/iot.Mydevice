@@ -45,19 +45,19 @@ const RoutesTab = ({ workspaceId }) => {
     return (
         <div className="w-full">
             {/* Header Area */}
-            <div className="flex-between mb-8 gap-4 bg-slate-50 p-6 rounded-xl border border-gray-100">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 bg-white border border-gray-200 rounded-xl text-blue-500 shadow-sm flex-center">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyItems: 'space-between', gap: '16px', background: '#f8fafc', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #f3f4f6', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', flex: '1 1 250px' }}>
+                    <div style={{ padding: '12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', color: '#3b82f6', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <Share2 size={24} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 tracking-tight">Reusable Routes</h2>
-                        <p className="text-sm text-gray-500 mt-1">Create and manage reusable API routes that can be grouped into APIs.</p>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.025em' }}>Reusable Routes</h2>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '4px' }}>Create and manage reusable API routes that can be grouped into APIs.</p>
                     </div>
                 </div>
                 <button
                     onClick={() => { setRouteToEdit(null); setIsCreateModalOpen(true); }}
-                    className="ds-btn shrink-0"
+                    style={{ background: '#2563eb', color: '#fff', padding: '8px 16px', borderRadius: '10px', fontWeight: 600, fontSize: '0.875rem', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                     + Create Route
                 </button>
@@ -111,24 +111,24 @@ const RoutesTab = ({ workspaceId }) => {
             </div>
 
             {/* Filters */}
-            <div className="flex gap-3 mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '1.5rem' }}>
+                <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '0' }}>
+                    <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} size={18} />
                     <input
                         type="text"
                         placeholder="Search routes by name, path or purpose..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-11 pl-10 pr-4 bg-white border border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm text-gray-900 shadow-sm transition-all outline-none"
+                        style={{ width: '100%', height: '44px', paddingLeft: '40px', paddingRight: '16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', color: '#111827', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', outline: 'none', boxSizing: 'border-box' }}
                     />
                 </div>
-                <div className="flex gap-3 shrink-0">
-                    <select className="h-11 px-4 bg-white border border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm font-medium text-gray-700 outline-none shadow-sm transition-all cursor-pointer min-w-[140px] appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 0.875rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', paddingRight: '2.5rem' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', flexShrink: 0 }}>
+                    <select style={{ height: '44px', padding: '0 40px 0 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 14px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '140px' }}>
                         <option>All Methods</option>
                         <option>GET</option>
                         <option>POST</option>
                     </select>
-                    <select className="h-11 px-4 bg-white border border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-sm font-medium text-gray-700 outline-none shadow-sm transition-all cursor-pointer min-w-[140px] appearance-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 0.875rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', paddingRight: '2.5rem' }}>
+                    <select style={{ height: '44px', padding: '0 40px 0 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 14px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '140px' }}>
                         <option>All Status</option>
                         <option>Active</option>
                         <option>Inactive</option>
@@ -207,19 +207,19 @@ const RoutesTab = ({ workspaceId }) => {
                 
                 {/* Pagination Footer */}
                 {filteredRoutes.length > 0 && (
-                    <div className="px-6 py-3.5 border-t border-gray-200 flex items-center justify-between bg-gray-50/30 rounded-b-xl">
-                        <span className="text-[13px] text-gray-500 font-medium">
-                            Showing <span className="font-bold text-gray-900">1-{filteredRoutes.length}</span> of <span className="font-bold text-gray-900">{filteredRoutes.length}</span>
+                    <div style={{ padding: '14px 24px', borderTop: '1px solid #e5e7eb', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', background: 'rgba(249, 250, 251, 0.3)', borderBottomLeftRadius: '12px', borderBottomRightRadius: '12px' }}>
+                        <span style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>
+                            Showing <span style={{ fontWeight: 700, color: '#111827' }}>1-{filteredRoutes.length}</span> of <span style={{ fontWeight: 700, color: '#111827' }}>{filteredRoutes.length}</span>
                         </span>
-                        <div className="flex items-center gap-1.5">
-                            <button className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-500 font-bold text-[13px] shadow-sm hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button disabled style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#6b7280', fontWeight: 700, fontSize: '13px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', opacity: 0.5, cursor: 'not-allowed' }}>
                                 <ChevronLeft size={16} />
                                 Previous
                             </button>
-                            <button className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white font-bold rounded-lg text-[13px] shadow-sm">
+                            <button style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2563eb', color: '#fff', fontWeight: 700, borderRadius: '8px', fontSize: '13px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', border: 'none' }}>
                                 1
                             </button>
-                            <button className="flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-gray-500 font-bold text-[13px] shadow-sm hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <button disabled style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#6b7280', fontWeight: 700, fontSize: '13px', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', opacity: 0.5, cursor: 'not-allowed' }}>
                                 Next
                                 <ChevronRight size={16} />
                             </button>

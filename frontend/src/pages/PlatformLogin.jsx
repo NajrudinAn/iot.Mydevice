@@ -45,19 +45,7 @@ export default function PlatformLogin() {
       backgroundImage: 'radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 40%), radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.05), transparent 40%)',
       padding: '1.5rem'
     }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '440px',
-        backgroundColor: 'var(--glass-bg)',
-        backdropFilter: 'var(--glass-blur)',
-        WebkitBackdropFilter: 'var(--glass-blur)',
-        border: '1px solid var(--glass-border)',
-        borderRadius: 'var(--radius-xl)',
-        boxShadow: 'var(--shadow-lg)',
-        padding: '3rem 2.5rem',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
+      <div className="glass-panel relative overflow-hidden w-full max-w-[440px] p-6 sm:p-10">
         {/* Decorative Top Glow */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, var(--primary), transparent)', opacity: 0.5 }}></div>
         

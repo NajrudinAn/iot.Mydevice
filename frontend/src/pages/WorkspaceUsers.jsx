@@ -72,11 +72,10 @@ export default function WorkspaceUsers() {
           {error}
         </div>
       ) : (
-        <div className="glass-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="ds-table w-full text-sm text-left">
-              <thead className="text-xs text-muted uppercase bg-gray-50/50 border-b border-gray-100">
-                <tr>
+        <div className="table-container">
+          <table className="ds-table">
+            <thead>
+              <tr>
                   <th className="px-6 py-4 font-bold tracking-wider">User</th>
                   <th className="px-6 py-4 font-bold tracking-wider">Role & Access</th>
                   <th className="px-6 py-4 font-bold tracking-wider">Application</th>
@@ -144,7 +143,6 @@ export default function WorkspaceUsers() {
               </tbody>
             </table>
           </div>
-        </div>
       )}
     </div>
   );

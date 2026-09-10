@@ -10,8 +10,17 @@ export default function PlatformLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   const closeSidebar = () => setIsSidebarOpen(false);
+
+  const toggleSidebar = () => {
+    if (window.innerWidth <= 768) {
+      setIsSidebarOpen(prev => !prev);
+    } else {
+      setDesktopSidebarOpen(prev => !prev);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -23,7 +32,7 @@ export default function PlatformLayout({ children }) {
         />
       )}
       
-      <aside className={`app-sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
+      <aside className={`app-sidebar ${isSidebarOpen ? 'mobile-open' : ''} ${!desktopSidebarOpen ? 'desktop-collapsed' : ''}`}>
         <div className="flex-align gap-3 mb-2" style={{ padding: '1.5rem' }}>
           <div className="flex-align gap-3 cursor-pointer" onClick={() => navigate('/portal')}>
             <Hexagon className="text-primary" size={32} style={{ color: '#2563eb' }} strokeWidth={2.5} />
@@ -71,11 +80,12 @@ export default function PlatformLayout({ children }) {
         <header className="app-topbar">
           <div className="flex-1 flex-align gap-4">
             <button 
-              className="mobile-only" 
-              onClick={() => setIsSidebarOpen(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)' }}
+              className="mobile-only"
+              onClick={toggleSidebar}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-main)', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
+              aria-label="Toggle sidebar"
             >
-              <Menu size={24} />
+              <Menu size={20} />
             </button>
             <div style={{ position: 'relative', width: '100%', maxWidth: '36rem' }} className="hidden-md">
               <Search style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />

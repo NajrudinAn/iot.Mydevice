@@ -55,7 +55,7 @@ export default function AppRegister({ application }) {
   if (!application.registration_enabled) {
     return (
       <div className="app-container flex-center">
-        <div className="login-box">
+        <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto">
           <h2>Registration Disabled</h2>
           <p style={{ color: 'var(--text-muted)' }}>This application is not accepting new users.</p>
           <button className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => navigate(`/app/${application.slug}`)}>
@@ -69,7 +69,7 @@ export default function AppRegister({ application }) {
   if (success) {
     return (
       <div className="app-container flex-center">
-        <div className="login-box" style={{ textAlign: 'center' }}>
+        <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto" style={{ textAlign: 'center' }}>
           <h2>Success</h2>
           <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{success}</p>
           <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => navigate(`/app/${application.slug}/login`)}>
@@ -82,7 +82,7 @@ export default function AppRegister({ application }) {
 
   return (
     <div className="app-container flex-center">
-      <div className="login-box">
+      <div className="glass-panel w-full max-w-[420px] p-6 sm:p-10 mx-auto">
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
           <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '16px' }}>
             <UserPlus size={32} color="#10b981" />

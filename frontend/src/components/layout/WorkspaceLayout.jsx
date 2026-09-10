@@ -13,10 +13,21 @@ export default function WorkspaceLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // desktop sidebar toggle
   const [workspaces, setWorkspaces] = useState([]);
   const [currentWorkspace, setCurrentWorkspace] = useState(null);
   const [showWsSwitcher, setShowWsSwitcher] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const isMobile = () => window.innerWidth <= 768;
+
+  const toggleSidebar = () => {
+    if (isMobile()) {
+      setMobileMenuOpen(prev => !prev);
+    } else {
+      setSidebarOpen(prev => !prev);
+    }
+  };
 
   const basePath = `/workspaces/${workspaceId}`;
 
@@ -47,7 +58,7 @@ export default function WorkspaceLayout({ children }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`app-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', zIndex: 50 }}>
+      <aside className={`app-sidebar ${mobileMenuOpen ? 'mobile-open' : ''} ${!sidebarOpen ? 'desktop-collapsed' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', zIndex: 50 }}>
         <div className="flex-between mb-2" style={{ padding: '1.25rem' }}>
           <div className="flex-align gap-2 cursor-pointer" onClick={() => navigate('/portal')}>
             <Hexagon className="text-primary" size={24} style={{ color: '#2563eb' }} strokeWidth={2.5} />
@@ -56,7 +67,7 @@ export default function WorkspaceLayout({ children }) {
               <div className="text-muted" style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>User Portal</div>
             </div>
           </div>
-          <button className="hidden-md text-muted" onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none' }}>
+          <button className="mobile-only text-muted" onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none' }}>
             <X size={20} />
           </button>
         </div>
@@ -127,33 +138,41 @@ export default function WorkspaceLayout({ children }) {
       <div className="app-main" style={{ backgroundColor: 'var(--bg-base)' }}>
         <header className="app-topbar" style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-color)' }}>
           <div className="flex-1 flex-align gap-4">
-            <button className="text-main hidden-md" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            {/* Hamburger — mobile only, opens the slide-in drawer */}
+            <button
+              className="mobile-only text-main"
+              onClick={toggleSidebar}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              aria-label="Toggle sidebar"
+            >
               <Menu size={20} />
             </button>
 
             <div style={{ position: 'relative' }}>
               <button 
                 className="flex-align gap-2 rounded-full text-sm font-medium transition-colors" 
-                style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid transparent', color: 'var(--text-main)', cursor: 'pointer' }}
+                style={{ padding: '0.5rem 1rem', background: 'var(--bg-surface-elevated)', border: '1px solid transparent', color: 'var(--text-main)', cursor: 'pointer', maxWidth: '60vw' }}
                 onClick={() => setShowWsSwitcher(!showWsSwitcher)}
-                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#e2e8f0'; }}
-                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#f1f5f9'; }}
+                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--border-color)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-surface-elevated)'; }}
               >
-                <div style={{ width: '20px', height: '20px', borderRadius: '4px', backgroundColor: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="shrink-0" style={{ width: '20px', height: '20px', borderRadius: '4px', backgroundColor: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Hexagon size={12} style={{ color: 'white' }} />
                 </div>
-                {workspaces.find(w => w.id === workspaceId)?.name || currentWorkspace?.name || 'Workspace'} 
-                <ChevronDown size={14} className="text-muted ml-2" />
+                <span className="truncate">
+                  {workspaces.find(w => w.id === workspaceId)?.name || currentWorkspace?.name || 'Workspace'} 
+                </span>
+                <ChevronDown size={14} className="text-muted shrink-0 ml-1" />
               </button>
               
               {showWsSwitcher && workspaces.length > 0 && (
-                <div className="ds-card" style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '250px', zIndex: 100, padding: '0.5rem' }}>
+                <div className="ds-card shadow-lg" style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '280px', maxWidth: '85vw', zIndex: 100, padding: '0.5rem' }}>
                   <div className="text-xs text-muted font-bold uppercase mb-2 px-2 pt-1" style={{ letterSpacing: '0.05em' }}>Switch Workspace</div>
                   <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {workspaces.map(ws => (
                       <div 
                         key={ws.id} 
-                        className="flex-align gap-3 p-2 hover-bg-gray-50 cursor-pointer rounded"
+                        className="flex-align gap-3 p-2 hover-bg-gray-50 cursor-pointer rounded transition-colors"
                         onClick={() => {
                           setShowWsSwitcher(false);
                           if (ws.id !== workspaceId) {
@@ -161,7 +180,7 @@ export default function WorkspaceLayout({ children }) {
                           }
                         }}
                       >
-                        <div className="ds-icon-box bg-blue-light text-blue" style={{ width: '1.5rem', height: '1.5rem', borderRadius: '4px' }}>
+                        <div className="ds-icon-box bg-blue-50 text-primary shrink-0" style={{ width: '1.5rem', height: '1.5rem', borderRadius: '4px' }}>
                           <Hexagon size={14} />
                         </div>
                         <div className="truncate text-sm font-medium text-main">{ws.name}</div>

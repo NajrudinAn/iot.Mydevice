@@ -115,7 +115,7 @@ export default function WorkspaceOverview() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="glass-card p-6 flex-column justify-center relative overflow-hidden">
+        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
           <div className="flex-between mb-2 z-10">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Total Devices</h3>
             <Server size={18} className="text-blue" />
@@ -123,7 +123,7 @@ export default function WorkspaceOverview() {
           <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : deviceCount}</div>
         </div>
 
-        <div className="glass-card p-6 flex-column justify-center relative overflow-hidden">
+        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
           <div className="flex-between mb-2 z-10">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Online Devices</h3>
             <Wifi size={18} className="text-green" />
@@ -131,7 +131,7 @@ export default function WorkspaceOverview() {
           <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : onlineCount}</div>
         </div>
 
-        <div className="glass-card p-6 flex-column justify-center relative overflow-hidden">
+        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
           <div className="flex-between mb-2 z-10">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Offline Devices</h3>
             <WifiOff size={18} className="text-red" />
@@ -139,7 +139,7 @@ export default function WorkspaceOverview() {
           <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : offlineCount}</div>
         </div>
 
-        <div className="glass-card p-6 flex-column justify-center relative overflow-hidden">
+        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
           <div className="flex-between mb-2 z-10">
             <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Applications</h3>
             <LayoutGrid size={18} className="text-purple" />

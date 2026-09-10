@@ -198,34 +198,34 @@ export default function WorkspaceDevices() {
       ) : (
         <>
           {/* Compact Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="glass-card flex-align gap-4 p-4">
-              <div className="ds-icon-box bg-blue-light text-blue">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div className="ds-icon-box bg-blue-light text-blue" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
                 <Server size={20} />
               </div>
               <div>
-                <div className="text-xs text-muted font-semibold uppercase tracking-wider mb-1">Total Devices</div>
-                <div className="text-2xl font-bold leading-none">{loading ? '-' : stats.total}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Devices</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.total}</div>
               </div>
             </div>
-            
-            <div className="glass-card flex-align gap-4 p-4">
-              <div className="ds-icon-box bg-green-light text-green">
+
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div className="ds-icon-box bg-green-light text-green" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
                 <Activity size={20} />
               </div>
               <div>
-                <div className="text-xs text-muted font-semibold uppercase tracking-wider mb-1">Online</div>
-                <div className="text-2xl font-bold leading-none">{loading ? '-' : stats.online}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Online</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.online}</div>
               </div>
             </div>
-            
-            <div className="glass-card flex-align gap-4 p-4">
-              <div className="ds-icon-box bg-gray-100 text-muted">
+
+            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div className="ds-icon-box bg-gray-100 text-muted" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
                 <Server size={20} />
               </div>
               <div>
-                <div className="text-xs text-muted font-semibold uppercase tracking-wider mb-1">Offline</div>
-                <div className="text-2xl font-bold leading-none">{loading ? '-' : stats.offline}</div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Offline</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.offline}</div>
               </div>
             </div>
           </div>
@@ -324,8 +324,8 @@ export default function WorkspaceDevices() {
               {/* Mobile Cards */}
               <div className="md:hidden grid grid-cols-1 gap-4">
                  {filteredDevices.map(device => (
-                    <div key={device.id} className="device-card-mobile flex-column gap-4">
-                       <div className="flex-between align-start">
+                    <div key={device.id} className="ds-card p-4 flex-col gap-4">
+                       <div className="flex-between items-start">
                           <div>
                             <div className="font-bold text-main mb-1">{device.name}</div>
                             <span className="font-mono text-xs text-muted bg-gray-50 px-1 rounded border border-gray-100">{device.device_id}</span>
@@ -335,12 +335,12 @@ export default function WorkspaceDevices() {
                           </span>
                        </div>
                        
-                       <div className="text-sm text-muted flex-column gap-2">
+                       <div className="text-sm text-muted flex-col gap-2">
                           <div className="flex-between"><span>Type</span> <span>{device.device_type}</span></div>
                           <div className="flex-between"><span>Last Seen</span> <span>{formatLastSeen(device.last_seen)}</span></div>
                        </div>
                        
-                       <Button variant="secondary" className="w-full" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
+                       <Button variant="secondary" className="w-full mt-2" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
                           View Device
                        </Button>
                     </div>

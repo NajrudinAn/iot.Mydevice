@@ -567,11 +567,10 @@ export default function PlatformApplicationInspection() {
                 ) : deployments.length === 0 ? (
                   <div className="text-center py-10 bg-white border border-slate-200 rounded-xl text-slate-500 text-sm shadow-sm">No deployments found.</div>
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-[13px]">
+                  <div className="table-container">
+                      <table className="ds-table">
                         <thead>
-                          <tr className="text-slate-500 font-semibold uppercase tracking-wider text-[11px] bg-slate-50/30">
+                          <tr>
                             <th className="py-4 px-5 border-b border-gray-200 w-[35%]">Version</th>
                             <th className="py-4 px-5 border-b border-gray-200">Status</th>
                             <th className="py-4 px-5 border-b border-gray-200">Uploaded</th>
@@ -643,7 +642,6 @@ export default function PlatformApplicationInspection() {
                         </tbody>
                       </table>
                     </div>
-                  </div>
                 )}
               </div>
 
@@ -822,8 +820,8 @@ export default function PlatformApplicationInspection() {
                 <h3 className="text-[15px] font-bold text-main m-0">Application Users</h3>
                 <Button variant="secondary" icon={Plus} onClick={() => setIsAddingUser(true)}>Add User</Button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="ds-table w-full">
+              <div className="table-container border-t-0 rounded-t-none">
+                <table className="ds-table">
                   <thead>
                     <tr>
                       <th>User</th>

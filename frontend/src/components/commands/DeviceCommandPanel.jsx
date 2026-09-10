@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import { Terminal, Settings2 } from 'lucide-react';
 
-const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = [], deviceStatus }) => {
+const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = [], deviceStatus, readOnly = false }) => {
     const [sendingAction, setSendingAction] = useState(null);
     
     // Local state for dynamic forms
@@ -119,6 +119,107 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
 
     const groups = Object.values(groupedActions);
 
+    // ─── readOnly mode: clean capability reference ───────────────────────────────
+    if (readOnly) {
+        if (groups.length === 0) {
+            return (
+                <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+                    <Settings2 size={32} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                    <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '4px', color: '#6b7280' }}>No capabilities registered</div>
+                    <div style={{ fontSize: '12px' }}>Publish to the capabilities topic to register device actions.</div>
+                </div>
+            );
+        }
+
+        return (
+            <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                    <Settings2 size={18} style={{ color: '#6366f1' }} />
+                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>Device Capabilities</span>
+                    <span style={{ marginLeft: '4px', background: '#ede9fe', color: '#6d28d9', borderRadius: '20px', padding: '2px 9px', fontSize: '11px', fontWeight: 700 }}>{groups.length}</span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {groups.map((group, idx) => (
+                        <div key={idx} style={{ border: '1px solid #e5e7eb', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
+                            {/* Group Header */}
+                            <div style={{ padding: '12px 16px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#6366f1', display: 'inline-block', flexShrink: 0 }} />
+                                    <span style={{ fontWeight: 700, fontSize: '14px', color: '#111827' }}>{group.label}</span>
+                                </div>
+                                {group.state_mapping?.path && (
+                                    <span style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'monospace', background: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                        state → {group.state_mapping.path}{group.state_mapping.unit ? ` (${group.state_mapping.unit})` : ''}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Actions */}
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {group.actions.map((action, aIdx) => {
+                                    const params = action.parameters ? (typeof action.parameters === 'string' ? JSON.parse(action.parameters) : action.parameters) : {};
+                                    const paramEntries = Object.entries(params);
+                                    return (
+                                        <div key={action.name} style={{ padding: '14px 16px', borderBottom: aIdx < group.actions.length - 1 ? '1px solid #f3f4f6' : 'none', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {/* Action title row */}
+                                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flexWrap: 'wrap' }}>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                                                        <span style={{ fontWeight: 600, fontSize: '13px', color: '#1f2937' }}>{action.label}</span>
+                                                        <code style={{ fontSize: '11px', fontFamily: 'monospace', color: '#7c3aed', background: '#f5f3ff', padding: '1px 7px', borderRadius: '4px', border: '1px solid #ede9fe' }}>{action.name}</code>
+                                                    </div>
+                                                    {action.description && (
+                                                        <div style={{ fontSize: '12px', color: '#6b7280', lineHeight: '1.5' }}>{action.description}</div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Parameters */}
+                                            {paramEntries.length > 0 ? (
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '2px' }}>
+                                                    {paramEntries.map(([pName, pSchema]) => {
+                                                        const typeColor = pSchema.type === 'number' ? { bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe' }
+                                                            : pSchema.type === 'boolean' ? { bg: '#f0fdf4', text: '#15803d', border: '#bbf7d0' }
+                                                            : pSchema.type === 'enum' ? { bg: '#fef3c7', text: '#b45309', border: '#fde68a' }
+                                                            : { bg: '#f3f4f6', text: '#374151', border: '#e5e7eb' };
+                                                        return (
+                                                            <div key={pName} style={{ display: 'inline-flex', alignItems: 'center', gap: '0', border: `1px solid ${typeColor.border}`, borderRadius: '6px', overflow: 'hidden', fontSize: '11.5px' }}>
+                                                                <span style={{ padding: '3px 8px', fontWeight: 600, color: '#374151', background: '#f9fafb', borderRight: `1px solid ${typeColor.border}`, fontFamily: 'monospace' }}>
+                                                                    {pName}{pSchema.required && <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>}
+                                                                </span>
+                                                                <span style={{ padding: '3px 8px', background: typeColor.bg, color: typeColor.text, fontWeight: 600 }}>
+                                                                    {pSchema.type || 'string'}
+                                                                </span>
+                                                                {pSchema.min !== undefined && pSchema.max !== undefined && (
+                                                                    <span style={{ padding: '3px 8px', color: '#6b7280', background: '#f9fafb', borderLeft: `1px solid ${typeColor.border}` }}>
+                                                                        {pSchema.min} – {pSchema.max}{pSchema.step && pSchema.step !== 1 ? ` / ${pSchema.step}` : ''}
+                                                                    </span>
+                                                                )}
+                                                                {(pSchema.enum || pSchema.values) && (
+                                                                    <span style={{ padding: '3px 8px', color: '#6b7280', background: '#f9fafb', borderLeft: `1px solid ${typeColor.border}` }}>
+                                                                        {(pSchema.enum || pSchema.values).join(' | ')}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontSize: '11px', color: '#9ca3af', fontStyle: 'italic' }}>No parameters</span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+    // ─────────────────────────────────────────────────────────────────────────────
+
     return (
         <div className="command-panel">
             <div className="flex justify-between items-center mb-6">
@@ -192,7 +293,24 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
                                             </div>
                                             
                                             <div className="flex flex-wrap items-center gap-3">
-                                                {hasParams ? (
+                                                {readOnly ? (
+                                                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col gap-1.5 w-full md:w-auto font-mono text-xs shadow-inner">
+                                                        {hasParams ? (
+                                                            Object.entries(params).map(([paramName, paramSchema]) => (
+                                                                <div key={paramName} className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 last:border-0 pb-1.5 last:pb-0">
+                                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold">{paramName}{paramSchema.required && <span className="text-red-500 ml-0.5">*</span>}</span>
+                                                                    <span className="text-gray-500 ml-auto text-right">
+                                                                        <span className="text-blue-600 dark:text-blue-400 font-medium mr-1">{paramSchema.type || 'string'}</span>
+                                                                        {paramSchema.min !== undefined && paramSchema.max !== undefined && ` [${paramSchema.min} - ${paramSchema.max}]`}
+                                                                        {(paramSchema.enum || paramSchema.values) && ` [${(paramSchema.enum || paramSchema.values).join(', ')}]`}
+                                                                    </span>
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="text-gray-500 italic">No parameters required</div>
+                                                        )}
+                                                    </div>
+                                                ) : hasParams ? (
                                                     <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
                                                         {Object.entries(params).map(([paramName, paramSchema]) => (
                                                             <div key={paramName} className="flex flex-col">

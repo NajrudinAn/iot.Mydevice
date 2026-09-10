@@ -48,37 +48,36 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             {/* Header */}
-            <div className="flex items-start justify-between mb-6">
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '1.5rem' }}>
                 <div>
-                    <h2 className="text-[22px] font-bold text-gray-900 tracking-tight">Workspace APIs</h2>
-                    <p className="text-[15px] text-gray-500 mt-1 font-medium">Manage and configure your custom API packages.</p>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>Workspace APIs</h2>
+                    <p style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '4px' }}>Manage and configure your custom API packages.</p>
                 </div>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                    style={{ background: '#2563eb', color: '#fff', padding: '8px 16px', borderRadius: '10px', fontWeight: 600, fontSize: '0.875rem', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
                 >
                     + Create API
                 </button>
             </div>
 
             {/* Search and Filters */}
-            <div className="flex gap-4 mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '1.5rem' }}>
+                <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '0' }}>
+                    <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} size={16} />
                     <input
                         type="text"
                         placeholder="Search APIs by name or description..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-11 pl-10 pr-4 bg-gray-50/50 border border-gray-200 hover:border-gray-300 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-[15px] text-gray-900 transition-all outline-none"
+                        style={{ width: '100%', height: '42px', paddingLeft: '38px', paddingRight: '12px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
                     />
                 </div>
-                <div className="shrink-0 relative">
+                <div style={{ flexShrink: 0 }}>
                     <select 
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="h-11 px-4 bg-white border border-gray-200 hover:border-gray-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl text-[15px] font-medium text-gray-700 outline-none transition-all cursor-pointer min-w-[150px] appearance-none" 
-                        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 0.875rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', paddingRight: '2.5rem' }}
+                        style={{ height: '42px', padding: '0 36px 0 14px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 10px center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
                     >
                         <option>All Status</option>
                         <option>Active</option>
@@ -126,7 +125,7 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
                                         <div>
                                             <div className="flex items-center gap-3">
                                                 <h3 className="text-[18px] font-bold text-gray-900">{api.name}</h3>
-                                                <span className={`badge gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase ${api.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                <span className={`badge gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase ${api.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                                                     <div className={`w-1.5 h-1.5 rounded-full ${api.status === 'ACTIVE' ? 'bg-green-500' : 'bg-slate-400'}`}></div>
                                                     {api.status}
                                                 </span>
@@ -140,27 +139,27 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
                                 </div>
                                 
                                 {/* Bottom Half */}
-                                <div className="flex items-end justify-between mt-8" style={{ paddingLeft: '4.5rem' }}>
-                                    <div className="flex items-center">
-                                        <div className="pr-8">
-                                            <p className="text-xl font-bold text-gray-900 leading-none mb-1">{api.route_count}</p>
-                                            <p className="text-[13px] text-gray-500 font-medium">Routes</p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+                                        <div style={{ paddingRight: '20px' }}>
+                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.route_count}</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Routes</p>
                                         </div>
-                                        <div className="w-px h-10 bg-gray-200"></div>
-                                        <div className="px-8">
-                                            <p className="text-xl font-bold text-gray-900 leading-none mb-1">{api.credential_count}</p>
-                                            <p className="text-[13px] text-gray-500 font-medium">API Keys</p>
+                                        <div style={{ width: '1px', height: '36px', background: '#e5e7eb' }}></div>
+                                        <div style={{ padding: '0 20px' }}>
+                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.credential_count}</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>API Keys</p>
                                         </div>
-                                        <div className="w-px h-10 bg-gray-200"></div>
-                                        <div className="pl-8">
-                                            <p className="text-xl font-bold text-gray-900 leading-none mb-1">{api.user_count}</p>
-                                            <p className="text-[13px] text-gray-500 font-medium">Users</p>
+                                        <div style={{ width: '1px', height: '36px', background: '#e5e7eb' }}></div>
+                                        <div style={{ paddingLeft: '20px' }}>
+                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.user_count}</p>
+                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Users</p>
                                         </div>
                                     </div>
                                     
-                                    <div className="flex items-center border border-gray-200 rounded-lg px-4 py-2 hover:bg-gray-50 transition-colors bg-white shadow-sm">
-                                        <span className="text-sm font-semibold text-gray-800">Manage</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1.5 text-gray-600"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '6px 14px', background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', cursor: 'pointer', flexShrink: 0 }}>
+                                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1f2937' }}>Manage</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '5px', color: '#6b7280' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                                     </div>
                                 </div>
                             </div>

@@ -140,6 +140,11 @@ export default function WorkspaceDataDeviceView() {
   const [liveData, setLiveData] = useState(null); 
   const latestTimestampRef = useRef(null);
 
+  // Overview: expandable group cards
+  const [expandedSource, setExpandedSource] = useState(null);   // which group card is open
+  const [groupLiveData, setGroupLiveData] = useState({});        // { [src]: { [fieldName]: {value, timestamp} } }
+  const [groupLoading, setGroupLoading] = useState(null);        // src string while fetching
+
   // History Data State
   const [historyRecords, setHistoryRecords] = useState([]);
   const [recentRecords, setRecentRecords] = useState([]);
@@ -152,6 +157,7 @@ export default function WorkspaceDataDeviceView() {
   // Modal State
   const [detailRecord, setDetailRecord] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [modalViewMode, setModalViewMode] = useState('filtered');
 
   useEffect(() => {
     fetchDeviceAndFields();
@@ -179,14 +185,44 @@ export default function WorkspaceDataDeviceView() {
       setDevice(devRes.data.device);
 
       const fieldsRes = await platformClient.get(`/workspaces/${workspaceId}/devices/${deviceId}/data-fields`);
-      setDataFields(fieldsRes.data || []);
-      
+      const fields = fieldsRes.data || [];
+      setDataFields(fields);
+
       setError(null);
     } catch (err) {
       console.error(err);
       setError('Failed to load device details.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch live state for one specific source group (called when user clicks a card)
+  const fetchGroupLiveData = async (src) => {
+    try {
+      setGroupLoading(src);
+      const res = await platformClient.get(
+        `/workspaces/${workspaceId}/devices/${deviceId}/live-state`,
+        { params: { source: src } }
+      );
+      setGroupLiveData(prev => ({ ...prev, [src]: res.data || {} }));
+    } catch (e) {
+      console.error('Failed to fetch group live state', e);
+      setGroupLiveData(prev => ({ ...prev, [src]: {} }));
+    } finally {
+      setGroupLoading(null);
+    }
+  };
+
+  const handleGroupCardClick = (src) => {
+    if (expandedSource === src) {
+      setExpandedSource(null); // collapse
+    } else {
+      setExpandedSource(src);
+      // Only fetch if we don't have data yet
+      if (!groupLiveData[src]) {
+        fetchGroupLiveData(src);
+      }
     }
   };
 
@@ -259,7 +295,7 @@ export default function WorkspaceDataDeviceView() {
   // Live SSE Status & Telemetry Updates
   // Only request telemetry if a specific source or 'All' is selected. 
   // If undefined (overview page), request 'None' so the server drops all telemetry and only sends status.
-  const sseUrl = workspaceId && deviceId ? `/api/workspaces/${workspaceId}/devices/live-status?deviceId=${deviceId}&sourceId=${sourceId || 'None'}` : null;
+  const sseUrl = workspaceId && deviceId ? `/api/workspaces/${workspaceId}/devices/live-status?deviceId=${deviceId}&sourceId=${sourceId || 'All'}` : null;
   useSSE(sseUrl, token, (event, eventType) => {
       if (eventType === 'device-status') {
           if (!event || !event.deviceId) return;
@@ -267,6 +303,26 @@ export default function WorkspaceDataDeviceView() {
       } 
       else if (eventType === 'device-telemetry') {
           if (!event || !event.deviceId || !event.data) return;
+
+          // Overview mode: update only the expanded source group's live data
+          if (!sourceId) {
+              if (!expandedSource) return; // no card open, ignore
+              const flat = flattenJSON(event.data);
+              // Check if this event contains fields belonging to the expanded source
+              const relevantEntries = Object.entries(flat).filter(([key]) =>
+                  key.startsWith(expandedSource + '.')
+              );
+              if (relevantEntries.length === 0) return;
+              setGroupLiveData(prev => {
+                  const srcData = { ...(prev[expandedSource] || {}) };
+                  relevantEntries.forEach(([key, val]) => {
+                      srcData[key] = { value: val, timestamp: event.timestamp };
+                  });
+                  return { ...prev, [expandedSource]: srcData };
+              });
+              return;
+          }
+
           if (activeTab !== 'live') return;
           
           const newRecord = {
@@ -434,80 +490,124 @@ export default function WorkspaceDataDeviceView() {
       </div>
 
       {!sourceId ? (
-        <div className="mt-8">
-            <div className="flex-between align-center mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue/10 flex-center text-blue shadow-sm">
-                        <Database size={20} />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-main tracking-tight">Data Sources</h2>
-                        <p className="text-xs text-muted mt-0.5">Categorized telemetry streams</p>
-                    </div>
-                </div>
-                <Button variant="outline" onClick={() => navigate(`/workspaces/${workspaceId}/data/${deviceId}/source/All`)} className="flex-align gap-2 border-slate-300 hover:bg-slate-50 hover:text-blue hover:border-blue/30 transition-all">
-                    <Layers size={16} className="text-blue" />
-                    <span className="font-medium">View All Data</span>
-                </Button>
+        <div className="mt-6">
+          {sourceKeys.length === 0 ? (
+            <div className="bg-white p-12 rounded-xl border border-gray-100 text-center shadow-sm">
+              <Activity size={32} className="mx-auto text-slate-300 mb-3" />
+              <h3 className="font-medium text-main">No telemetry data yet.</h3>
+              <p className="text-muted text-sm mt-1">Send telemetry to automatically discover data groups.</p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sourceKeys.map(src => {
-                    const fieldCount = sourcesMap[src].length;
-                    
-                    return (
-                        <div 
-                            key={src} 
-                            className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:border-blue/50 group flex flex-col relative overflow-hidden"
-                            onClick={() => navigate(`/workspaces/${workspaceId}/data/${deviceId}/source/${src}`)}
-                        >
-                            {/* Accent Glow */}
-                            <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue/5 rounded-full blur-2xl group-hover:bg-blue/10 transition-colors"></div>
-                            
-                            <div className="flex-between mb-4 relative z-10">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex-center text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-colors border-transparent">
-                                        <Activity size={16} />
-                                    </div>
-                                    <h3 className="font-bold text-lg capitalize text-main group-hover:text-blue transition-colors">
-                                        {src}
-                                    </h3>
-                                </div>
-                                <div 
-                                    className="bg-slate-50 text-slate-500 text-xs font-semibold rounded-md border border-slate-100 flex items-center justify-center shrink-0 group-hover:bg-blue-100 group-hover:text-blue-500 transition-colors"
-                                    style={{ padding: '0.25rem 0.625rem', lineHeight: 1 }}
-                                >
-                                    {fieldCount} field{fieldCount !== 1 ? 's' : ''}
-                                </div>
-                            </div>
-                            
-                            <div className="flex-1 relative z-10">
-                                <p className="text-sm font-medium text-slate-500 leading-relaxed mb-4">
-                                    {sourcesMap[src].slice(0, 3).map(f => f.display_name || f.field_name.split('.').pop().replace(/_/g, ' ')).join(' • ')}
-                                    {sourcesMap[src].length > 3 && <span className="opacity-50"> • ...</span>}
-                                </p>
-                            </div>
-                            
-                            <div className="mt-auto pt-4 border-t border-gray-100 flex-between align-center relative z-10">
-                                <span className="text-xs font-medium text-slate-400 group-hover:text-blue/70 transition-colors">
-                                    View telemetry
-                                </span>
-                                <div className="w-8 h-8 rounded-full bg-slate-50 flex-center text-slate-400 group-hover:bg-blue-500 group-hover:text-white transition-all transform group-hover:translate-x-1">
-                                    <ChevronLeft size={16} className="rotate-180" />
-                                </div>
-                            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {sourceKeys.map(src => {
+                const srcFields = sourcesMap[src];
+                const isExpanded = expandedSource === src;
+                const isLoadingThis = groupLoading === src;
+                const srcLiveData = groupLiveData[src] || {};
+                const liveEntries = Object.entries(srcLiveData);
+
+                return (
+                  <div key={src} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                    {/* ── Clickable card header ── */}
+                    <div
+                      onClick={() => handleGroupCardClick(src)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '14px 18px', cursor: 'pointer', userSelect: 'none',
+                        background: isExpanded ? '#f0f7ff' : '#fff',
+                        borderBottom: isExpanded ? '1px solid #dbeafe' : 'none',
+                        transition: 'background 0.15s'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{
+                          width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
+                          background: isExpanded ? '#3b82f6' : '#eff6ff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'background 0.15s'
+                        }}>
+                          <Database size={17} style={{ color: isExpanded ? '#fff' : '#3b82f6' }} />
                         </div>
-                    );
-                })}
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '14px', color: '#111827', textTransform: 'capitalize' }}>{src.replace(/_/g, ' ')}</div>
+                          <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
+                            {srcFields.length} field{srcFields.length !== 1 ? 's' : ''}
+                            {liveEntries.length > 0 && !isExpanded && (
+                              <span style={{ marginLeft: '6px', color: '#6b7280' }}>• {liveEntries.length} live</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); navigate(`/workspaces/${workspaceId}/data/${deviceId}/source/${src}`); }}
+                          style={{ fontSize: '11px', color: '#3b82f6', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '5px', padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          Full View
+                        </button>
+                        <div style={{
+                          width: '20px', height: '20px', borderRadius: '50%', background: '#f3f4f6',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s'
+                        }}>
+                          <ChevronLeft size={12} style={{ color: '#6b7280', transform: 'rotate(-90deg)' }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ── Expanded live data panel ── */}
+                    {isExpanded && (
+                      <div style={{ padding: '16px 18px' }}>
+                        {isLoadingThis ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9ca3af', fontSize: '13px', padding: '12px 0' }}>
+                            <Spinner size={16} />
+                            Fetching live data…
+                          </div>
+                        ) : liveEntries.length > 0 ? (
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
+                            {liveEntries.map(([path, fieldState]) => {
+                              const fieldMeta = srcFields.find(f => f.field_name === path);
+                              const displayName = fieldMeta?.display_name ||
+                                path.split('.').pop().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                              let val = fieldState.value;
+                              if (typeof val === 'boolean') val = val ? 'ON' : 'OFF';
+                              else if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
+                              return (
+                                <div key={path} style={{
+                                  background: '#f9fafb', border: '1px solid #e5e7eb',
+                                  borderRadius: '9px', padding: '13px 15px',
+                                  position: 'relative', overflow: 'hidden'
+                                }}>
+                                  <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', background: '#3b82f6', borderRadius: '9px 0 0 9px' }} />
+                                  <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginBottom: '4px', paddingLeft: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={path}>
+                                    {displayName}
+                                  </div>
+                                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#111827', paddingLeft: '5px', lineHeight: 1.15 }}>
+                                    {val !== null && val !== undefined ? String(val) : '—'}
+                                    {fieldMeta?.unit && <span style={{ fontSize: '11px', fontWeight: 400, color: '#9ca3af', marginLeft: '3px' }}>{fieldMeta.unit}</span>}
+                                  </div>
+                                  {fieldState.timestamp && (
+                                    <div style={{ fontSize: '9px', color: '#d1d5db', marginTop: '5px', paddingLeft: '5px' }}>
+                                      {new Date(fieldState.timestamp).toLocaleTimeString()}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{ textAlign: 'center', padding: '20px 0', color: '#9ca3af' }}>
+                            <Activity size={20} style={{ margin: '0 auto 6px', opacity: 0.4 }} />
+                            <p style={{ fontSize: '13px' }}>No live data for <strong>{src}</strong> yet. Make sure the device is online and sending telemetry.</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            
-            {sourceKeys.length === 0 && (
-                <div className="bg-white p-12 rounded-xl border border-gray-100 text-center shadow-sm mt-4">
-                    <Activity size={32} className="mx-auto text-slate-300 mb-3" />
-                    <h3 className="font-medium text-main">No data sources discovered yet.</h3>
-                    <p className="text-muted text-sm mt-1">Send telemetry to automatically register fields and sources.</p>
-                </div>
-            )}
+          )}
         </div>
       ) : (
         <>
@@ -661,7 +761,7 @@ export default function WorkspaceDataDeviceView() {
                       {historyLoading ? (
                           <div className="flex-center h-64"><Spinner size={24} /></div>
                       ) : historyRecords.length === 0 ? (
-                          <div className="flex-center flex-column text-muted h-64">
+                          <div className="flex-center flex-col text-muted h-64">
                               <Database size={32} className="opacity-30 mb-3" />
                               <p>No historical data for the selected range.</p>
                           </div>
@@ -735,14 +835,16 @@ export default function WorkspaceDataDeviceView() {
                           No fields discovered yet.
                       </div>
                   ) : (
-                      <table className="w-full text-left">
+                    <div className="table-container">
+                      <table className="ds-table">
                           <thead>
-                              <tr className="bg-white border-b border-gray-100 text-xs uppercase tracking-wider text-muted font-semibold">
-                                  <th className="p-4">Display Name</th>
-                                  <th className="p-4">Raw Field Key</th>
-                                  <th className="p-4">Type</th>
-                                  <th className="p-4">Unit</th>
-                                  <th className="p-4">Source</th>
+                              <tr>
+                                  <th>Display Name</th>
+                                  <th>Raw Field Key</th>
+                                  <th>Type</th>
+                                  <th>Unit</th>
+                                  <th>Source</th>
+                                  <th className="text-right">Actions</th>
                               </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
@@ -763,6 +865,7 @@ export default function WorkspaceDataDeviceView() {
                               ))}
                           </tbody>
                       </table>
+                    </div>
                   )}
               </div>
           )}

@@ -16,41 +16,49 @@ const WorkspaceApis = () => {
 
     return (
         <div className="p-6 md:p-8 max-w-7xl mx-auto w-full bg-white min-h-[500px]">
-            <div className="flex-between mb-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-2">API Management</h1>
-                    <p className="text-sm text-gray-500 mb-4">Manage reusable API routes and package them into secure APIs.</p>
-                    <button className="flex-align gap-2 text-blue-500 hover:text-blue-700 font-medium text-sm transition-colors">
+                    <h1 style={{ fontSize: 'clamp(1.5rem, 5vw, 1.875rem)', fontWeight: 800, color: '#111827', letterSpacing: '-0.02em', marginBottom: '0.375rem', lineHeight: 1.1 }}>API Management</h1>
+                    <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.75rem' }}>Manage reusable API routes and package them into secure APIs.</p>
+                    <button style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#3b82f6', fontWeight: 500, fontSize: '0.875rem', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                         <BookOpen size={16} />
                         <span>API Documentation</span>
                     </button>
                 </div>
 
-                <div className="bg-slate-100 p-1 rounded-xl flex-align">
+                <div style={{ background: '#f1f5f9', padding: '4px', borderRadius: '10px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                     <button
                         onClick={() => handleTabChange('routes')}
-                        className={`flex-align gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                            activeTab === 'routes'
-                                ? 'bg-white text-blue-500 shadow-sm'
-                                : 'text-slate-600 hover:bg-gray-50'
-                        }`}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '8px 18px', borderRadius: '7px', fontSize: '0.875rem', fontWeight: 500,
+                            border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                            background: activeTab === 'routes' ? '#fff' : 'transparent',
+                            color: activeTab === 'routes' ? '#3b82f6' : '#64748b',
+                            boxShadow: activeTab === 'routes' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        }}
                     >
-                        <Share2 size={16} />
+                        <Share2 size={15} />
                         <span>Routes</span>
                     </button>
                     <button
                         onClick={() => handleTabChange('apis')}
-                        className={`flex-align gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-                            activeTab === 'apis'
-                                ? 'bg-white text-blue-500 shadow-sm'
-                                : 'text-slate-600 hover:bg-gray-50'
-                        }`}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                            padding: '8px 18px', borderRadius: '7px', fontSize: '0.875rem', fontWeight: 500,
+                            border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                            background: activeTab === 'apis' ? '#fff' : 'transparent',
+                            color: activeTab === 'apis' ? '#3b82f6' : '#64748b',
+                            boxShadow: activeTab === 'apis' ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                        }}
                     >
-                        <Package size={16} />
+                        <Package size={15} />
                         <span>APIs</span>
                     </button>
                 </div>
             </div>
+        </div>
 
             <div className="w-full">
                 {activeTab === 'routes' && <RoutesTab workspaceId={workspaceId} />}

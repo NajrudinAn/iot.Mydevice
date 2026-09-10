@@ -206,18 +206,18 @@ const WorkspaceApiDetails = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
+            <div className="table-container">
+                <table className="ds-table">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Route</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Purpose</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Method</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Status</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider text-right" style={{ fontSize: '11px' }}>Actions</th>
+                        <tr>
+                            <th>Route</th>
+                            <th>Purpose</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th className="text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody>
                         {apiData.routes?.length === 0 ? (
                             <tr>
                                 <td colSpan="5" className="p-8 text-center text-gray-500" style={{ fontSize: '14px' }}>No routes attached to this API package.</td>
@@ -340,17 +340,17 @@ const WorkspaceApiDetails = () => {
             )}
 
             {/* Table */}
-            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                <table className="w-full text-left border-collapse">
+            <div className="table-container">
+                <table className="ds-table">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Name</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>API Key (ID)</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider" style={{ fontSize: '11px' }}>Status</th>
-                            <th className="py-4 px-6 text-gray-600 font-bold uppercase tracking-wider text-right" style={{ fontSize: '11px' }}>Actions</th>
+                        <tr>
+                            <th>Name</th>
+                            <th>API Key (ID)</th>
+                            <th>Status</th>
+                            <th className="text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody>
                         {apiData.credentials?.length === 0 && (
                             <tr><td colSpan="4" className="p-8 text-center text-gray-500" style={{ fontSize: '14px' }}>No credentials generated yet.</td></tr>
                         )}
@@ -603,12 +603,12 @@ ${requestHeaders}${requestBody ? ` \\\n  -H "Content-Type: application/json" \\\
                     {/* Header */}
                     <div className="bg-gray-50 p-4 border-b border-gray-200 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <span className={`font-bold px-2.5 py-1 rounded-md text-[11px] uppercase tracking-wide ${methodColor}`}>
+                            <span className={`font-bold px-3 py-1 rounded-md text-[11px] uppercase tracking-wide ${methodColor}`}>
                                 {route.method}
                             </span>
                             <code className="text-[15px] font-bold text-gray-900">/{route.endpoint_slug}</code>
                         </div>
-                        <span className="bg-gray-200 text-gray-700 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                        <span className="bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider">
                             {route.purpose}
                         </span>
                     </div>
