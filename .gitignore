@@ -25,3 +25,7 @@ mosquitto.passwd
 mosquitto.acl
 !mosquitto.conf.example
 !mosquitto.acl.example
+brain/
+scratch/
+*.passwd
+*.bak
