@@ -36,38 +36,72 @@ const handleData = async (topicDeviceId, payload) => {
         }, {});
     };
 
-    // 4. Discover fields safely (does not block telemetry storage)
-    if (payload.data && typeof payload.data === 'object' && !Array.isArray(payload.data)) {
-        const flatPayload = flattenJSON(payload.data);
+    // 4. If an explicit source is provided, namespace all flat field keys with it.
+    //    This allows devices to send separate per-group messages:
+    //      { device_id, source: "sensor_1", data: { temperature: 22.5, humidity: 48.0 } }
+    //    which becomes fields: sensor_1.temperature, sensor_1.humidity
+    const explicitSource = (typeof payload.source === 'string' && payload.source.trim()) ? payload.source.trim() : null;
+
+    const flatRaw = flattenJSON(payload.data);
+
+    // Build the namespaced data object that will be stored & emitted
+    const namespacedData = {};
+    if (explicitSource) {
+        for (const [k, v] of Object.entries(flatRaw)) {
+            namespacedData[`${explicitSource}.${k}`] = v;
+        }
+    } else {
+        // No explicit source — field names are used as-is (dot-prefix = source group)
+        Object.assign(namespacedData, flatRaw);
+    }
+
+    // 5. Discover & sync fields
+    if (Object.keys(namespacedData).length > 0) {
         const discoveredFields = {};
-        for (const [key, value] of Object.entries(flatPayload)) {
+        for (const [key, value] of Object.entries(namespacedData)) {
             if (value === null) discoveredFields[key] = 'null';
             else if (Array.isArray(value)) discoveredFields[key] = 'array';
-            else discoveredFields[key] = typeof value; // string, number, boolean
+            else discoveredFields[key] = typeof value;
         }
-        
-        // Sync asynchronously, do not await it blocking the main MQTT flow
         DeviceDataField.syncFields(topicDeviceId, discoveredFields).catch(err => {
             console.error('Field sync error:', err);
         });
     }
 
-    // 5. Store telemetry with the raw payload
-    await SensorData.insert(topicDeviceId, payload.data);
+    // Helper: convert flat dot-keyed object to nested object for JSONB storage
+    // e.g. { "sensor_1.temperature": 22.5 } → { "sensor_1": { "temperature": 22.5 } }
+    const nestify = (flat) => {
+        const nested = {};
+        for (const [key, value] of Object.entries(flat)) {
+            const parts = key.split('.');
+            let cur = nested;
+            for (let i = 0; i < parts.length - 1; i++) {
+                if (cur[parts[i]] === undefined || typeof cur[parts[i]] !== 'object') {
+                    cur[parts[i]] = {};
+                }
+                cur = cur[parts[i]];
+            }
+            cur[parts[parts.length - 1]] = value;
+        }
+        return nested;
+    };
 
-    // Emit live telemetry to SSE
+    // 6. Store telemetry as NESTED JSON so jsonb_extract_path works per field path
+    const nestedPayload = nestify(namespacedData);
+    await SensorData.insert(topicDeviceId, nestedPayload);
+
+    // Emit live telemetry to SSE (using namespaced keys so UI groups correctly)
     if (device && device.workspace_id) {
         sseEmitter.emitTelemetry(device.workspace_id, {
             deviceId: topicDeviceId,
             timestamp: new Date().toISOString(),
-            data: payload.data
+            data: namespacedData
         });
     }
 
-    // 6. Update device status and last_seen
+    // 7. Update device status and last_seen
     const updatedDevice = await Device.updateStatusAndLastSeen(topicDeviceId, 'ONLINE');
     
-    // Emit SSE if status changed from something else to ONLINE
     if (device.status !== 'ONLINE' && updatedDevice && device.workspace_id) {
         sseEmitter.emitStatusChange(device.workspace_id, {
             deviceId: topicDeviceId,
@@ -75,9 +109,8 @@ const handleData = async (topicDeviceId, payload) => {
             lastSeen: updatedDevice.last_seen
         });
     }
-    
-    // console.log(`Telemetry processed for ${topicDeviceId}`); // debug
 };
+
 
 const handleStatus = async (topicDeviceId, payload) => {
     if (!payload.device_id || !payload.status) {

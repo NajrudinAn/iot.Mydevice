@@ -32,6 +32,7 @@ router.get('/:workspace_id/devices/live-status', deviceController.streamLiveStat
 
 router.get('/:workspace_id/devices/:id', deviceController.getDeviceDetails);
 router.get('/:workspace_id/devices/:id/capabilities', deviceController.getDeviceCapabilities);
+router.put('/:workspace_id/devices/:id', deviceController.updateDevice);
 router.delete('/:workspace_id/devices/:id', deviceController.deleteDevice);
 
 // Workspace Commands

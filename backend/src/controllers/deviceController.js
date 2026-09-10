@@ -188,6 +188,42 @@ const deleteDevice = async (req, res, next) => {
 };
 
 
+const updateDevice = async (req, res, next) => {
+    try {
+        const { id, workspace_id } = req.params;
+        const { name } = req.body;
+        const userId = req.user.id;
+
+        if (!name || name.trim() === '') {
+            return res.status(400).json({ success: false, message: 'Device name is required' });
+        }
+
+        if (workspace_id) {
+            const Workspace = require('../models/workspace');
+            const ws = await Workspace.findByIdAndOwnerId(workspace_id, userId);
+            if (!ws) {
+                return res.status(403).json({ success: false, message: 'Forbidden: Not your workspace' });
+            }
+        }
+
+        const device = await Device.updateName(id, workspace_id, name.trim());
+        
+        if (!device) {
+            return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+
+        return res.json({
+            success: true,
+            device
+        });
+    } catch (err) {
+        if (err.code === '22P02') {
+             return res.status(404).json({ success: false, message: 'Device not found' });
+        }
+        next(err);
+    }
+};
+
 const streamLiveStatus = async (req, res, next) => {
     try {
         const { workspace_id } = req.params;
@@ -312,4 +348,4 @@ const getDeviceCapabilities = async (req, res, next) => {
 };
 
 module.exports = {
-    streamLiveStatus, registerDevice, getDevices, getDeviceDetails, deleteDevice, getDeviceCapabilities };
+    streamLiveStatus, registerDevice, getDevices, getDeviceDetails, updateDevice, deleteDevice, getDeviceCapabilities };

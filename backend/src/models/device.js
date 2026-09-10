@@ -44,6 +44,17 @@ class Device {
         return result.rowCount > 0;
     }
 
+    static async updateName(id, workspaceId, newName) {
+        const query = `
+            UPDATE devices 
+            SET name = $1 
+            WHERE id = $2 AND workspace_id = $3
+            RETURNING id, name, device_id, device_type, status, last_seen, created_at, workspace_id
+        `;
+        const result = await db.query(query, [newName, id, workspaceId]);
+        return result.rows[0];
+    }
+
     static async findByDeviceId(deviceId) {
         const query = `
             SELECT id, device_id, name, device_type, status, last_seen, created_at, workspace_id 
