@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { platformClient } from '../api/client';
 import { 
-  ArrowLeft, Server, Activity, Clock, Trash2, AlertCircle, CheckCircle2, Copy, Terminal, Edit2, Check, X, ChevronDown, ChevronRight, Upload, Download
+  ArrowLeft, Server, Activity, Clock, Trash2, AlertCircle, CheckCircle2, Copy, Terminal, Edit2, Check, X, ChevronDown, ChevronRight, Upload, Download, Book, Code2, Package
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { useSSE } from '../hooks/useSSE';
@@ -157,6 +157,7 @@ export default function WorkspaceDeviceDetails() {
 
   const [expandedTopics, setExpandedTopics] = useState({});
   const toggleTopic = (key) => setExpandedTopics(prev => ({ ...prev, [key]: !prev[key] }));
+  const [sdkTab, setSdkTab] = useState('python');
 
   if (loading) {
     return (
@@ -305,7 +306,7 @@ export default function WorkspaceDeviceDetails() {
           </div>
         </div>
 
-        {/* Row 2: Commands */}
+        {/* Row 2: Capabilities / Commands */}
         <div className="glass-panel p-6 border border-gray-100">
           <DeviceCommandPanel 
             workspaceId={workspaceId} 
@@ -316,8 +317,353 @@ export default function WorkspaceDeviceDetails() {
             readOnly={true}
           />
         </div>
+        {/* Row 3: SDK & Device Library */}
+        {(() => {
+          const did = device.device_id;
 
-        {/* Row 3: MQTT Documentation */}
+          // ── Clean USAGE examples (what users write) ──────────────────
+          const pythonExample = `from mydevice import MyDevice
+import time
+
+device = MyDevice("${did}", "YOUR_SECRET_KEY")
+
+# Register a capability with an action
+cap = device.add_capability("motor_control", "Motor Control",
+                            "Control actuators", "motor_status.fan_speed")
+cap.add_action("SET_FAN_SPEED", "Set Fan Speed", "0=off, 3=high",
+               speed={"type": "number", "min": 0, "max": 3, "step": 1, "required": True})
+
+# Handle incoming commands
+@device.on_command("SET_FAN_SPEED")
+def handle_fan(params):
+    print(f"Fan speed -> {params['speed']}")
+    return True   # True = COMPLETED, False = FAILED
+
+# Connect to MyDevice platform
+device.connect()
+
+# Send telemetry in a loop
+try:
+    while True:
+        device.send("sensor_1", temperature=25.4, humidity=60)
+        device.send("motor_status", fan_speed=2, pump_active=True)
+        time.sleep(5)
+except KeyboardInterrupt:
+    device.disconnect()
+`;
+
+          const arduinoExample = `#include <WiFi.h>          // Use <ESP8266WiFi.h> for ESP8266
+#include "MyDevice.h"      // Place MyDevice.h in sketch folder or Arduino libraries
+
+const char* WIFI_SSID  = "YOUR_WIFI_SSID";
+const char* WIFI_PASS  = "YOUR_WIFI_PASSWORD";
+
+WiFiClient wifiClient;
+MyDevice   device("${did}", "YOUR_SECRET_KEY", wifiClient);
+
+void setup() {
+    Serial.begin(115200);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+    Serial.println("\\nWiFi connected");
+
+    // Register capabilities
+    device.addCapability("motor_control", "Motor Control",
+                         "Control actuators", "motor_status.fan_speed");
+    device.addAction("motor_control", "SET_FAN_SPEED", "Set Fan Speed", "0=off, 3=high");
+    device.addNumberParam("speed", 0, 3, 1);
+
+    // Handle commands
+    device.onCommand("SET_FAN_SPEED", [](JsonObject p) {
+        int speed = p["speed"];
+        Serial.printf("Fan speed -> %d\\n", speed);
+        return true;   // true = COMPLETED, false = FAILED
+    });
+
+    device.begin();
+}
+
+void loop() {
+    device.loop();
+
+    // Send telemetry every 5 seconds
+    static unsigned long lastMs = 0;
+    if (millis() - lastMs > 5000) {
+        lastMs = millis();
+        device.addField("temperature", 25.4f);
+        device.addField("humidity", 60);
+        device.send("sensor_1");
+    }
+}
+`;
+
+          const nodejsExample = `const { MyDevice } = require('./mydevice-sdk');
+
+const device = new MyDevice('${did}', 'YOUR_SECRET_KEY');
+
+// Register capabilities
+device.addCapability('motor_control', 'Motor Control',
+                     'Control actuators', 'motor_status.fan_speed');
+device.addAction('motor_control', 'SET_FAN_SPEED', 'Set Fan Speed', '0=off, 3=high', {
+    speed: { type: 'number', min: 0, max: 3, step: 1, required: true }
+});
+
+// Handle commands
+device.onCommand('SET_FAN_SPEED', (params) => {
+    console.log('Fan speed ->', params.speed);
+    return true;   // true = COMPLETED, false = FAILED
+});
+
+// Connect
+device.connect();
+
+// Send telemetry every 5 seconds
+setInterval(() => {
+    device.send('sensor_1', { temperature: 25.4, humidity: 60 });
+    device.send('motor_status', { fan_speed: 2, pump_active: true });
+}, 5000);
+`;
+
+          const sdkConfigs = {
+            python: {
+              label: 'Python',
+              icon: '🐍',
+              code: pythonExample,
+              exampleFilename: `example_${did.toLowerCase()}.py`,
+              libraryFilename: 'mydevice.py',
+              libraryUrl: '/sdk/mydevice.py',
+              install: 'pip install paho-mqtt',
+              run: `python example_${did.toLowerCase()}.py`,
+              importLine: 'from mydevice import MyDevice',
+              notes: [
+                'Download mydevice.py and place it next to your script.',
+                'Requires paho-mqtt: pip install paho-mqtt',
+                'Replace YOUR_SECRET_KEY with the key shown at device creation.',
+                'Works on Raspberry Pi, desktop, or any Python 3.7+ environment.',
+              ],
+              apiRef: [
+                { fn: 'MyDevice(id, key)', desc: 'Create device instance' },
+                { fn: 'device.connect()', desc: 'Connect to the platform' },
+                { fn: 'device.send(source, **fields)', desc: 'Send telemetry data' },
+                { fn: 'device.add_capability(...)', desc: 'Register a capability group' },
+                { fn: 'cap.add_action(...)', desc: 'Add an action to a capability' },
+                { fn: '@device.on_command(type)', desc: 'Decorator to handle a command' },
+                { fn: 'device.disconnect()', desc: 'Graceful shutdown' },
+              ]
+            },
+            arduino: {
+              label: 'Arduino / C++',
+              icon: '⚙️',
+              code: arduinoExample,
+              exampleFilename: `example_${did.toLowerCase()}.ino`,
+              libraryFilename: 'MyDevice.h',
+              libraryUrl: '/sdk/MyDevice.h',
+              install: 'PubSubClient + ArduinoJson (via Library Manager)',
+              run: 'Flash via Arduino IDE or PlatformIO',
+              importLine: '#include "MyDevice.h"',
+              notes: [
+                'Download MyDevice.h and place in sketch folder or Arduino/libraries/MyDevice/.',
+                'Install PubSubClient + ArduinoJson via Arduino Library Manager.',
+                'Works on ESP32 and ESP8266 (change WiFi.h to ESP8266WiFi.h).',
+                'Replace WiFi credentials and YOUR_SECRET_KEY before flashing.',
+              ],
+              apiRef: [
+                { fn: 'MyDevice(id, key, client)', desc: 'Create device instance' },
+                { fn: 'device.begin()', desc: 'Connect (call in setup())' },
+                { fn: 'device.loop()', desc: 'Process MQTT (call in loop())' },
+                { fn: 'device.addField(key, val)', desc: 'Queue a telemetry field' },
+                { fn: 'device.send(source)', desc: 'Publish queued fields' },
+                { fn: 'device.addCapability(...)', desc: 'Register a capability' },
+                { fn: 'device.onCommand(type, fn)', desc: 'Handle a command' },
+              ]
+            },
+            nodejs: {
+              label: 'Node.js',
+              icon: '🟩',
+              code: nodejsExample,
+              exampleFilename: `example_${did.toLowerCase()}.js`,
+              libraryFilename: 'mydevice-sdk.js',
+              libraryUrl: '/sdk/mydevice-sdk.js',
+              install: 'npm install mqtt',
+              run: `node example_${did.toLowerCase()}.js`,
+              importLine: "const { MyDevice } = require('./mydevice-sdk')",
+              notes: [
+                'Download mydevice-sdk.js and place it in your project folder.',
+                'Requires mqtt package: npm install mqtt',
+                'Replace YOUR_SECRET_KEY with the key shown at device creation.',
+                'Use process.env.SECRET_KEY in production to avoid hardcoding.',
+              ],
+              apiRef: [
+                { fn: "new MyDevice(id, key)", desc: 'Create device instance' },
+                { fn: 'device.connect()', desc: 'Connect to the platform' },
+                { fn: 'device.send(source, fields)', desc: 'Send telemetry data' },
+                { fn: 'device.addCapability(...)', desc: 'Register a capability' },
+                { fn: 'device.addAction(...)', desc: 'Add an action' },
+                { fn: 'device.onCommand(type, fn)', desc: 'Handle a command' },
+                { fn: 'device.disconnect()', desc: 'Graceful shutdown' },
+              ]
+            },
+          };
+
+          const cfg = sdkConfigs[sdkTab];
+
+          const handleDownloadExample = () => {
+            const blob = new Blob([cfg.code], { type: 'text/plain' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url; a.download = cfg.exampleFilename; a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Downloaded ${cfg.exampleFilename}`);
+          };
+
+          const handleDownloadLibrary = () => {
+            const a = document.createElement('a');
+            a.href = cfg.libraryUrl;
+            a.download = cfg.libraryFilename;
+            a.click();
+            showToast(`Downloaded ${cfg.libraryFilename}`);
+          };
+
+          return (
+            <div className="glass-panel p-6 border border-gray-100">
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+                <div>
+                  <h3 className="font-bold text-main flex-align gap-2 mb-1">
+                    <Package size={18} className="text-blue" />
+                    Device SDK & Library
+                  </h3>
+                  <p className="text-sm text-muted">Import the MyDevice library and use simple functions — no boilerplate needed. Download the library + example pre-filled with your Device ID.</p>
+                </div>
+              </div>
+
+              {/* Language Tabs */}
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', borderBottom: '1px solid #e5e7eb', paddingBottom: '0' }}>
+                {Object.entries(sdkConfigs).map(([key, c]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSdkTab(key)}
+                    style={{
+                      padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+                      border: 'none', background: 'transparent', cursor: 'pointer',
+                      borderBottom: sdkTab === key ? '2px solid #2563eb' : '2px solid transparent',
+                      color: sdkTab === key ? '#2563eb' : '#6b7280',
+                      marginBottom: '-1px', transition: 'all 0.15s', borderRadius: '0',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                    }}
+                  >
+                    <span style={{ fontSize: '15px' }}>{c.icon}</span>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Install + Import bar */}
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px', alignItems: 'center' }}>
+                <div style={{ flex: 1, minWidth: '220px', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Install</span>
+                  <code style={{ fontSize: '12px', fontFamily: 'monospace', color: '#0f172a', flex: 1 }}>{cfg.install}</code>
+                  <button onClick={() => handleCopy(cfg.install, 'Install command')} style={{ flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: '4px' }} className="hover:text-gray-600 transition-colors"><Copy size={13} /></button>
+                </div>
+                <div style={{ flex: 1, minWidth: '220px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#15803d', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>Import</span>
+                  <code style={{ fontSize: '12px', fontFamily: 'monospace', color: '#14532d', flex: 1 }}>{cfg.importLine}</code>
+                  <button onClick={() => handleCopy(cfg.importLine, 'Import line')} style={{ flexShrink: 0, background: 'transparent', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: '4px' }} className="hover:text-gray-600 transition-colors"><Copy size={13} /></button>
+                </div>
+              </div>
+
+              {/* Main two-column area: Code + Sidebar */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '16px', alignItems: 'start' }} className="sdk-grid">
+                <style>{`.sdk-grid { @media (max-width: 900px) { grid-template-columns: 1fr !important; } }`}</style>
+
+                {/* Code Block */}
+                <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', border: '1px solid #1f2937' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#161b22', padding: '10px 16px', borderBottom: '1px solid #21262d', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Code2 size={14} style={{ color: '#58a6ff' }} />
+                      <span style={{ fontSize: '12px', fontWeight: 600, color: '#c9d1d9', fontFamily: 'monospace' }}>{cfg.exampleFilename}</span>
+                      <span style={{ fontSize: '10px', color: '#8b949e', fontStyle: 'italic' }}>Usage Example</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => handleCopy(cfg.code, 'Example code')}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#8b949e', background: '#21262d', border: '1px solid #30363d', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontWeight: 500 }}
+                        className="hover:bg-gray-700 hover:text-gray-200 transition-colors"
+                      >
+                        <Copy size={11} /> Copy
+                      </button>
+                      <button
+                        onClick={handleDownloadExample}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#c9d1d9', background: '#21262d', border: '1px solid #30363d', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontWeight: 500 }}
+                        className="hover:bg-gray-700 hover:text-gray-200 transition-colors"
+                      >
+                        <Download size={11} /> Example
+                      </button>
+                      <button
+                        onClick={handleDownloadLibrary}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#ffffff', background: '#2563eb', border: '1px solid #1d4ed8', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}
+                        className="hover:bg-blue-700 transition-colors"
+                      >
+                        <Download size={11} /> {cfg.libraryFilename}
+                      </button>
+                    </div>
+                  </div>
+                  <pre style={{ background: '#0d1117', color: '#e6edf3', fontSize: '11.5px', padding: '16px', overflow: 'auto', lineHeight: '1.7', fontFamily: '"Fira Code", "Cascadia Code", "Consolas", monospace', margin: 0, maxHeight: '480px' }}>{cfg.code}</pre>
+                </div>
+
+                {/* Sidebar */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Setup Notes */}
+                  <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#0369a1', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Book size={12} /> Setup Guide
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {cfg.notes.map((note, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px', color: '#0c4a6e' }}>
+                          <span style={{ flexShrink: 0, width: '18px', height: '18px', borderRadius: '50%', background: '#0ea5e9', color: 'white', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1px' }}>{i + 1}</span>
+                          <span style={{ lineHeight: '1.5' }}>{note}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* API Reference */}
+                  <div style={{ background: '#fafafa', border: '1px solid #e5e7eb', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>API Reference</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {cfg.apiRef.map((ref, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '12px' }}>
+                          <code style={{ flexShrink: 0, fontSize: '11px', fontFamily: 'monospace', color: '#7c3aed', background: '#f5f3ff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e9d5ff', whiteSpace: 'nowrap' }}>{ref.fn}</code>
+                          <span style={{ color: '#6b7280', lineHeight: '1.5' }}>{ref.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Start */}
+                  <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '10px', padding: '16px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#92400e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Quick Start</div>
+                    {[
+                      `Download ${cfg.libraryFilename} using the button above.`,
+                      `Download the example file (pre-filled with your Device ID).`,
+                      'Replace YOUR_SECRET_KEY with your device secret key.',
+                      `Run: ${cfg.run}`,
+                      'Your device appears Online — add your real sensor code!',
+                    ].map((step, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '12px', color: '#78350f', marginBottom: i < 4 ? '8px' : 0 }}>
+                        <span style={{ flexShrink: 0, width: '20px', height: '20px', borderRadius: '50%', background: '#fbbf24', color: '#78350f', fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i + 1}</span>
+                        <span style={{ lineHeight: '1.5' }}>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Row 4: MQTT Protocol Reference */}
         <div className="glass-panel p-6 flex-column border border-gray-100">
           <h3 className="font-bold text-main mb-2 flex-align gap-2">
             <Terminal size={18} className="text-blue" />
