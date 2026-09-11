@@ -7,8 +7,8 @@ const PLATFORM_APP_ID = window.PLATFORM_APP_ID || 'dummy-app-id';
 
 // Placeholder API routes - configure these in the platform!
 const ROUTES = {
-    telemetry: '/api/v1/routes/realtime-506320',
-    commands: '/api/v1/routes/comand-test-94d621'
+    telemetry: '/api/v1/routes/test1-efe9a6',
+    commands: '/api/v1/routes/test2-ed788a'
 };
 
 const ui = {

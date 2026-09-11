@@ -329,7 +329,8 @@ const forgotPassword = async (req, res, next) => {
 
         // Reset URL should ideally point to the Application's UI, not the platform UI.
         // If the application uses the platform portal resolver, it will look like this:
-        const resetUrl = `http://localhost:5173/app/${application.slug}/reset-password?token=${token}`;
+        const baseUrl = process.env.FRONTEND_URL || 'https://mydevice.in';
+        const resetUrl = `${baseUrl}/app/${application.slug}/reset-password?token=${token}`;
         
         try {
             await emailService.sendPasswordResetEmail(user.email, resetUrl);

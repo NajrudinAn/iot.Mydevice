@@ -107,7 +107,8 @@ const forgotPassword = async (req, res, next) => {
 
         await User.setResetToken(user.id, token, expiresAt);
 
-        const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
+        const baseUrl = process.env.FRONTEND_URL || 'https://mydevice.in';
+        const resetUrl = `${baseUrl}/reset-password?token=${token}`;
         
         try {
             await emailService.sendPasswordResetEmail(user.email, resetUrl);

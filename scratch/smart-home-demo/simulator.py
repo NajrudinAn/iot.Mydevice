@@ -11,8 +11,8 @@ import sys
 BROKER       = "mydevice.in"
 PORT         = 1883
 
-DEVICE_ID   = "DEV-002-F123"
-SECRET_KEY  = "fabbd4576de1e9d427e962b6826ee5ef0ba031b55c915df3ed64ad0105619f15"
+DEVICE_ID   = "DEV-001-FE59"
+SECRET_KEY  = "d95794d45b79bcd9390ac95784094c48bd8ad1fc3db5631708c336316f5367d7"
 
 TOPIC_DATA         = f"devices/{DEVICE_ID}/data"
 TOPIC_STATUS       = f"devices/{DEVICE_ID}/status"
