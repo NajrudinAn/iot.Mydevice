@@ -148,7 +148,7 @@ class EmailService {
             `,
             attachments: [{
                 filename: 'logo.png',
-                path: require('path').join(__dirname, '../../../../frontend/public/logo.png'),
+                path: require('path').join(__dirname, '../../../frontend/public/logo.png'),
                 cid: 'logo' // same cid value as in the html img src
             }]
         };
