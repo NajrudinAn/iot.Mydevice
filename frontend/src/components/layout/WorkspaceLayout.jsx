@@ -79,7 +79,7 @@ export default function WorkspaceLayout({ children }) {
       <aside className={`app-sidebar ${mobileMenuOpen ? 'mobile-open' : ''} ${!sidebarOpen ? 'desktop-collapsed' : ''}`} style={{ backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', zIndex: 50 }}>
         <div className="flex-between mb-2" style={{ padding: '1.25rem' }}>
           <div className="flex-align gap-2 cursor-pointer" onClick={() => navigate('/portal')}>
-            <Hexagon className="text-primary" size={24} style={{ color: '#2563eb' }} strokeWidth={2.5} />
+            <img src="/logo.png" alt="MyDevice Logo" style={{ width: 24, height: 24, borderRadius: 6 }} />
             <div>
               <div className="font-bold text-main" style={{ lineHeight: 1.1, fontSize: '1rem' }}>MyDevice</div>
               <div className="text-muted" style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>User Portal</div>
@@ -177,8 +177,8 @@ export default function WorkspaceLayout({ children }) {
                 onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--border-color)'; }}
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-surface-elevated)'; }}
               >
-                <div className="shrink-0" style={{ width: '20px', height: '20px', borderRadius: '4px', backgroundColor: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Hexagon size={12} style={{ color: 'white' }} />
+                <div className="shrink-0" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src="/logo.png" alt="" style={{ width: '100%', height: '100%', borderRadius: '4px' }} />
                 </div>
                 <span className="truncate">
                   {workspaces.find(w => w.id === workspaceId)?.name || currentWorkspace?.name || 'Workspace'} 
@@ -202,8 +202,8 @@ export default function WorkspaceLayout({ children }) {
                           }
                         }}
                       >
-                        <div className="bg-blue-50 text-blue-600 flex items-center justify-center shrink-0" style={{ width: '2rem', height: '2rem', borderRadius: '8px' }}>
-                          <Hexagon size={16} />
+                        <div className="flex items-center justify-center shrink-0" style={{ width: '2rem', height: '2rem' }}>
+                          <img src="/logo.png" alt="" style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
                         </div>
                         <div className="truncate text-sm font-bold text-gray-900">{ws.name}</div>
                       </div>

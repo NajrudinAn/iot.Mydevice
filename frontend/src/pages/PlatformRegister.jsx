@@ -58,15 +58,7 @@ export default function PlatformRegister() {
         </Link>
 
         <div className="flex-center" style={{ flexDirection: 'column', gap: '1.25rem', marginBottom: '2.5rem', marginTop: '1rem' }}>
-          <div style={{ 
-            width: '64px', height: '64px', 
-            borderRadius: 'var(--radius-lg)', 
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05))',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Hexagon size={32} color="var(--primary)" strokeWidth={1.5} />
-          </div>
+          <img src="/logo.png" alt="Logo" style={{ width: 56, height: 56, borderRadius: 14, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
           <div style={{ textAlign: 'center' }}>
             <h1 className="text-2xl font-bold" style={{ letterSpacing: '-0.025em', marginBottom: '0.25rem' }}>Create Account</h1>
             <p className="text-muted text-sm">Join the MyDevice Platform</p>

@@ -35,7 +35,7 @@ export default function PlatformLayout({ children }) {
       <aside className={`app-sidebar ${isSidebarOpen ? 'mobile-open' : ''} ${!desktopSidebarOpen ? 'desktop-collapsed' : ''}`}>
         <div className="flex-align gap-3 mb-2" style={{ padding: '1.5rem' }}>
           <div className="flex-align gap-3 cursor-pointer" onClick={() => navigate('/portal')}>
-            <Hexagon className="text-primary" size={32} style={{ color: '#2563eb' }} strokeWidth={2.5} />
+            <img src="/logo.png" alt="MyDevice Logo" style={{ width: 32, height: 32, borderRadius: 8 }} />
             <div>
               <h2 className="font-bold text-main truncate" style={{ maxWidth: '120px', lineHeight: 1.1, color: 'var(--text-main)', fontSize: '1.25rem' }}>MyDevice</h2>
               <div className="text-muted" style={{ marginTop: '2px', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>IoT Platform</div>
@@ -100,7 +100,7 @@ export default function PlatformLayout({ children }) {
           
           {/* Mobile Logo Centered */}
           <div className="mobile-only flex-align gap-2" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-            <Hexagon className="text-primary" size={24} style={{ color: '#2563eb' }} strokeWidth={2.5} />
+            <img src="/logo.png" alt="MyDevice Logo" style={{ width: 24, height: 24, borderRadius: 6 }} />
             <div style={{ textAlign: 'left' }}>
               <div className="font-bold text-main" style={{ lineHeight: 1.1, fontSize: '1rem' }}>MyDevice</div>
               <div className="text-muted" style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>IoT Platform</div>

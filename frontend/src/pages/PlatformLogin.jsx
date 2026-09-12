@@ -262,14 +262,7 @@ export default function PlatformLogin() {
           <div style={{ position: 'relative', zIndex: 1 }}>
             {/* Logo + Title */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '3rem' }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(59,130,246,0.1))',
-                border: '1px solid rgba(59,130,246,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Hexagon size={26} color="#60a5fa" strokeWidth={1.5} />
-              </div>
+              <img src="/logo.png" alt="Logo" style={{ width: 48, height: 48, borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }} />
               <div>
                 <h2 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.03em', margin: 0, lineHeight: 1.2 }}>MyDevice</h2>
                 <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8125rem', margin: 0, marginTop: 2 }}>IoT Control Platform</p>
@@ -322,9 +315,7 @@ export default function PlatformLogin() {
             {/* Mobile-only logo */}
             <div style={{ display: 'none', marginBottom: '2rem', textAlign: 'center' }} className="login-mobile-logo">
               <style>{`@media (max-width: 900px) { .login-mobile-logo { display: block !important; } }`}</style>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.05))', border: '1px solid rgba(59,130,246,0.15)', marginBottom: '1rem' }}>
-                <Hexagon size={26} color="#3b82f6" strokeWidth={1.5} />
-              </div>
+                <img src="/logo.png" alt="Logo" style={{ width: 48, height: 48, borderRadius: 12, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', marginBottom: '1rem' }} />
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', letterSpacing: '-0.03em' }}>MyDevice</h2>
             </div>
 

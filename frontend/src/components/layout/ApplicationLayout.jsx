@@ -100,7 +100,7 @@ export default function ApplicationLayout({ children, appName, appLogo }) {
                   <div className="mb-6">
                     <div className="sidebar-section-title text-muted text-xs font-bold uppercase mb-2 px-3" style={{ letterSpacing: '0.05em' }}>Integration</div>
                     <NavLink to={`${basePath}/admin/security`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
-                      <Hexagon size={18} /> APIs
+                      <img src="/logo.png" style={{ width: 18, height: 18, borderRadius: 4 }} alt="" /> APIs
                     </NavLink>
                     <NavLink to={`${basePath}/admin/frontend`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
                       <Code size={18} /> Custom Application

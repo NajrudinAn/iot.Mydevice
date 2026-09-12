@@ -19,7 +19,7 @@ export default function PortalLayout({ children }) {
       }}>
         <div className="flex-1 flex-align gap-4">
           <div className="flex-align gap-2 cursor-pointer" onClick={() => navigate('/portal')}>
-            <Hexagon className="text-primary" size={28} style={{ color: '#2563eb' }} strokeWidth={2.5} />
+            <img src="/logo.png" alt="MyDevice Logo" style={{ width: 28, height: 28, borderRadius: 6 }} />
             <div>
               <div className="font-bold text-main" style={{ lineHeight: 1.1, fontSize: '1.25rem' }}>MyDevice</div>
               <div className="text-muted" style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>User Portal</div>
