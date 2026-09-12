@@ -106,13 +106,13 @@ export default function WorkspaceSettings() {
                 </div>
             )}
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Data Retention</h2>
-                    <p className="text-sm text-gray-500 mt-1">Configure how long historical data is kept before automatic deletion.</p>
+            <div className="bg-white border border-gray-200 shadow-sm relative z-10 overflow-hidden" style={{ borderRadius: '24px' }}>
+                <div className="p-8 pb-6 border-b border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight">Data Retention</h2>
+                    <p className="text-sm text-gray-500 mt-1 font-medium">Configure how long historical data is kept before automatic deletion.</p>
                 </div>
                 
-                <div className="p-6">
+                <div className="p-8 bg-gray-50/30">
                     <div className="max-w-md">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Command History Retention
@@ -134,7 +134,7 @@ export default function WorkspaceSettings() {
                         </select>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
                         <Button 
                             variant="primary" 
                             icon={Save} 
@@ -147,13 +147,13 @@ export default function WorkspaceSettings() {
                 </div>
             </div>
 
-            <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Change Password</h2>
-                    <p className="text-sm text-gray-500 mt-1">Update your account password securely.</p>
+            <div className="mt-8 bg-white border border-gray-200 shadow-sm relative z-10 overflow-hidden" style={{ borderRadius: '24px' }}>
+                <div className="p-8 pb-6 border-b border-gray-100">
+                    <h2 className="text-xl font-bold text-gray-900 tracking-tight">Change Password</h2>
+                    <p className="text-sm text-gray-500 mt-1 font-medium">Update your account password securely.</p>
                 </div>
                 
-                <div className="p-6">
+                <div className="p-8 bg-gray-50/30">
                     {passwordMessage && (
                         <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${passwordMessage.type === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'}`}>
                             <span className="font-medium">{passwordMessage.text}</span>

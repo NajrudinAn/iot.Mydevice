@@ -148,10 +148,10 @@ export default function WorkspaceCommands() {
             {/* Tabs (Hide when inside a specific device command center) */}
             {!deviceId && (
                 <div className="flex border-b border-gray-200 dark:border-gray-700 mb-8">
-                    <button onClick={() => setActiveTab('devices')} className={`px-5 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'devices' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                    <button onClick={() => setActiveTab('devices')} style={{ cursor: 'pointer' }} className={`px-5 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'devices' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                         <Play size={16} /> Devices
                     </button>
-                    <button onClick={() => setActiveTab('history')} className={`px-5 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                    <button onClick={() => setActiveTab('history')} style={{ cursor: 'pointer' }} className={`px-5 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                         <History size={16} /> Command History
                     </button>
                 </div>
@@ -160,13 +160,18 @@ export default function WorkspaceCommands() {
             {/* Devices Tab -> Device List */}
             {!deviceId && activeTab === 'devices' && (
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex-between flex-wrap gap-4 bg-slate-50 dark:bg-gray-900/50">
-                        <div className="relative w-full md:w-72">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
+                    <div style={{ padding: '16px 24px', borderBottom: '1px solid #f1f5f9', background: '#fafaf9', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ position: 'relative', width: '320px' }}>
+                            <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                             <input 
                                 type="text"
                                 placeholder="Search devices..."
-                                className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                style={{ 
+                                  width: '100%', padding: '8px 16px 8px 36px', 
+                                  borderRadius: '9999px', border: '1px solid #e2e8f0', 
+                                  background: '#fff', fontSize: '13px', color: '#0f172a',
+                                  boxShadow: '0 1px 2px rgba(0,0,0,0.02)', outline: 'none'
+                                }}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -190,35 +195,62 @@ export default function WorkspaceCommands() {
                                         <Link 
                                             key={device.device_id}
                                             to={`/workspaces/${workspaceId}/commands/${device.id}`}
-                                            className="group block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-blue-500/40 transition-all relative overflow-hidden"
+                                            className="group block transition-all relative overflow-hidden"
+                                            style={{ 
+                                              background: '#fff', borderRadius: '16px', padding: '20px',
+                                              boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)', border: '1px solid #e2e8f0',
+                                              cursor: 'pointer'
+                                            }}
                                         >
-                                            <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-blue-500 transition-colors"></div>
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isOnline ? 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
-                                                    <Server size={20} />
+                                                <div style={{
+                                                  width: '40px', height: '40px', flexShrink: 0,
+                                                  borderRadius: '50%',
+                                                  border: isOnline ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                                                  background: isOnline ? '#ecfdf5' : '#f8fafc',
+                                                  color: isOnline ? '#059669' : '#64748b',
+                                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                  transition: 'all 0.2s'
+                                                }}>
+                                                    <Server size={18} />
                                                 </div>
-                                                <div 
-                                                    className={`flex items-center rounded border shrink-0 ${isOnline ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:border-green-800/50 dark:text-green-400' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'}`}
-                                                    style={{ padding: '0.25rem 0.625rem', gap: '0.375rem', width: 'max-content' }}
-                                                >
-                                                    <div 
-                                                        className={`rounded-full shrink-0 ${isOnline ? 'bg-green-500' : 'bg-slate-400'}`}
-                                                        style={{ width: '0.375rem', height: '0.375rem' }}
-                                                    ></div>
-                                                    <span className="text-xs font-medium whitespace-nowrap leading-none" style={{ lineHeight: 1 }}>{isOnline ? 'Online' : 'Offline'}</span>
+                                                <div style={{ 
+                                                  display: 'flex', alignItems: 'center', 
+                                                  background: isOnline ? '#ecfdf5' : '#f1f5f9', 
+                                                  color: isOnline ? '#059669' : '#64748b', 
+                                                  padding: '4px 12px', borderRadius: '9999px', 
+                                                  fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                                  letterSpacing: '0.05em', border: isOnline ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                                                }}>
+                                                    <div style={{ 
+                                                      width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', 
+                                                      background: isOnline ? '#10b981' : '#94a3b8' 
+                                                    }}></div>
+                                                    {isOnline ? 'Online' : 'Offline'}
                                                 </div>
                                             </div>
                                             
-                                            <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-1 truncate group-hover:text-blue-500 transition-colors">{device.name}</h4>
-                                            <div className="font-mono text-xs text-gray-500 mb-4 bg-slate-50 dark:bg-gray-900 px-2 py-1 rounded w-max border border-slate-100 dark:border-gray-700">{device.device_id}</div>
+                                            <h4 style={{ fontWeight: 800, fontSize: '18px', color: '#0f172a', marginBottom: '6px', letterSpacing: '-0.01em' }} className="truncate group-hover:text-blue-600 transition-colors">
+                                              {device.name}
+                                            </h4>
+                                            <div style={{ marginBottom: '16px' }}>
+                                              <span style={{ 
+                                                background: '#f8fafc', color: '#475569', 
+                                                padding: '4px 12px', borderRadius: '9999px', 
+                                                fontSize: '11px', fontWeight: 700, letterSpacing: '0.02em',
+                                                fontFamily: 'monospace', border: '1px solid #e2e8f0'
+                                              }}>
+                                                {device.device_id}
+                                              </span>
+                                            </div>
                                             
-                                            <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                                                <div className="text-xs text-gray-500 flex items-center gap-1.5">
-                                                    <Activity size={14} />
+                                            <div style={{ paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
+                                                    <Activity size={14} style={{ opacity: 0.7 }} />
                                                     {hasNeverConnected ? 'Never connected' : new Date(device.last_seen).toLocaleDateString()}
                                                 </div>
-                                                <div className="text-sm font-medium text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transform flex items-center">
-                                                    Commands <span className="ml-1">→</span>
+                                                <div style={{ fontSize: '12px', fontWeight: 600, color: '#0284c7' }} className="group-hover:translate-x-1 transition-transform">
+                                                    Commands &rarr;
                                                 </div>
                                             </div>
                                         </Link>
@@ -238,20 +270,51 @@ export default function WorkspaceCommands() {
                     </Link>
 
                     {selectedDevice && (
-                        <div className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div style={{
+                          background: '#fff', padding: '24px', borderRadius: '16px',
+                          border: '1px solid #e2e8f0', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px'
+                        }}>
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                                <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     {selectedDevice.name}
                                 </h2>
-                                <p className="text-sm text-gray-500 mt-1 font-mono">{selectedDevice.device_id}</p>
-                                <p className="text-sm text-gray-500 mt-1">{selectedDevice.device_type || 'Device'}</p>
-                            </div>
-                            <div className="flex flex-col md:items-end">
-                                <div className={`flex items-center rounded-full border px-3 py-1 gap-2 mb-2 w-max ${deviceStatus === 'ONLINE' ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:border-green-800/50 dark:text-green-400' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400'}`}>
-                                    <div className={`w-2 h-2 rounded-full ${deviceStatus === 'ONLINE' ? 'bg-green-500' : 'bg-slate-400'}`}></div>
-                                    <span className="text-sm font-semibold">{deviceStatus === 'ONLINE' ? 'Online' : 'Offline'}</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
+                                  <span style={{ 
+                                    background: '#f8fafc', color: '#475569', 
+                                    padding: '4px 12px', borderRadius: '9999px', 
+                                    fontSize: '12px', fontWeight: 700, letterSpacing: '0.02em',
+                                    fontFamily: 'monospace', border: '1px solid #e2e8f0'
+                                  }}>
+                                      {selectedDevice.device_id}
+                                  </span>
+                                  {selectedDevice.device_type && (
+                                    <span style={{ 
+                                      background: '#f1f5f9', color: '#64748b', 
+                                      padding: '4px 12px', borderRadius: '9999px', 
+                                      fontSize: '11px', fontWeight: 600, border: '1px solid #e2e8f0', textTransform: 'uppercase', letterSpacing: '0.05em'
+                                    }}>
+                                        {selectedDevice.device_type}
+                                    </span>
+                                  )}
+                                  <div style={{ 
+                                    display: 'flex', alignItems: 'center', 
+                                    background: deviceStatus === 'ONLINE' ? '#ecfdf5' : '#f1f5f9', 
+                                    color: deviceStatus === 'ONLINE' ? '#059669' : '#64748b', 
+                                    padding: '4px 12px', borderRadius: '9999px', 
+                                    fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                    letterSpacing: '0.05em', border: deviceStatus === 'ONLINE' ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                                  }}>
+                                      <div style={{ 
+                                        width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', 
+                                        background: deviceStatus === 'ONLINE' ? '#10b981' : '#94a3b8' 
+                                      }}></div>
+                                      {deviceStatus === 'ONLINE' ? 'Online' : 'Offline'}
+                                  </div>
                                 </div>
-                                <span className="text-xs text-gray-500">
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <span style={{ fontSize: '12px', fontWeight: 500, color: '#94a3b8' }}>
                                     Last activity: {selectedDevice.last_seen ? new Date(selectedDevice.last_seen).toLocaleString() : 'Never'}
                                 </span>
                             </div>
@@ -272,55 +335,75 @@ export default function WorkspaceCommands() {
 
             {/* History Tab */}
             {!deviceId && activeTab === 'history' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                        <h3 className="font-bold text-lg text-gray-900 dark:text-white">Workspace Command History</h3>
-                        <Button variant="secondary" icon={RefreshCcw} onClick={() => fetchHistory(1)} loading={historyLoading}>Refresh</Button>
+                <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid #f1f5f9', background: '#fafaf9' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em', margin: 0 }}>Workspace Command History</h3>
+                        <div style={{ width: '100px', display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="secondary" icon={RefreshCcw} onClick={() => fetchHistory(1)} loading={historyLoading} style={{ height: '38px', minWidth: '105px', boxSizing: 'border-box' }}>Refresh</Button>
+                        </div>
                     </div>
                     {historyError ? (
-                        <div className="p-12 text-center text-red-500">{historyError}</div>
+                        <div style={{ padding: '48px', textAlign: 'center', color: '#ef4444' }}>{historyError}</div>
                     ) : (
-                        <div className="table-container">
-                            <table className="ds-table">
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                                 <thead>
                                     <tr>
-                                        <th className="px-6 py-4 font-medium">Time</th>
-                                        <th className="px-6 py-4 font-medium">Device</th>
-                                        <th className="px-6 py-4 font-medium">Command</th>
-                                        <th className="px-6 py-4 font-medium">Requested By</th>
-                                        <th className="px-6 py-4 font-medium">Status</th>
-                                        <th className="px-6 py-4 font-medium">Duration</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Time</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Device</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Command</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Requested By</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Status</th>
+                                        <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Duration</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {historyLoading && commands.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-6 py-12 text-center">Loading...</td></tr>
+                                        <tr><td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>Loading...</td></tr>
                                     ) : commands.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-6 py-12 text-center text-gray-500">No commands have been sent in this workspace.</td></tr>
+                                        <tr><td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>No commands have been sent in this workspace.</td></tr>
                                     ) : (
-                                        commands.map((cmd) => (
-                                            <tr key={cmd.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                <td className="px-6 py-4 whitespace-nowrap">{new Date(cmd.created_at).toLocaleString()}</td>
-                                                <td className="px-6 py-4 font-mono text-xs">
-                                                    <Link to={`/workspaces/${workspaceId}/commands/${cmd.device_id}`} className="text-blue-600 hover:underline">{cmd.public_device_id || cmd.device_id}</Link>
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{cmd.command_type}</td>
-                                                <td className="px-6 py-4 text-xs">{cmd.requested_by_email}</td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-md text-xs font-medium border ${getStatusBadge(cmd.status)}`}>{cmd.status}</span>
-                                                </td>
-                                                <td className="px-6 py-4 font-mono text-xs text-gray-500">{calculateDuration(cmd)}</td>
-                                            </tr>
-                                        ))
+                                        commands.map((cmd, index) => {
+                                            let statusColor = { bg: '#f1f5f9', text: '#64748b', border: '#e2e8f0', dot: '#94a3b8' };
+                                            if (cmd.status === 'COMPLETED') statusColor = { bg: '#ecfdf5', text: '#059669', border: '#d1fae5', dot: '#10b981' };
+                                            else if (cmd.status === 'FAILED' || cmd.status === 'TIMEOUT' || cmd.status === 'REJECTED') statusColor = { bg: '#fef2f2', text: '#dc2626', border: '#fee2e2', dot: '#ef4444' };
+                                            else if (cmd.status === 'ACKNOWLEDGED' || cmd.status === 'SENT') statusColor = { bg: '#eff6ff', text: '#2563eb', border: '#dbeafe', dot: '#3b82f6' };
+
+                                            return (
+                                                <tr key={cmd.id} style={{ borderBottom: index === commands.length - 1 ? 'none' : '1px solid #f1f5f9', transition: 'background-color 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                                    <td style={{ padding: '16px 24px', fontSize: '13px', color: '#475569', whiteSpace: 'nowrap' }}>{new Date(cmd.created_at).toLocaleString()}</td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <Link to={`/workspaces/${workspaceId}/commands/${cmd.device_id}`} style={{ fontFamily: 'monospace', fontSize: '12px', color: '#0284c7', textDecoration: 'none', fontWeight: 600 }}>
+                                                            {cmd.public_device_id || cmd.device_id}
+                                                        </Link>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{cmd.command_type}</td>
+                                                    <td style={{ padding: '16px 24px', fontSize: '12px', color: '#64748b' }}>{cmd.requested_by_email}</td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <div style={{ 
+                                                          display: 'inline-flex', alignItems: 'center', 
+                                                          background: statusColor.bg, color: statusColor.text, 
+                                                          padding: '4px 12px', borderRadius: '9999px', 
+                                                          fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                                          letterSpacing: '0.05em', border: `1px solid ${statusColor.border}`
+                                                        }}>
+                                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', background: statusColor.dot }}></div>
+                                                            {cmd.status}
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px', fontFamily: 'monospace', fontSize: '12px', color: '#64748b' }}>{calculateDuration(cmd)}</td>
+                                                </tr>
+                                            );
+                                        })
                                     )}
                                 </tbody>
                             </table>
                         </div>
                     )}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/20">
-                            <span className="text-sm text-gray-500">Page {page} of {totalPages}</span>
-                            <div className="flex gap-2">
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderTop: '1px solid #e2e8f0', background: '#fafaf9' }}>
+                            <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 500 }}>Page {page} of {totalPages}</span>
+                            <div style={{ display: 'flex', gap: '8px' }}>
                                 <Button variant="outline" size="sm" icon={ChevronLeft} onClick={() => fetchHistory(page - 1)} disabled={page === 1 || historyLoading}>Previous</Button>
                                 <Button variant="outline" size="sm" className="flex-row-reverse" icon={ChevronRight} onClick={() => fetchHistory(page + 1)} disabled={page === totalPages || historyLoading}>Next</Button>
                             </div>

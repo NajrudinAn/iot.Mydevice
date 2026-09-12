@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { platformClient } from '../api/client';
-import { Activity, Database, Server, X, Copy, Check, ChevronLeft, FileJson, Clock, Filter, BarChart2, Layers } from 'lucide-react';
+import { Activity, Database, Server, X, Copy, Check, ChevronLeft, ChevronDown, FileJson, Clock, Filter, BarChart2, Layers } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { useAuth } from '../context/AuthContext';
@@ -40,7 +40,7 @@ const LiveMetricTreeRenderer = ({ node, level = 0, name = '', dataFields = [] })
         }
         
         return (
-            <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm relative overflow-hidden group flex flex-col h-full">
+            <div className="bg-white p-3 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden group flex flex-col h-full">
                 <div className={`absolute top-0 left-0 w-1 h-full ${level > 1 ? 'bg-purple-400/40 group-hover:bg-purple-500' : 'bg-blue/30 group-hover:bg-blue'} transition-colors`}></div>
                 <div className="text-xs font-medium text-slate-500 mb-0.5 truncate pl-1.5 pr-2" title={node.path}>{displayName}</div>
                 <div className="text-lg font-bold text-main truncate mb-1 pl-1.5" title={String(displayValue)}>
@@ -93,7 +93,7 @@ const LiveMetricTreeRenderer = ({ node, level = 0, name = '', dataFields = [] })
         const groupName = name.replace(/_/g, ' ').toUpperCase();
         
         return (
-            <div className={`border ${level > 1 ? 'border-gray-200 shadow-sm bg-slate-50' : 'border-gray-200 bg-white'} rounded-lg p-3 sm:p-4 mb-3`}>
+            <div className={`border ${level > 1 ? 'border-gray-200 shadow-sm bg-slate-50' : 'border-gray-200 bg-white'} rounded-2xl p-3 sm:p-4 mb-3`}>
                 <div className="flex-between align-center mb-3 border-b border-gray-100 pb-1.5">
                     <h4 className={`font-bold tracking-wide text-main ${level > 1 ? 'text-xs' : 'text-[11px] text-slate-500'}`}>
                         {groupName}
@@ -464,24 +464,38 @@ export default function WorkspaceDataDeviceView() {
                       <h1 className="text-2xl font-bold text-main">
                           {sourceId && sourceId !== 'All' ? sourceId.charAt(0).toUpperCase() + sourceId.slice(1) : device.name}
                       </h1>
-                      <div className="flex-align gap-3 text-sm mt-1">
+                      <div className="flex-align gap-3 text-sm mt-2">
                           {sourceId && sourceId !== 'All' ? (
-                              <span className="text-muted bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                              <span style={{ 
+                                background: '#f1f5f9', color: '#475569', 
+                                padding: '4px 12px', borderRadius: '9999px', 
+                                fontSize: '12px', fontWeight: 600, border: '1px solid #e2e8f0' 
+                              }}>
                                   {dataFields.filter(f => f.source === sourceId).length} fields
                               </span>
                           ) : (
-                              <span className="font-mono text-muted bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{device.device_id}</span>
+                              <span style={{ 
+                                background: '#f8fafc', color: '#475569', 
+                                padding: '4px 12px', borderRadius: '9999px', 
+                                fontSize: '11px', fontWeight: 700, letterSpacing: '0.02em',
+                                fontFamily: 'monospace', border: '1px solid #e2e8f0'
+                              }}>
+                                  {device.device_id}
+                              </span>
                           )}
-                          <span className="text-gray-300">•</span>
-                          <div 
-                              className={`flex items-center rounded border shrink-0 ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}
-                              style={{ padding: '0.125rem 0.5rem', gap: '0.375rem', width: 'max-content' }}
-                          >
-                              <div 
-                                  className={`rounded-full shrink-0 ${isOnline ? 'bg-green-500' : 'bg-slate-400'}`}
-                                  style={{ width: '0.375rem', height: '0.375rem' }}
-                              ></div>
-                              <span className="text-xs font-medium whitespace-nowrap leading-none" style={{ lineHeight: 1 }}>{isOnline ? 'Online' : 'Offline'}</span>
+                          <div style={{ 
+                            display: 'flex', alignItems: 'center', 
+                            background: isOnline ? '#ecfdf5' : '#f1f5f9', 
+                            color: isOnline ? '#059669' : '#64748b', 
+                            padding: '4px 12px', borderRadius: '9999px', 
+                            fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                            letterSpacing: '0.05em', border: isOnline ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                          }}>
+                              <div style={{ 
+                                width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', 
+                                background: isOnline ? '#10b981' : '#94a3b8' 
+                              }}></div>
+                              {isOnline ? 'Online' : 'Offline'}
                           </div>
                       </div>
                   </div>
@@ -507,64 +521,82 @@ export default function WorkspaceDataDeviceView() {
                 const liveEntries = Object.entries(srcLiveData);
 
                 return (
-                  <div key={src} style={{ border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                  <div key={src} style={{ 
+                    background: '#fff', 
+                    borderRadius: '16px', 
+                    boxShadow: '0 4px 20px -2px rgba(15,23,42,0.05)', 
+                    border: '1px solid #e2e8f0', 
+                    overflow: 'hidden',
+                    marginBottom: '16px'
+                  }}>
                     {/* ── Clickable card header ── */}
                     <div
                       onClick={() => handleGroupCardClick(src)}
                       style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '14px 18px', cursor: 'pointer', userSelect: 'none',
-                        background: isExpanded ? '#f0f7ff' : '#fff',
-                        borderBottom: isExpanded ? '1px solid #dbeafe' : 'none',
-                        transition: 'background 0.15s'
+                        padding: '16px 20px', cursor: 'pointer', userSelect: 'none',
+                        background: isExpanded ? '#fafaf9' : '#fff',
+                        borderBottom: isExpanded ? '1px solid #f1f5f9' : 'none',
+                        transition: 'background 0.2s'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{
-                          width: '36px', height: '36px', borderRadius: '9px', flexShrink: 0,
-                          background: isExpanded ? '#3b82f6' : '#eff6ff',
+                          width: '40px', height: '40px', flexShrink: 0,
+                          borderRadius: '50%',
+                          border: isExpanded ? '1px solid #3b82f6' : '1px solid #e0f2fe',
+                          background: isExpanded ? '#3b82f6' : '#f0f9ff',
+                          color: isExpanded ? '#fff' : '#0284c7',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'background 0.15s'
+                          boxShadow: isExpanded ? '0 2px 8px rgba(59, 130, 246, 0.25)' : 'none',
+                          transition: 'all 0.2s'
                         }}>
-                          <Database size={17} style={{ color: isExpanded ? '#fff' : '#3b82f6' }} />
+                          <Database size={18} />
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: '14px', color: '#111827', textTransform: 'capitalize' }}>{src.replace(/_/g, ' ')}</div>
-                          <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '1px' }}>
+                          <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', textTransform: 'capitalize', letterSpacing: '-0.01em' }}>{src.replace(/_/g, ' ')}</div>
+                          <div style={{ fontSize: '12px', fontWeight: 500, color: '#64748b', marginTop: '1px' }}>
                             {srcFields.length} field{srcFields.length !== 1 ? 's' : ''}
                             {liveEntries.length > 0 && !isExpanded && (
-                              <span style={{ marginLeft: '6px', color: '#6b7280' }}>• {liveEntries.length} live</span>
+                              <span style={{ marginLeft: '8px', color: '#94a3b8' }}>• {liveEntries.length} live</span>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <button
                           onClick={(e) => { e.stopPropagation(); navigate(`/workspaces/${workspaceId}/data/${deviceId}/source/${src}`); }}
-                          style={{ fontSize: '11px', color: '#3b82f6', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '5px', padding: '4px 10px', cursor: 'pointer', fontWeight: 600 }}
+                          style={{
+                            fontSize: '11px', fontWeight: 600, color: '#0284c7',
+                            background: '#f0f9ff', border: '1px solid #e0f2fe',
+                            padding: '6px 12px', borderRadius: '9999px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
                         >
                           Full View
                         </button>
                         <div style={{
-                          width: '20px', height: '20px', borderRadius: '50%', background: '#f3f4f6',
+                          width: '28px', height: '28px', borderRadius: '50%',
+                          background: isExpanded ? '#f1f5f9' : '#f8fafc',
+                          color: isExpanded ? '#64748b' : '#cbd5e1',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s'
+                          transition: 'all 0.2s'
                         }}>
-                          <ChevronLeft size={12} style={{ color: '#6b7280', transform: 'rotate(-90deg)' }} />
+                           <ChevronDown size={16} style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
                         </div>
                       </div>
                     </div>
 
                     {/* ── Expanded live data panel ── */}
                     {isExpanded && (
-                      <div style={{ padding: '16px 18px' }}>
+                      <div style={{ padding: '20px', background: '#fafaf9' }}>
                         {isLoadingThis ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#9ca3af', fontSize: '13px', padding: '12px 0' }}>
-                            <Spinner size={16} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '13px', padding: '12px 0' }}>
+                            <Spinner size={14} />
                             Fetching live data…
                           </div>
                         ) : liveEntries.length > 0 ? (
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                             {liveEntries.map(([path, fieldState]) => {
                               const fieldMeta = srcFields.find(f => f.field_name === path);
                               const displayName = fieldMeta?.display_name ||
@@ -574,20 +606,19 @@ export default function WorkspaceDataDeviceView() {
                               else if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
                               return (
                                 <div key={path} style={{
-                                  background: '#f9fafb', border: '1px solid #e5e7eb',
-                                  borderRadius: '9px', padding: '13px 15px',
+                                  background: '#fff', borderRadius: '12px', padding: '14px 16px',
+                                  border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
                                   position: 'relative', overflow: 'hidden'
                                 }}>
-                                  <div style={{ position: 'absolute', top: 0, left: 0, width: '3px', height: '100%', background: '#3b82f6', borderRadius: '9px 0 0 9px' }} />
-                                  <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginBottom: '4px', paddingLeft: '5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={path}>
+                                  <div style={{ fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={path}>
                                     {displayName}
                                   </div>
-                                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#111827', paddingLeft: '5px', lineHeight: 1.15 }}>
+                                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
                                     {val !== null && val !== undefined ? String(val) : '—'}
-                                    {fieldMeta?.unit && <span style={{ fontSize: '11px', fontWeight: 400, color: '#9ca3af', marginLeft: '3px' }}>{fieldMeta.unit}</span>}
+                                    {fieldMeta?.unit && <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8', marginLeft: '4px' }}>{fieldMeta.unit}</span>}
                                   </div>
                                   {fieldState.timestamp && (
-                                    <div style={{ fontSize: '9px', color: '#d1d5db', marginTop: '5px', paddingLeft: '5px' }}>
+                                    <div style={{ fontSize: '10px', fontWeight: 500, color: '#94a3b8', marginTop: '6px' }}>
                                       {new Date(fieldState.timestamp).toLocaleTimeString()}
                                     </div>
                                   )}
@@ -596,9 +627,9 @@ export default function WorkspaceDataDeviceView() {
                             })}
                           </div>
                         ) : (
-                          <div style={{ textAlign: 'center', padding: '20px 0', color: '#9ca3af' }}>
-                            <Activity size={20} style={{ margin: '0 auto 6px', opacity: 0.4 }} />
-                            <p style={{ fontSize: '13px' }}>No live data for <strong>{src}</strong> yet. Make sure the device is online and sending telemetry.</p>
+                          <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8' }}>
+                            <Activity size={20} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                            <p style={{ fontSize: '13px', fontWeight: 500 }}>No live data for <strong style={{ color: '#64748b' }}>{src}</strong> yet.</p>
                           </div>
                         )}
                       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Button from '../ui/Button';
 import { platformClient } from '../../api/client';
@@ -162,9 +163,9 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
     });
   };
 
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose} style={{ zIndex: 2147483647 }}>
+      <div className="modal-content" style={{ maxWidth: '600px', borderRadius: '16px' }} onClick={e => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Create Application (Step {step} of 4)</h2>
           <Button variant="icon" icon={X} onClick={onClose} />
@@ -443,6 +444,7 @@ export default function CreateApplicationFlow({ workspaceId, onClose, onSuccess 
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

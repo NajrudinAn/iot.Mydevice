@@ -236,22 +236,22 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
             )}
 
             {groups.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 mb-10">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '40px' }}>
                     {groups.map((group, idx) => (
-                        <div key={idx} className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
-                            <div className="flex justify-between items-start mb-4 border-b border-gray-200 dark:border-gray-800 pb-3">
+                        <div key={idx} style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', borderBottom: '1px solid #f1f5f9', paddingBottom: '16px' }}>
                                 <div>
-                                    <h4 className="text-lg font-bold text-gray-800 dark:text-white">{group.label}</h4>
+                                    <h4 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em', margin: 0 }}>{group.label}</h4>
                                 </div>
                                 {group.state_mapping && group.state_mapping.path && (
-                                    <div className="text-right">
-                                        <p className="text-xs text-gray-500 mb-1">Actual State</p>
-                                        {deviceStatus !== 'ONLINE' && (
-                                            <p className="text-xs text-gray-400 mb-1">
-                                                Last known: {liveState[group.state_mapping.path] !== undefined ? liveState[group.state_mapping.path] : 'Unknown'}
-                                            </p>
-                                        )}
-                                        <p className={`font-mono font-medium px-3 py-1 rounded border ${deviceStatus === 'ONLINE' ? 'text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'text-gray-400 bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px', fontWeight: 500 }}>Actual State</p>
+                                        <p style={{
+                                          fontFamily: 'monospace', fontSize: '13px', fontWeight: 700, padding: '4px 12px', borderRadius: '6px',
+                                          background: deviceStatus === 'ONLINE' ? '#f8fafc' : '#f1f5f9',
+                                          color: deviceStatus === 'ONLINE' ? '#0f172a' : '#94a3b8',
+                                          border: '1px solid #e2e8f0'
+                                        }}>
                                             {deviceStatus !== 'ONLINE' ? 'OFFLINE' : (
                                                 liveState[group.state_mapping.path] !== undefined 
                                                     ? (liveState.power === 'OFF' && group.state_mapping.path !== 'power' ? 'Turned Off' :
@@ -265,7 +265,7 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
                                 )}
                             </div>
                             
-                            <div className="space-y-4">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {group.actions.map(action => {
                                     const params = action.parameters ? (typeof action.parameters === 'string' ? JSON.parse(action.parameters) : action.parameters) : {};
                                     const hasParams = Object.keys(params).length > 0;
@@ -285,82 +285,88 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
                                     const isDisabled = isSendingThisAction || isOffline || isStateUnknown;
                                     
                                     return (
-                                        <div key={action.name} className={`rounded-lg p-4 border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${isDisabled ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 opacity-75' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'}`}>
+                                        <div key={action.name} style={{ 
+                                          background: isDisabled ? '#f8fafc' : '#fff', borderRadius: '12px', padding: '20px', 
+                                          border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '16px',
+                                          opacity: isDisabled ? 0.7 : 1
+                                        }}>
                                             <div>
-                                                <h5 className="font-medium text-gray-900 dark:text-white">{action.label}</h5>
-                                                {action.description && <p className="text-sm text-gray-500 mt-1">{action.description}</p>}
-                                                <code className="text-xs text-gray-400 mt-2 block">{action.name}</code>
+                                                <h5 style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', margin: 0 }}>{action.label}</h5>
+                                                {action.description && <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', margin: 0 }}>{action.description}</p>}
+                                                <code style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px', display: 'block' }}>{action.name}</code>
                                             </div>
                                             
-                                            <div className="flex flex-wrap items-center gap-3">
-                                                {readOnly ? (
-                                                    <div className="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 flex flex-col gap-1.5 w-full md:w-auto font-mono text-xs shadow-inner">
-                                                        {hasParams ? (
-                                                            Object.entries(params).map(([paramName, paramSchema]) => (
-                                                                <div key={paramName} className="flex items-center gap-4 border-b border-gray-100 dark:border-gray-800 last:border-0 pb-1.5 last:pb-0">
-                                                                    <span className="text-gray-700 dark:text-gray-300 font-semibold">{paramName}{paramSchema.required && <span className="text-red-500 ml-0.5">*</span>}</span>
-                                                                    <span className="text-gray-500 ml-auto text-right">
-                                                                        <span className="text-blue-600 dark:text-blue-400 font-medium mr-1">{paramSchema.type || 'string'}</span>
-                                                                        {paramSchema.min !== undefined && paramSchema.max !== undefined && ` [${paramSchema.min} - ${paramSchema.max}]`}
-                                                                        {(paramSchema.enum || paramSchema.values) && ` [${(paramSchema.enum || paramSchema.values).join(', ')}]`}
-                                                                    </span>
-                                                                </div>
-                                                            ))
-                                                        ) : (
-                                                            <div className="text-gray-500 italic">No parameters required</div>
-                                                        )}
-                                                    </div>
-                                                ) : hasParams ? (
-                                                    <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
+                                            <div style={{ 
+                                              display: 'flex', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap', 
+                                              background: isDisabled ? 'transparent' : '#f8fafc', padding: isDisabled ? '0' : '16px', 
+                                              borderRadius: '12px', border: isDisabled ? 'none' : '1px solid #f1f5f9' 
+                                            }}>
+                                                {hasParams ? (
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', flex: 1, flexWrap: 'wrap' }}>
                                                         {Object.entries(params).map(([paramName, paramSchema]) => (
-                                                            <div key={paramName} className="flex flex-col">
-                                                                <label className="text-xs text-gray-500 mb-1">{paramName} {paramSchema.required && '*'}</label>
+                                                            <div key={paramName} style={{ display: 'flex', flexDirection: 'column', flex: paramSchema.type === 'number' ? 1 : 'none', minWidth: '200px' }}>
+                                                                <label style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px', fontWeight: 600 }}>{paramName} {paramSchema.required && <span style={{ color: '#ef4444' }}>*</span>}</label>
                                                                 {paramSchema.type === 'enum' || paramSchema.enum ? (
-                                                                    <select 
-                                                                        className="w-28 text-sm px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
-                                                                        onChange={(e) => handleFormChange(capId, action.name, paramName, e.target.value, paramSchema.type)}
-                                                                        defaultValue=""
-                                                                        disabled={isDisabled}
-                                                                    >
-                                                                        <option value="" disabled>Select...</option>
-                                                                        {(paramSchema.enum || paramSchema.values || []).map(val => (
-                                                                            <option key={val} value={val}>{val}</option>
-                                                                        ))}
-                                                                    </select>
+                                                                    <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '4px', borderRadius: '8px', gap: '4px' }}>
+                                                                        {(paramSchema.enum || paramSchema.values || []).map(val => {
+                                                                            const isSelected = formStates[`${capId}_${action.name}`]?.[paramName] === val;
+                                                                            return (
+                                                                                <button
+                                                                                    key={val}
+                                                                                    onClick={() => handleFormChange(capId, action.name, paramName, val, paramSchema.type)}
+                                                                                    disabled={isDisabled}
+                                                                                    style={{
+                                                                                        padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 700,
+                                                                                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                                                        background: isSelected ? '#fff' : 'transparent',
+                                                                                        color: isSelected ? '#0f172a' : '#64748b',
+                                                                                        boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                                                                                        border: 'none', transition: 'all 0.2s', minWidth: '80px'
+                                                                                    }}
+                                                                                >
+                                                                                    {val}
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 ) : paramSchema.type === 'boolean' ? (
-                                                                     <select 
-                                                                        className="w-24 text-sm px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
-                                                                        onChange={(e) => handleFormChange(capId, action.name, paramName, e.target.value === 'true', 'boolean')}
-                                                                        defaultValue=""
-                                                                        disabled={isDisabled}
-                                                                    >
-                                                                        <option value="" disabled>Select...</option>
-                                                                        <option value="true">True</option>
-                                                                        <option value="false">False</option>
-                                                                    </select>
+                                                                     <div style={{ display: 'inline-flex', background: '#e2e8f0', padding: '4px', borderRadius: '8px', gap: '4px' }}>
+                                                                        {[{ label: 'ON', value: true }, { label: 'OFF', value: false }].map(opt => {
+                                                                            const isSelected = formStates[`${capId}_${action.name}`]?.[paramName] === opt.value;
+                                                                            return (
+                                                                                <button
+                                                                                    key={opt.label}
+                                                                                    onClick={() => handleFormChange(capId, action.name, paramName, opt.value, 'boolean')}
+                                                                                    disabled={isDisabled}
+                                                                                    style={{
+                                                                                        padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 700,
+                                                                                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                                                        background: isSelected ? (opt.value ? '#10b981' : '#ef4444') : 'transparent',
+                                                                                        color: isSelected ? '#fff' : '#64748b',
+                                                                                        boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                                                                        border: 'none', transition: 'all 0.2s', minWidth: '80px'
+                                                                                    }}
+                                                                                >
+                                                                                    {opt.label}
+                                                                                </button>
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 ) : paramSchema.type === 'number' && paramSchema.min !== undefined && paramSchema.max !== undefined ? (
-                                                                    <div className="flex items-center gap-2">
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#fff', padding: '8px 16px', borderRadius: '8px', border: '1px solid #cbd5e1', height: '40px' }}>
                                                                         <input 
                                                                             type="range"
                                                                             min={paramSchema.min}
                                                                             max={paramSchema.max}
                                                                             step={paramSchema.step || 1}
                                                                             value={formStates[`${capId}_${action.name}`]?.[paramName] ?? (typeof actualState === 'number' ? actualState : paramSchema.min)}
-                                                                            className="w-24 cursor-pointer accent-indigo-600"
+                                                                            style={{ flex: 1, cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                                                                             onChange={(e) => handleFormChange(capId, action.name, paramName, e.target.value, 'number')}
                                                                             disabled={isDisabled}
                                                                         />
-                                                                        <input 
-                                                                            type="number"
-                                                                            min={paramSchema.min}
-                                                                            max={paramSchema.max}
-                                                                            step={paramSchema.step || 1}
-                                                                            value={formStates[`${capId}_${action.name}`]?.[paramName] ?? (typeof actualState === 'number' ? actualState : '')}
-                                                                            placeholder={`${paramSchema.min}`}
-                                                                            className="w-20 text-sm px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 focus:ring-1 focus:ring-indigo-500"
-                                                                            onChange={(e) => handleFormChange(capId, action.name, paramName, e.target.value, 'number')}
-                                                                            disabled={isDisabled}
-                                                                        />
+                                                                        <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', width: '40px', textAlign: 'right' }}>
+                                                                            {formStates[`${capId}_${action.name}`]?.[paramName] ?? (typeof actualState === 'number' ? actualState : paramSchema.min)}
+                                                                        </span>
                                                                     </div>
                                                                 ) : (
                                                                     <input 
@@ -368,36 +374,47 @@ const DeviceCommandPanel = ({ workspaceId, deviceId, hardwareId, capabilities = 
                                                                         placeholder={`e.g. ${paramSchema.min || 0}`}
                                                                         min={paramSchema.min}
                                                                         max={paramSchema.max}
-                                                                        className="w-24 text-sm px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 focus:ring-1 focus:ring-indigo-500"
+                                                                        style={{ 
+                                                                          padding: '8px 16px', fontSize: '14px', borderRadius: '8px', 
+                                                                          border: '1px solid #cbd5e1', outline: 'none', height: '40px'
+                                                                        }}
                                                                         onChange={(e) => handleFormChange(capId, action.name, paramName, e.target.value, paramSchema.type)}
                                                                         disabled={isDisabled}
                                                                     />
                                                                 )}
                                                             </div>
                                                         ))}
-                                                        <Button 
+                                                        
+                                                        <button 
                                                             onClick={() => {
                                                                 const payload = formStates[`${capId}_${action.name}`] || {};
                                                                 sendCommand(action.name, payload);
                                                             }}
                                                             disabled={isDisabled}
-                                                            className="ml-2 mt-4"
-                                                            variant="primary"
+                                                            style={{
+                                                              background: '#2563eb', color: '#fff', padding: '0 24px', borderRadius: '8px',
+                                                              fontSize: '14px', fontWeight: 700, border: 'none', cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                              opacity: isDisabled ? 0.5 : 1, height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                            }}
                                                         >
-                                                            {isSendingThisAction ? 'Sending...' : 'Send'}
-                                                        </Button>
+                                                            {isSendingThisAction ? 'Sending...' : 'Execute'}
+                                                        </button>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex flex-col items-end gap-1">
-                                                        <Button 
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <button 
                                                             onClick={() => sendCommand(action.name, {})}
                                                             disabled={isDisabled}
-                                                            variant="outline"
+                                                            style={{
+                                                              background: '#f1f5f9', color: '#0f172a', padding: '10px 24px', borderRadius: '8px',
+                                                              fontSize: '14px', fontWeight: 700, border: '1px solid #e2e8f0', cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                                              opacity: isDisabled ? 0.5 : 1
+                                                            }}
                                                         >
                                                             {isSendingThisAction ? 'Sending...' : action.label}
-                                                        </Button>
+                                                        </button>
                                                         {isDisabled && isStateUnknown && !isOffline && (
-                                                            <span className="text-xs text-amber-500">State unknown</span>
+                                                            <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 600 }}>State unknown</span>
                                                         )}
                                                     </div>
                                                 )}

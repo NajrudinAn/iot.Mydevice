@@ -395,6 +395,7 @@ export default function PlatformApplicationInspection() {
       className={`px-4 py-3 font-semibold text-[14px] flex items-center gap-2 border-b-2 transition-colors ${
         activeTab === id ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
       }`}
+      style={{ cursor: 'pointer' }}
     >
       <Icon size={16} />
       {label}
@@ -405,8 +406,8 @@ export default function PlatformApplicationInspection() {
     <div className="animate-fade-in relative">
       {/* Toast */}
       {toastMessage && createPortal(
-        <div className="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-xl flex-align gap-3 z-[999999] animate-slide-up text-sm font-medium">
-          <CheckCircle2 size={18} className="text-green-400" />
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', backgroundColor: '#1e293b', color: '#ffffff', padding: '12px 16px', borderRadius: '8px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 999999, fontSize: '14px', fontWeight: 500 }}>
+          <CheckCircle2 size={18} style={{ color: '#4ade80' }} />
           {toastMessage}
         </div>,
         document.body
@@ -567,18 +568,18 @@ export default function PlatformApplicationInspection() {
                 ) : deployments.length === 0 ? (
                   <div className="text-center py-10 bg-white border border-slate-200 rounded-xl text-slate-500 text-sm shadow-sm">No deployments found.</div>
                 ) : (
-                  <div className="table-container">
-                      <table className="ds-table">
-                        <thead>
+                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                      <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+                        <thead className="bg-gray-50 border-b border-gray-200">
                           <tr>
-                            <th className="py-4 px-5 border-b border-gray-200 w-[35%]">Version</th>
-                            <th className="py-4 px-5 border-b border-gray-200">Status</th>
-                            <th className="py-4 px-5 border-b border-gray-200">Uploaded</th>
-                            <th className="py-4 px-5 border-b border-gray-200">Size & Files</th>
-                            <th className="py-4 px-5 text-right border-b border-gray-200 w-[120px]">Actions</th>
+                            <th className="py-4 px-5 text-[11px] font-bold text-gray-500 uppercase tracking-wider w-[35%]">Version</th>
+                            <th className="py-4 px-5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="py-4 px-5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Uploaded</th>
+                            <th className="py-4 px-5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Size & Files</th>
+                            <th className="py-4 px-5 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider w-[120px]">Actions</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-gray-100">
                           {deployments.map((dep, index) => (
                             <tr key={dep.id} className="hover:bg-slate-50/50 transition-colors bg-white">
                               <td className={`py-4 px-5 ${index !== deployments.length - 1 ? 'border-b border-gray-200' : ''}`}>

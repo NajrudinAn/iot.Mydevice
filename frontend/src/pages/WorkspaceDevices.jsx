@@ -169,6 +169,64 @@ export default function WorkspaceDevices() {
         .device-card-mobile { border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; background: white; transition: box-shadow 0.2s; }
         .device-card-mobile:hover { box-shadow: var(--shadow-sm); }
         .secret-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-family: monospace; color: #0f172a; word-break: break-all; }
+        
+        .overview-stat-card {
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        @media (max-width: 768px) {
+          .overview-stat-card {
+            padding: 1rem;
+          }
+        }
+        .overview-stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px -5px rgba(15, 23, 42, 0.06);
+        }
+        .stat-icon-wrapper {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 0.75rem;
+        }
+        .stat-blue { background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%); color: #2563eb; border: 1px solid rgba(59,130,246,0.2); }
+        .stat-green { background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .stat-red { background: linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+        
+        .stat-title {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 0.25rem;
+        }
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #0f172a;
+          line-height: 1;
+        }
+        
+        .premium-table-row {
+          cursor: pointer;
+          transition: background-color 0.15s ease;
+        }
+        .premium-table-row:hover {
+          background-color: #f8fafc;
+        }
       `}</style>
 
       {toastMsg && <Toast message={toastMsg.message} type={toastMsg.type} />}
@@ -198,53 +256,55 @@ export default function WorkspaceDevices() {
       ) : (
         <>
           {/* Compact Metric Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div className="ds-icon-box bg-blue-light text-blue" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
-                <Server size={20} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="overview-stat-card">
+              <div className="flex-between items-start mb-1 z-10">
+                <div className="stat-icon-wrapper stat-blue">
+                  <Server size={20} />
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Devices</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.total}</div>
-              </div>
+              <h3 className="stat-title z-10">Total Devices</h3>
+              <div className="stat-value z-10">{loading ? '-' : stats.total}</div>
             </div>
 
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div className="ds-icon-box bg-green-light text-green" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
-                <Activity size={20} />
+            <div className="overview-stat-card">
+              <div className="flex-between items-start mb-1 z-10">
+                <div className="stat-icon-wrapper stat-green">
+                  <Activity size={20} />
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Online</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.online}</div>
-              </div>
+              <h3 className="stat-title z-10">Online Devices</h3>
+              <div className="stat-value z-10">{loading ? '-' : stats.online}</div>
             </div>
 
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div className="ds-icon-box bg-gray-100 text-muted" style={{ width: '40px', height: '40px', flexShrink: 0 }}>
-                <Server size={20} />
+            <div className="overview-stat-card">
+              <div className="flex-between items-start mb-1 z-10">
+                <div className="stat-icon-wrapper stat-red">
+                  <Server size={20} />
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Offline</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, lineHeight: 1.1 }}>{loading ? '-' : stats.offline}</div>
-              </div>
+              <h3 className="stat-title z-10">Offline Devices</h3>
+              <div className="stat-value z-10">{loading ? '-' : stats.offline}</div>
             </div>
           </div>
 
           {/* Toolbar */}
-          <div className="flex items-center justify-between flex-wrap gap-4 mb-6 bg-white p-3 rounded-xl border border-gray-100">
-            <div className="flex-1 min-w-[260px] max-w-md relative">
+          {/* Toolbar */}
+          {/* Toolbar */}
+          <div className="flex flex-row items-center gap-3 mb-6">
+            <div className="relative w-full max-w-[320px]">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="text"
                 placeholder="Search devices..."
-                className="form-input pl-9"
+                className="form-input pl-9 w-full bg-white border-gray-200 text-sm shadow-sm focus:border-blue-500 transition-colors rounded-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <div className="relative min-w-[140px]">
+            <div className="relative shrink-0 w-[140px]">
               <select 
-                className="form-select appearance-none pr-8" 
+                className="form-select appearance-none pl-3 pr-8 w-full text-sm bg-white border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-colors rounded-lg" 
                 value={statusFilter} 
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
@@ -290,29 +350,29 @@ export default function WorkspaceDevices() {
                     </thead>
                     <tbody>
                       {filteredDevices.map(device => (
-                        <tr key={device.id}>
+                        <tr key={device.id} className="premium-table-row" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
                           <td>
-                            <div className="font-semibold text-main">{device.name}</div>
+                            <div className="font-bold text-main" style={{ fontSize: '15px' }}>{device.name}</div>
                           </td>
                           <td>
-                            <span className="font-mono text-xs text-muted bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                            <span className="font-mono text-[13px] text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-md font-medium tracking-wide shadow-sm">
                               {device.device_id}
                             </span>
                           </td>
-                          <td className="text-muted">{device.device_type || 'Unknown'}</td>
+                          <td className="text-muted font-medium">{device.device_type || 'Unknown'}</td>
                           <td>
-                            <span className={`badge ${device.status?.toUpperCase() === 'ONLINE' ? 'badge-success' : 'badge-neutral'}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-500' : 'bg-slate-400'}`}></span>
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
                               {device.status?.toUpperCase() === 'ONLINE' ? 'Online' : 'Offline'}
                             </span>
                           </td>
-                          <td className="text-muted text-sm">
+                          <td className="text-muted text-sm font-medium">
                             {formatLastSeen(device.last_seen)}
                           </td>
                           <td className="text-right">
-                             <Button variant="secondary" size="sm" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
-                               View &rarr;
-                             </Button>
+                             <div className="text-muted flex justify-end">
+                                <ChevronRight size={18} />
+                             </div>
                           </td>
                         </tr>
                       ))}
@@ -324,25 +384,22 @@ export default function WorkspaceDevices() {
               {/* Mobile Cards */}
               <div className="md:hidden grid grid-cols-1 gap-4">
                  {filteredDevices.map(device => (
-                    <div key={device.id} className="ds-card p-4 flex-col gap-4">
-                       <div className="flex-between items-start">
+                    <div key={device.id} className="glass-card p-5 flex-col gap-4 cursor-pointer active:scale-[0.98] transition-transform" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
+                       <div className="flex-between items-start mb-1">
                           <div>
-                            <div className="font-bold text-main mb-1">{device.name}</div>
-                            <span className="font-mono text-xs text-muted bg-gray-50 px-1 rounded border border-gray-100">{device.device_id}</span>
+                            <div className="font-bold text-main text-lg mb-1">{device.name}</div>
+                            <span className="font-mono text-[13px] text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-md font-medium tracking-wide shadow-sm">{device.device_id}</span>
                           </div>
-                          <span className={`badge ${device.status?.toUpperCase() === 'ONLINE' ? 'badge-success' : 'badge-neutral'}`}>
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
                             {device.status?.toUpperCase() === 'ONLINE' ? 'Online' : 'Offline'}
                           </span>
                        </div>
                        
-                       <div className="text-sm text-muted flex-col gap-2">
-                          <div className="flex-between"><span>Type</span> <span>{device.device_type}</span></div>
-                          <div className="flex-between"><span>Last Seen</span> <span>{formatLastSeen(device.last_seen)}</span></div>
+                       <div className="text-sm text-muted flex-col gap-2 mt-2 pt-4 border-t border-gray-100">
+                          <div className="flex-between font-medium"><span>Type</span> <span className="text-main">{device.device_type}</span></div>
+                          <div className="flex-between font-medium"><span>Last Seen</span> <span className="text-main">{formatLastSeen(device.last_seen)}</span></div>
                        </div>
-                       
-                       <Button variant="secondary" className="w-full mt-2" onClick={() => navigate(`/workspaces/${workspaceId}/devices/${device.id}`)}>
-                          View Device
-                       </Button>
                     </div>
                  ))}
               </div>

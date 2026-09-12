@@ -9,6 +9,8 @@ const RoutesTab = ({ workspaceId }) => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [routeToEdit, setRouteToEdit] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [methodFilter, setMethodFilter] = useState('All Methods');
+    const [statusFilter, setStatusFilter] = useState('All Status');
 
     const loadRoutes = async () => {
         try {
@@ -40,7 +42,12 @@ const RoutesTab = ({ workspaceId }) => {
     const totalApiUsage = routes.reduce((acc, r) => acc + parseInt(r.usage_count || 0), 0);
     const mostUsedRoute = routes.length > 0 ? [...routes].sort((a, b) => b.usage_count - a.usage_count)[0] : null;
 
-    const filteredRoutes = routes.filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()) || (r.endpoint_slug || '').toLowerCase().includes(searchQuery.toLowerCase()));
+    const filteredRoutes = routes.filter(r => {
+        const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) || (r.endpoint_slug || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesMethod = methodFilter === 'All Methods' || r.method === methodFilter;
+        const matchesStatus = statusFilter === 'All Status' || (statusFilter === 'Active' ? r.is_active : !r.is_active);
+        return matchesSearch && matchesMethod && matchesStatus;
+    });
 
     return (
         <div className="w-full">
@@ -64,71 +71,81 @@ const RoutesTab = ({ workspaceId }) => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="p-2.5 bg-blue-50 rounded-lg text-blue-500 shrink-0">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+                <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ padding: '10px', background: '#eff6ff', borderRadius: '12px', color: '#3b82f6', flexShrink: 0 }}>
                         <Share2 size={20} />
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-gray-500 mb-1">Total Routes</p>
-                        <h3 className="text-2xl font-bold text-gray-900 leading-none mb-1">{routes.length}</h3>
-                        <p className="text-xs text-gray-400">Reusable endpoints</p>
+                        <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Total Routes</p>
+                        <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{routes.length}</h3>
+                        <p style={{ fontSize: '12px', color: '#94a3b8' }}>Reusable endpoints</p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="p-2.5 bg-green-50 rounded-lg text-green-500 shrink-0">
+                <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ padding: '10px', background: '#ecfdf5', borderRadius: '12px', color: '#10b981', flexShrink: 0 }}>
                         <ShieldCheck size={20} />
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-gray-500 mb-1">Active Routes</p>
-                        <h3 className="text-2xl font-bold text-gray-900 leading-none mb-1">{activeRoutesCount}</h3>
-                        <p className="text-xs text-gray-400">Accessible and ready</p>
+                        <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Active Routes</p>
+                        <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{activeRoutesCount}</h3>
+                        <p style={{ fontSize: '12px', color: '#94a3b8' }}>Accessible and ready</p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="p-2.5 bg-amber-50 rounded-lg text-amber-700 shrink-0">
+                <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ padding: '10px', background: '#fffbeb', borderRadius: '12px', color: '#d97706', flexShrink: 0 }}>
                         <Clock size={20} />
                     </div>
                     <div>
-                        <p className="text-xs font-medium text-gray-500 mb-1">Total API Usage</p>
-                        <h3 className="text-2xl font-bold text-gray-900 leading-none mb-1">{totalApiUsage}</h3>
-                        <p className="text-xs text-gray-400">APIs attached</p>
+                        <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Total API Usage</p>
+                        <h3 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{totalApiUsage}</h3>
+                        <p style={{ fontSize: '12px', color: '#94a3b8' }}>APIs attached</p>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4 shadow-sm hover:shadow-md transition-all">
-                    <div className="p-2.5 bg-purple-light rounded-lg text-purple shrink-0">
+                <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '20px', display: 'flex', alignItems: 'flex-start', gap: '16px', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ padding: '10px', background: '#f5f3ff', borderRadius: '12px', color: '#8b5cf6', flexShrink: 0 }}>
                         <FileText size={20} />
                     </div>
-                    <div className="overflow-hidden">
-                        <p className="text-xs font-medium text-gray-500 mb-1">Most Used Route</p>
-                        <h3 className="text-2xl font-bold text-gray-900 leading-none mb-1 truncate">{mostUsedRoute?.name || 'None'}</h3>
-                        <p className="text-xs text-gray-400">{mostUsedRoute?.usage_count || 0} APIs</p>
+                    <div style={{ overflow: 'hidden' }}>
+                        <p style={{ fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>Most Used Route</p>
+                        <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{mostUsedRoute?.name || 'None'}</h3>
+                        <p style={{ fontSize: '12px', color: '#94a3b8' }}>{mostUsedRoute?.usage_count || 0} APIs</p>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '0' }}>
-                    <Search style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} size={18} />
+                    <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} size={16} />
                     <input
                         type="text"
                         placeholder="Search routes by name, path or purpose..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ width: '100%', height: '44px', paddingLeft: '40px', paddingRight: '16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', color: '#111827', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', outline: 'none', boxSizing: 'border-box' }}
+                        style={{ width: '100%', height: '40px', paddingLeft: '44px', paddingRight: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '9999px', fontSize: '14px', color: '#0f172a', outline: 'none', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                        onFocus={(e) => { e.target.style.background = '#fff'; e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)'; }}
+                        onBlur={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
                     />
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', flexShrink: 0 }}>
-                    <select style={{ height: '44px', padding: '0 40px 0 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 14px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '140px' }}>
+                    <select 
+                        value={methodFilter}
+                        onChange={(e) => setMethodFilter(e.target.value)}
+                        style={{ height: '40px', padding: '0 36px 0 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, color: '#475569', outline: 'none', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '130px' }}
+                    >
                         <option>All Methods</option>
                         <option>GET</option>
                         <option>POST</option>
                     </select>
-                    <select style={{ height: '44px', padding: '0 40px 0 16px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', transition: 'all 0.15s', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 14px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '140px' }}>
+                    <select 
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        style={{ height: '40px', padding: '0 36px 0 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, color: '#475569', outline: 'none', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '130px' }}
+                    >
                         <option>All Status</option>
                         <option>Active</option>
                         <option>Inactive</option>
@@ -137,63 +154,77 @@ const RoutesTab = ({ workspaceId }) => {
             </div>
 
             {/* Table */}
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse ds-table">
+            <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)', overflow: 'hidden', marginBottom: '24px' }}>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr className="bg-gray-50/80 border-b border-gray-200">
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Route</th>
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Method</th>
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Purpose</th>
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Usage</th>
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                            <tr style={{ background: '#fafaf9' }}>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Route</th>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Method</th>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Purpose</th>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Usage</th>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0' }}>Status</th>
+                                <th style={{ padding: '16px 24px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', borderBottom: '1px solid #e2e8f0', textAlign: 'right' }}>Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody>
                             {filteredRoutes.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-12 text-center text-gray-500">
+                                    <td colSpan="6" style={{ padding: '48px', textAlign: 'center', color: '#94a3b8' }}>
                                         No routes found.
                                     </td>
                                 </tr>
                             ) : (
-                                filteredRoutes.map((route) => (
-                                    <tr key={route.id} className={`hover:bg-slate-50/50 transition-colors ${!route.is_active ? 'opacity-60' : ''}`}>
-                                        <td className="px-6 py-3.5 whitespace-nowrap">
-                                            <div className="font-bold text-gray-900">{route.name}</div>
-                                            <div className="text-xs text-gray-400 mt-0.5 font-mono">/{route.endpoint_slug}</div>
+                                filteredRoutes.map((route, index) => (
+                                    <tr key={route.id} style={{ borderBottom: index === filteredRoutes.length - 1 ? 'none' : '1px solid #f1f5f9', opacity: route.is_active ? 1 : 0.6, transition: 'background-color 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{route.name}</div>
+                                            <div style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace', marginTop: '2px' }}>/{route.endpoint_slug}</div>
                                         </td>
-                                        <td className="px-6 py-3.5 whitespace-nowrap">
-                                            <span className={`badge ${route.method === 'GET' ? 'badge-success' : 'badge-primary'}`}>
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ 
+                                                display: 'inline-flex', alignItems: 'center', 
+                                                background: route.method === 'GET' ? '#ecfdf5' : '#eff6ff', 
+                                                color: route.method === 'GET' ? '#059669' : '#2563eb', 
+                                                padding: '4px 12px', borderRadius: '9999px', 
+                                                fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                                letterSpacing: '0.05em', border: route.method === 'GET' ? '1px solid #d1fae5' : '1px solid #dbeafe'
+                                            }}>
                                                 {route.method}
-                                            </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-3.5 whitespace-nowrap">
-                                            <div className="text-[13px] font-semibold text-gray-700">{route.purpose}</div>
-                                            <div className="text-xs text-gray-400 mt-0.5 max-w-[200px] truncate" title={route.description}>
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>{route.purpose}</div>
+                                            <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }} title={route.description}>
                                                 {route.description || 'No description provided'}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-3.5 whitespace-nowrap">
-                                            <div className="text-[13px] font-bold text-gray-900">{route.usage_count} APIs</div>
-                                            <div className="text-xs text-gray-400 mt-0.5">{(route.calls_count || 0).toLocaleString()} calls</div>
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{route.usage_count} APIs</div>
+                                            <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{(route.calls_count || 0).toLocaleString()} calls</div>
                                         </td>
-                                        <td className="px-6 py-3.5 whitespace-nowrap">
-                                            <span className={`badge gap-1.5 ${route.is_active ? 'badge-success' : 'badge-neutral'}`}>
-                                                <div className={`w-1.5 h-1.5 rounded-full ${route.is_active ? 'bg-green-500' : 'bg-slate-400'}`}></div>
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                                            <div style={{ 
+                                                display: 'inline-flex', alignItems: 'center', 
+                                                background: route.is_active ? '#ecfdf5' : '#f1f5f9', 
+                                                color: route.is_active ? '#059669' : '#64748b', 
+                                                padding: '4px 12px', borderRadius: '9999px', 
+                                                fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                                letterSpacing: '0.05em', border: route.is_active ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                                            }}>
+                                                <div style={{ width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', background: route.is_active ? '#10b981' : '#94a3b8' }}></div>
                                                 {route.is_active ? 'Active' : 'Inactive'}
-                                            </span>
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-3.5 whitespace-nowrap text-right text-gray-400">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button onClick={() => { setRouteToEdit(route); setIsCreateModalOpen(true); }} className="p-1.5 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                                        <td style={{ padding: '16px 24px', whiteSpace: 'nowrap', textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                                                <button onClick={() => { setRouteToEdit(route); setIsCreateModalOpen(true); }} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.color = '#3b82f6'; e.currentTarget.style.background = '#eff6ff'; }} onMouseOut={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }} title="Edit">
                                                     <Pencil size={16} strokeWidth={2.5} />
                                                 </button>
-                                                <button className="p-1.5 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" title="Copy">
+                                                <button style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.background = '#f1f5f9'; }} onMouseOut={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.background = 'transparent'; }} title="Copy">
                                                     <Copy size={16} strokeWidth={2.5} />
                                                 </button>
-                                                <button onClick={() => handleDelete(route.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                                <button onClick={() => handleDelete(route.id)} style={{ padding: '6px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#f87171', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.color = '#dc2626'; e.currentTarget.style.background = '#fef2f2'; }} onMouseOut={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'transparent'; }} title="Delete">
                                                     <Trash2 size={16} strokeWidth={2.5} />
                                                 </button>
                                             </div>

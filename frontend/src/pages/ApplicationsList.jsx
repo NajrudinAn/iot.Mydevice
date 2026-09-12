@@ -252,17 +252,18 @@ export default function ApplicationsList() {
       </div>
 
       {/* Applications */}
-      <div className="glass-card p-0 mb-8 relative z-10">
-        <div className="p-6 pb-4">
-          <h2 className="text-lg font-bold text-main">Applications in this Workspace</h2>
+      <div className="bg-white border border-gray-200 shadow-sm relative z-10 mb-8" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+        <div className="p-8 pb-6 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight">Applications in this Workspace</h2>
         </div>
         
-        <div className="p-6 pt-0">
+        <div className="p-8 bg-gray-50/50">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {applications.map((app) => (
                 <div 
                   key={app.id} 
-                  className="glass-card hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-100" 
+                  className="bg-white hover:-translate-y-1 hover:shadow-md transition-all duration-200 cursor-pointer border border-gray-200 shadow-sm relative group" 
+                  style={{ borderRadius: '20px', padding: '24px' }}
                   onClick={() => navigate(`/workspaces/${workspaceId}/applications/${app.id}`)}
                 >
                   <div className="flex-between mb-4">
@@ -276,22 +277,23 @@ export default function ApplicationsList() {
                       className="text-red-400 hover:text-red-600 hover:bg-red-50"
                     />
                   </div>
-                  <div className="font-bold text-main text-[15px] mb-4 truncate">{app.name}</div>
-                  <span className="badge badge-success tracking-wide" style={{ width: 'fit-content', fontSize: '11px', fontWeight: 600 }}>
-                    ACTIVE
+                  <div className="font-bold text-gray-900 text-[16px] mb-4 truncate">{app.name}</div>
+                  <span className="inline-flex items-center rounded-full font-bold uppercase tracking-wide bg-green-100 text-green-700" style={{ gap: '6px', padding: '4px 10px', fontSize: '10px' }}>
+                     <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> ACTIVE
                   </span>
                 </div>
               ))}
 
               <div 
-                  className="flex-column flex-center cursor-pointer transition-all duration-200 min-h-[160px] p-8 border-2 border-dashed border-blue-300 rounded-xl hover:bg-blue-50/50 hover:border-blue-400 group"
+                  className="flex flex-col items-center justify-center cursor-pointer transition-all duration-200 min-h-[160px] p-8 border-2 border-dashed border-blue-200 hover:bg-blue-50/50 hover:border-blue-400 group bg-white"
+                  style={{ borderRadius: '20px' }}
                   onClick={() => setShowCreateModal(true)}
                 >
-                  <div className="ds-icon-box bg-blue-50 text-blue rounded-full mb-3 group-hover:bg-blue-100 transition-colors" style={{ width: '48px', height: '48px' }}>
-                    <Plus size={24} strokeWidth={1.5} />
+                  <div className="flex items-center justify-center bg-blue-50 text-blue-600 rounded-full mb-3 group-hover:bg-blue-100 transition-colors" style={{ width: '48px', height: '48px' }}>
+                    <Plus size={24} strokeWidth={2} />
                   </div>
-                  <h3 className="font-bold text-blue mb-1 text-[14px]">Create Application</h3>
-                  <p className="text-muted text-[12px] font-medium text-center">Add a new application</p>
+                  <h3 className="font-bold text-blue-600 mb-1 text-[15px]">Create Application</h3>
+                  <p className="text-gray-500 text-[13px] font-medium text-center">Add a new application</p>
                 </div>
             </div>
         </div>

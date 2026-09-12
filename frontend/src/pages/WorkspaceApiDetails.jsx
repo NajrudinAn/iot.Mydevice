@@ -206,18 +206,18 @@ const WorkspaceApiDetails = () => {
             </div>
 
             {/* Table */}
-            <div className="table-container">
-                <table className="ds-table">
-                    <thead>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+                    <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th>Route</th>
-                            <th>Purpose</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th className="text-right">Actions</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Route</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Purpose</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Method</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="py-4 px-6 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                         {apiData.routes?.length === 0 ? (
                             <tr>
                                 <td colSpan="5" className="p-8 text-center text-gray-500" style={{ fontSize: '14px' }}>No routes attached to this API package.</td>
@@ -258,7 +258,7 @@ const WorkspaceApiDetails = () => {
                 </table>
                 
                 {/* Pagination Footer */}
-                <div className="py-4 px-6 border-t border-gray-100 flex items-center justify-between bg-white">
+                <div className="py-4 px-6 flex items-center justify-between bg-white border-t border-gray-100">
                     <span className="text-gray-500" style={{ fontSize: '14px' }}>Showing {apiData.routes?.length ? '1' : '0'}–{apiData.routes?.length || 0} of {apiData.routes?.length || 0}</span>
                     <div className="flex items-center" style={{ gap: '0.5rem' }}>
                         <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 transition-colors bg-white">
@@ -300,12 +300,16 @@ const WorkspaceApiDetails = () => {
                             <p className="text-gray-500 mt-1" style={{ fontSize: '14px' }}>This API is protected by Application Session authentication.</p>
                         </div>
                     </div>
-                    <div className="bg-white p-8 text-center rounded-2xl border border-gray-200 shadow-sm">
-                        <Users size={32} className="mx-auto mb-4 text-indigo-400" />
-                        <h4 className="text-lg font-bold text-gray-900">Session Based</h4>
-                        <p className="text-gray-500 mt-1" style={{ fontSize: '14px' }}>
-                            Access is automatically granted to authenticated users via JWT Bearer tokens. You do not need to manage manual API keys for this mode.
-                        </p>
+                    <div className="bg-white text-center shadow-sm flex flex-col items-center justify-center" style={{ padding: '60px 40px', gap: '1rem', borderRadius: '16px', border: '1px solid #e5e7eb' }}>
+                        <div className="w-16 h-16 flex items-center justify-center mx-auto" style={{ borderRadius: '50%', backgroundColor: '#eff6ff', color: '#2563eb' }}>
+                            <Users size={32} />
+                        </div>
+                        <div>
+                            <h4 className="text-xl font-bold text-gray-900" style={{ marginBottom: '8px' }}>Session Based Authentication</h4>
+                            <p className="text-gray-500 max-w-xl mx-auto leading-relaxed" style={{ fontSize: '14.5px' }}>
+                                Access is automatically granted to authenticated users via JWT Bearer tokens. You do not need to manage manual API keys for this mode.
+                            </p>
+                        </div>
                     </div>
                 </div>
             );
@@ -340,17 +344,17 @@ const WorkspaceApiDetails = () => {
             )}
 
             {/* Table */}
-            <div className="table-container">
-                <table className="ds-table">
-                    <thead>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+                    <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th>Name</th>
-                            <th>API Key (ID)</th>
-                            <th>Status</th>
-                            <th className="text-right">Actions</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Name</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">API Key (ID)</th>
+                            <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="py-4 px-6 text-right text-[11px] font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                         {apiData.credentials?.length === 0 && (
                             <tr><td colSpan="4" className="p-8 text-center text-gray-500" style={{ fontSize: '14px' }}>No credentials generated yet.</td></tr>
                         )}
@@ -435,13 +439,13 @@ const WorkspaceApiDetails = () => {
                             <p className="text-gray-600 text-sm mb-4">
                                 This API requires an active API Key and Secret. You must generate a credential in the Credentials tab. The secret is displayed only once during generation—store it securely. Revoked credentials will be instantly denied access.
                             </p>
-                            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                                <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 border-b border-gray-200">Required Headers</div>
-                                <div className="p-4 relative">
-                                    <pre className="text-sm font-mono text-gray-800 m-0">
+                            <div className="bg-gray-50 border border-gray-200 overflow-hidden" style={{ borderRadius: '12px' }}>
+                                <div className="bg-gray-100 font-bold text-gray-500 border-b border-gray-200" style={{ padding: '8px 16px', fontSize: '12px' }}>Required Headers</div>
+                                <div style={{ padding: '16px', position: 'relative' }}>
+                                    <pre className="font-mono text-gray-800 m-0" style={{ fontSize: '14px' }}>
 {`X-API-Key: <your-api-key>
 X-API-Secret: <your-api-secret>`}</pre>
-                                    <button onClick={() => handleCopy(`X-API-Key: <your-api-key>\nX-API-Secret: <your-api-secret>`)} className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm">
+                                    <button onClick={() => handleCopy(`X-API-Key: <your-api-key>\nX-API-Secret: <your-api-secret>`)} className="text-gray-400 hover:text-gray-700 bg-white border border-gray-200 shadow-sm transition-colors" style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px', borderRadius: '6px' }}>
                                         <Copy size={14} />
                                     </button>
                                 </div>
@@ -456,11 +460,11 @@ X-API-Secret: <your-api-secret>`}</pre>
                                 This API is protected by MyDevice Session Authentication. You must obtain a token by logging into the MyDevice Platform (<code>/api/auth/login</code>) or a specific Workspace Application (<code>/api/applications/&lt;app_id&gt;/auth/login</code>).
                                 If you already have an active MyDevice session, no second login is required.
                             </p>
-                            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                                <div className="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 border-b border-gray-200">Required Header</div>
-                                <div className="p-4 relative">
-                                    <pre className="text-sm font-mono text-gray-800 m-0">Authorization: Bearer &lt;jwt_token&gt;</pre>
-                                    <button onClick={() => handleCopy(`Authorization: Bearer <jwt_token>`)} className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-700 bg-white border border-gray-200 rounded-md shadow-sm">
+                            <div className="bg-gray-50 border border-gray-200 overflow-hidden" style={{ borderRadius: '12px' }}>
+                                <div className="bg-gray-100 font-bold text-gray-500 border-b border-gray-200" style={{ padding: '8px 16px', fontSize: '12px' }}>Required Header</div>
+                                <div style={{ padding: '16px', position: 'relative' }}>
+                                    <pre className="font-mono text-gray-800 m-0" style={{ fontSize: '14px' }}>Authorization: Bearer &lt;jwt_token&gt;</pre>
+                                    <button onClick={() => handleCopy(`Authorization: Bearer <jwt_token>`)} className="text-gray-400 hover:text-gray-700 bg-white border border-gray-200 shadow-sm transition-colors" style={{ position: 'absolute', top: '16px', right: '16px', padding: '6px', borderRadius: '6px' }}>
                                         <Copy size={14} />
                                     </button>
                                 </div>
@@ -477,9 +481,9 @@ X-API-Secret: <your-api-secret>`}</pre>
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
                     <h4 className="text-lg font-bold text-gray-900 mb-4">Quick Start</h4>
                     <p className="text-gray-600 text-sm mb-4">All routes documented below are relative to this Base URL.</p>
-                    <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl p-4">
-                        <code className="text-sm font-mono text-gray-900 select-all">{baseUrl}</code>
-                        <button onClick={() => handleCopy(baseUrl)} className="p-2 text-gray-500 hover:text-gray-800 bg-white border border-gray-200 rounded-lg shadow-sm transition-colors">
+                    <div className="bg-gray-50 border border-gray-200" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderRadius: '12px' }}>
+                        <code className="font-mono text-gray-900 select-all" style={{ fontSize: '14px' }}>{baseUrl}</code>
+                        <button onClick={() => handleCopy(baseUrl)} className="text-gray-500 hover:text-gray-800 bg-white border border-gray-200 shadow-sm transition-colors" style={{ padding: '8px', borderRadius: '8px' }}>
                             <Copy size={16} />
                         </button>
                     </div>
@@ -943,7 +947,7 @@ ${requestHeaders}`}
                                         : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-t-lg'
                                     }
                                 `}
-                                style={{ fontSize: '14px', backgroundColor: isActive ? '#eff6ff' : 'transparent' }}
+                                style={{ fontSize: '14px', backgroundColor: isActive ? '#eff6ff' : 'transparent', cursor: 'pointer' }}
                             >
                                 <Icon size={18} className={isActive ? 'text-blue-600' : 'text-gray-400'} strokeWidth={2.5} style={{ marginRight: '0.625rem' }} />
                                 {tab.label}

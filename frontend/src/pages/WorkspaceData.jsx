@@ -124,35 +124,62 @@ export default function WorkspaceData() {
                         <Link 
                             key={device.device_id}
                             to={`/workspaces/${workspaceId}/data/${device.device_id}`}
-                            className="group block bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-blue/40 transition-all relative overflow-hidden"
+                            className="group block transition-all relative overflow-hidden"
+                            style={{ 
+                              background: '#fff', borderRadius: '16px', padding: '20px',
+                              boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)', border: '1px solid #e2e8f0',
+                              cursor: 'pointer'
+                            }}
                         >
-                            <div className="absolute top-0 left-0 w-1 h-full bg-transparent group-hover:bg-blue transition-colors"></div>
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`w-10 h-10 rounded-lg flex-center ${isOnline ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-500'}`}>
-                                    <Server size={20} />
+                                <div style={{
+                                  width: '40px', height: '40px', flexShrink: 0,
+                                  borderRadius: '50%',
+                                  border: isOnline ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                                  background: isOnline ? '#ecfdf5' : '#f8fafc',
+                                  color: isOnline ? '#059669' : '#64748b',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  transition: 'all 0.2s'
+                                }}>
+                                    <Server size={18} />
                                 </div>
-                                <div 
-                                    className={`flex items-center rounded border shrink-0 ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-50 text-slate-600 border-slate-200'}`}
-                                    style={{ padding: '0.25rem 0.625rem', gap: '0.375rem', width: 'max-content' }}
-                                >
-                                    <div 
-                                        className={`rounded-full shrink-0 ${isOnline ? 'bg-green-500' : 'bg-slate-400'}`}
-                                        style={{ width: '0.375rem', height: '0.375rem' }}
-                                    ></div>
-                                    <span className="text-xs font-medium whitespace-nowrap leading-none" style={{ lineHeight: 1 }}>{isOnline ? 'Online' : 'Offline'}</span>
+                                <div style={{ 
+                                  display: 'flex', alignItems: 'center', 
+                                  background: isOnline ? '#ecfdf5' : '#f1f5f9', 
+                                  color: isOnline ? '#059669' : '#64748b', 
+                                  padding: '4px 12px', borderRadius: '9999px', 
+                                  fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                  letterSpacing: '0.05em', border: isOnline ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                                }}>
+                                    <div style={{ 
+                                      width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', 
+                                      background: isOnline ? '#10b981' : '#94a3b8' 
+                                    }}></div>
+                                    {isOnline ? 'Online' : 'Offline'}
                                 </div>
                             </div>
                             
-                            <h4 className="font-bold text-lg text-main mb-1 truncate group-hover:text-blue transition-colors">{device.name}</h4>
-                            <div className="font-mono text-xs text-muted mb-4 bg-slate-50 px-2 py-1 rounded w-max border border-slate-100">{device.device_id}</div>
+                            <h4 style={{ fontWeight: 800, fontSize: '18px', color: '#0f172a', marginBottom: '6px', letterSpacing: '-0.01em' }} className="truncate group-hover:text-blue-600 transition-colors">
+                              {device.name}
+                            </h4>
+                            <div style={{ marginBottom: '16px' }}>
+                              <span style={{ 
+                                background: '#f8fafc', color: '#475569', 
+                                padding: '4px 12px', borderRadius: '9999px', 
+                                fontSize: '11px', fontWeight: 700, letterSpacing: '0.02em',
+                                fontFamily: 'monospace', border: '1px solid #e2e8f0'
+                              }}>
+                                {device.device_id}
+                              </span>
+                            </div>
                             
-                            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
-                                <div className="text-xs text-muted flex items-center gap-1.5">
-                                    <Activity size={14} />
+                            <div style={{ paddingTop: '16px', borderTop: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div style={{ fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
+                                    <Activity size={14} style={{ opacity: 0.7 }} />
                                     {hasNeverConnected ? 'Never connected' : new Date(device.last_seen).toLocaleDateString()}
                                 </div>
-                                <div className="text-sm font-medium text-blue opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transform flex items-center">
-                                    View Data <span className="ml-1">→</span>
+                                <div style={{ fontSize: '12px', fontWeight: 600, color: '#0284c7' }} className="group-hover:translate-x-1 transition-transform">
+                                    View Data &rarr;
                                 </div>
                             </div>
                         </Link>

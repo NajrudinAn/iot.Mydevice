@@ -72,14 +72,14 @@ export default function WorkspaceUsers() {
           {error}
         </div>
       ) : (
-        <div className="table-container">
-          <table className="ds-table">
-            <thead>
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+            <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                  <th className="px-6 py-4 font-bold tracking-wider">User</th>
-                  <th className="px-6 py-4 font-bold tracking-wider">Role & Access</th>
-                  <th className="px-6 py-4 font-bold tracking-wider">Application</th>
-                  <th className="px-6 py-4 font-bold tracking-wider">Status</th>
+                  <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">User</th>
+                  <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Role & Access</th>
+                  <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Application</th>
+                  <th className="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -106,7 +106,7 @@ export default function WorkspaceUsers() {
                       <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex-align gap-3">
-                            <div className="h-10 w-10 rounded-full bg-blue-100 text-blue flex-center font-bold text-sm">
+                            <div className="rounded-full bg-blue-100 text-blue flex-center font-bold text-sm" style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px', flexShrink: 0 }}>
                               {user.name ? user.name.substring(0, 2).toUpperCase() : user.email.substring(0, 2).toUpperCase()}
                             </div>
                             <div>

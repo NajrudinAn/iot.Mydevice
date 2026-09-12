@@ -159,25 +159,77 @@ export default function UserPortal() {
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.6rem 1.25rem;
-          border: 1px solid transparent;
+          padding: 0.75rem 1.5rem;
+          border: none;
           background: transparent;
-          font-weight: 500;
-          font-size: 0.9rem;
+          font-weight: 600;
+          font-size: 0.9375rem;
           cursor: pointer;
-          border-radius: var(--radius-sm);
-          transition: all 0.2s;
-          color: var(--text-muted);
+          border-radius: 10px 10px 0 0;
+          transition: all 0.2s ease;
+          color: #64748b;
+          position: relative;
+        }
+        .tab-button::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: transparent;
+          border-radius: 3px 3px 0 0;
+          transition: all 0.2s ease;
         }
         .tab-button.active {
-          color: var(--blue);
-          border-bottom: 2px solid var(--blue);
-          border-bottom-left-radius: 0;
-          border-bottom-right-radius: 0;
+          color: #2563eb;
+        }
+        .tab-button.active::after {
+          background: #2563eb;
         }
         .tab-button:hover:not(.active) {
-          background: rgba(0,0,0,0.02);
-          color: var(--text-main);
+          color: #334155;
+          background: rgba(15, 23, 42, 0.02);
+        }
+        
+        /* Premium Card Styles */
+        .portal-glass-card {
+          background: #ffffff;
+          border-radius: 20px;
+          box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.02);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          overflow: hidden;
+          padding: 2rem;
+        }
+        .portal-item-card {
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          transition: all 0.25s ease;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          cursor: pointer;
+        }
+        .grid .portal-item-card {
+          min-height: 230px;
+        }
+        .portal-item-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+          border-color: rgba(59, 130, 246, 0.3);
+        }
+        .ds-icon-premium {
+          width: 48px;
+          height: 48px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%);
+          border: 1px solid rgba(59,130,246,0.2);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #2563eb;
         }
       `}</style>
 
@@ -219,7 +271,7 @@ export default function UserPortal() {
 
         {isCompletelyEmpty ? (
           <div className="flex-center p-16">
-            <div className="glass-card text-center p-12 max-w-lg w-full flex-column flex-center">
+            <div className="portal-glass-card text-center p-12 max-w-lg w-full flex-column flex-center">
               <div className="ds-icon-box bg-blue-light text-blue mb-6" style={{ width: '80px', height: '80px', borderRadius: '50%' }}>
                 <Folder size={40} />
               </div>
@@ -234,10 +286,10 @@ export default function UserPortal() {
           <>
             {/* My Workspaces Section */}
             {activeTab === 'workspaces' && (
-            <div id="workspaces-section" className="glass-card mb-8">
+            <div id="workspaces-section" className="portal-glass-card mb-8">
               <div className="flex-between mb-8">
-                <div className="flex-align gap-3">
-                  <div className="ds-icon-box bg-blue-light text-blue">
+                <div className="flex-align gap-4">
+                  <div className="ds-icon-premium">
                     <Folder size={24} />
                   </div>
                   <div>
@@ -257,11 +309,11 @@ export default function UserPortal() {
                 ) : (
                   workspaces.map(ws => (
                     viewMode === 'grid' ? (
-                      <div key={ws.id} className="glass-card hover:-translate-y-1 hover:shadow-md transition-all duration-200 p-0 flex-column overflow-hidden">
-                        <div className="p-5">
-                          <div className="flex-between mb-4">
-                            <div className="ds-icon-box bg-blue-light text-blue" style={{ width: 36, height: 36 }}>
-                              <Folder size={18} />
+                      <div key={ws.id} className="portal-item-card p-0 flex-column overflow-hidden" onClick={() => navigateToWorkspaceApps(ws.id)}>
+                        <div className="p-8 flex-1 flex-column">
+                          <div className="flex-between mb-6">
+                            <div className="ds-icon-box bg-blue-light text-blue" style={{ width: 44, height: 44, borderRadius: '12px' }}>
+                              <Folder size={22} />
                             </div>
                             <div className="flex-align gap-1">
                               <Button 
@@ -281,74 +333,57 @@ export default function UserPortal() {
                             </div>
                           </div>
                           
-                          <h3 className="font-bold text-base mb-1 truncate text-main">{ws.name}</h3>
-                          <p className="text-xs text-muted truncate mb-5">{ws.description || 'Smart farming solutions and monitoring'}</p>
+                          <h3 className="font-bold text-lg mb-2 truncate text-main">{ws.name}</h3>
+                          <p className="text-sm text-muted line-clamp-2 mb-auto pb-6">{ws.description || 'Smart farming solutions and monitoring'}</p>
                           
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="flex-align gap-2">
-                              <div className="ds-icon-box bg-gray-50" style={{ width: 32, height: 32 }}>
-                                  <Box size={14} className="text-blue" />
+                          <div className="grid grid-cols-2 gap-4 mt-auto">
+                            <div className="flex-align gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                              <div className="ds-icon-box bg-white shadow-sm" style={{ width: 36, height: 36, borderRadius: '8px' }}>
+                                  <Box size={16} className="text-blue" />
                               </div>
                               <div>
-                                <div className="font-bold text-base leading-none mb-1 text-main">{ws.application_count ?? 0}</div>
-                                <div className="text-[10px] text-muted tracking-wide uppercase">Apps</div>
+                                <div className="font-bold text-lg leading-none mb-1 text-main">{ws.application_count ?? 0}</div>
+                                <div className="text-[11px] text-muted tracking-wide uppercase font-semibold">Apps</div>
                               </div>
                             </div>
-                            <div className="flex-align gap-2">
-                              <div className="ds-icon-box bg-gray-50" style={{ width: 32, height: 32 }}>
-                                  <Smartphone size={14} className="text-green" />
+                            <div className="flex-align gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                              <div className="ds-icon-box bg-white shadow-sm" style={{ width: 36, height: 36, borderRadius: '8px' }}>
+                                  <Smartphone size={16} className="text-green" />
                               </div>
                               <div>
-                                <div className="font-bold text-base leading-none mb-1 text-main">{ws.device_count ?? 0}</div>
-                                <div className="text-[10px] text-muted tracking-wide uppercase">Devices</div>
+                                <div className="font-bold text-lg leading-none mb-1 text-main">{ws.device_count ?? 0}</div>
+                                <div className="text-[11px] text-muted tracking-wide uppercase font-semibold">Devices</div>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="mt-auto border-t border-gray-100 bg-gray-50 p-2 flex justify-end">
-                          <Button 
-                            variant="ghost" 
-                            className="w-full text-blue hover:bg-blue-light justify-center text-sm"
-                            onClick={() => navigateToWorkspaceApps(ws.id)}
-                          >
-                            Open Workspace <ArrowRight size={14} />
-                          </Button>
-                        </div>
                       </div>
                     ) : (
-                      <div key={ws.id} className="glass-card hover:-translate-y-1 hover:shadow-md transition-all duration-200 p-4 flex-between gap-4" style={{ flexDirection: 'row' }}>
+                      <div key={ws.id} className="portal-item-card p-5 flex-between gap-4" style={{ flexDirection: 'row' }} onClick={() => navigateToWorkspaceApps(ws.id)}>
                         <div className="flex-align gap-4 min-w-0 flex-1">
-                          <div className="ds-icon-box bg-blue-light text-blue shrink-0">
+                          <div className="ds-icon-box bg-blue-light text-blue shrink-0" style={{ width: 44, height: 44, borderRadius: '12px' }}>
                             <Folder size={20} />
                           </div>
                           <div className="min-w-0">
                             <h3 className="font-bold text-base mb-0.5 truncate text-main">{ws.name}</h3>
-                            <p className="text-xs text-muted truncate">{ws.description || 'Smart farming solutions and monitoring'}</p>
+                            <p className="text-sm text-muted truncate">{ws.description || 'Smart farming solutions and monitoring'}</p>
                           </div>
                         </div>
 
                         <div className="flex-align gap-6 shrink-0 mr-4">
                           <div className="flex-align gap-2">
-                              <Box size={14} className="text-blue" />
+                              <Box size={16} className="text-blue" />
                               <span className="font-bold text-sm">{ws.application_count ?? 0}</span>
-                              <span className="text-xs text-muted">Apps</span>
+                              <span className="text-xs text-muted uppercase font-semibold">Apps</span>
                           </div>
                           <div className="flex-align gap-2">
-                              <Smartphone size={14} className="text-green" />
+                              <Smartphone size={16} className="text-green" />
                               <span className="font-bold text-sm">{ws.device_count ?? 0}</span>
-                              <span className="text-xs text-muted">Devices</span>
+                              <span className="text-xs text-muted uppercase font-semibold">Devices</span>
                           </div>
                         </div>
 
                         <div className="flex-align gap-2 shrink-0">
-                          <Button 
-                            variant="ghost" 
-                            className="text-blue hover:bg-blue-light text-sm px-3 py-1.5"
-                            onClick={() => navigateToWorkspaceApps(ws.id)}
-                          >
-                            Open
-                          </Button>
-                          <div className="w-px h-6 bg-gray-200 mx-1"></div>
                           <Button 
                             variant="icon" 
                             icon={Edit2} 
@@ -387,10 +422,10 @@ export default function UserPortal() {
 
             {/* Shared Applications Section */}
             {activeTab === 'applications' && (
-            <div id="shared-section" className="glass-card mb-8">
+            <div id="shared-section" className="portal-glass-card mb-8">
               <div className="flex-between mb-8">
-                <div className="flex-align gap-3">
-                  <div className="ds-icon-box bg-blue-light text-blue">
+                <div className="flex-align gap-4">
+                  <div className="ds-icon-premium" style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%)', borderColor: 'rgba(139,92,246,0.2)', color: '#8b5cf6' }}>
                     <Users size={24} />
                   </div>
                   <div>
@@ -401,7 +436,7 @@ export default function UserPortal() {
               </div>
 
               {sharedApplications.length === 0 && !loading ? (
-                <div className="text-center p-12 border border-dashed border-gray-200 rounded-lg bg-gray-50">
+                <div className="text-center border border-dashed border-gray-200 bg-gray-50" style={{ padding: '64px 24px', borderRadius: '16px' }}>
                   <Users size={32} className="text-muted mx-auto mb-3" />
                   <h3 className="text-base font-bold text-main mb-1">No shared applications</h3>
                   <p className="text-muted text-sm">Applications shared with you will appear here.</p>
@@ -412,33 +447,26 @@ export default function UserPortal() {
                     [...Array(2)].map((_, i) => <SkeletonCard key={i} />)
                   ) : (
                     sharedApplications.map((app, idx) => (
-                      <div key={app.id} className="glass-card hover:-translate-y-1 hover:shadow-md transition-all duration-200 p-0 flex-column overflow-hidden">
-                        <div className="p-6">
-                          <div className="flex-between mb-5">
-                            <div className={`ds-icon-box ${getIconClass(idx)}`}>
-                              <Box size={20} />
+                      <div key={app.id} className="portal-item-card p-0 flex-column overflow-hidden" onClick={() => setSelectedSharedApp(app)}>
+                        <div className="p-8 flex-1 flex-column">
+                          <div className="flex-between mb-6">
+                            <div className={`ds-icon-box ${getIconClass(idx)}`} style={{ width: 44, height: 44, borderRadius: '12px' }}>
+                              <Box size={22} />
                             </div>
-                            <span className={`badge ${getRoleBadgeClass(app.user_role)} uppercase tracking-wide`}>
+                            <span className={`badge ${getRoleBadgeClass(app.user_role)} uppercase tracking-wide px-3 py-1`}>
                               {app.user_role?.toLowerCase() || 'Viewer'}
                             </span>
                           </div>
                           
-                          <h3 className="font-bold text-lg mb-1 truncate text-main">{app.name}</h3>
-                          <p className="text-sm text-muted truncate mb-4">Shared by: {app.workspace_owner_name || 'Admin User'}</p>
-                        </div>
-                        <div className="flex-between mt-auto border-t border-gray-100 bg-gray-50 p-4">
-                          <div className="text-xs flex-align gap-2 text-muted truncate max-w-[60%]" title={app.workspace_name}>
-                            <Building size={14} className="flex-shrink-0" /> 
-                            <span className="truncate">Workspace: {app.workspace_name}</span>
+                          <h3 className="font-bold text-xl mb-2 truncate text-main">{app.name}</h3>
+                          <p className="text-sm text-muted truncate mb-auto pb-6">Shared by: {app.workspace_owner_name || 'Admin User'}</p>
+                          
+                          <div className="mt-auto p-4 rounded-xl bg-gray-50 border border-gray-100 flex-align gap-3 text-sm text-muted truncate">
+                            <div className="ds-icon-box bg-white shadow-sm shrink-0" style={{ width: 32, height: 32, borderRadius: '8px' }}>
+                              <Building size={14} className="text-indigo-500" />
+                            </div>
+                            <span className="truncate font-medium text-main">Workspace: {app.workspace_name}</span>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-blue hover:bg-blue-light flex-shrink-0"
-                            onClick={() => setSelectedSharedApp(app)}
-                          >
-                            Open <ArrowRight size={14} />
-                          </Button>
                         </div>
                       </div>
                     ))

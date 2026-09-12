@@ -181,8 +181,8 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                 )}
             </div>
             <div className="flex gap-3">
-                <button type="button" onClick={handleClose} className="btn btn-secondary px-6 py-2.5">Cancel</button>
-                <button type="submit" form="route-form" disabled={loading || !isFormValid} className="ds-btn px-6 py-2.5">{loading ? 'Saving...' : 'Save Route'}</button>
+                <button type="button" onClick={handleClose} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">Cancel</button>
+                <button type="submit" form="route-form" disabled={loading || !isFormValid} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm">{loading ? 'Saving...' : 'Save Route'}</button>
             </div>
         </div>
     );
@@ -196,20 +196,20 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                 className="max-w-2xl w-full !p-0 !overflow-hidden bg-white"
                 footer={modalFooter}
             >
-            <div className="p-1 max-h-[75vh] overflow-y-auto custom-scrollbar">
-                <form id="route-form" onSubmit={handleSubmit} className="space-y-4">
+            <div className="p-2 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <form id="route-form" onSubmit={handleSubmit} className="space-y-6">
                     
                     {conflictError && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2 mb-4">
                             <span className="text-sm font-bold">{conflictError}</span>
                         </div>
                     )}
 
                     {/* Basic Info */}
-                    <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-                        <div className="flex items-start gap-4 mb-4">
-                            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-500 shrink-0">
-                                <Layers size={22} />
+                    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="p-2 bg-blue-50 text-blue-500 rounded-lg shrink-0">
+                                <Layers size={18} />
                             </div>
                             <div>
                                 <h4 className="text-[15px] font-bold text-gray-900 leading-none mb-1.5">Basic Information</h4>
@@ -217,24 +217,26 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                             </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 mt-4" style={{ gap: '20px' }}>
                             <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-1.5">Route Name <span className="text-red-500">*</span></label>
+                                <label className="block text-[13px] font-bold text-gray-700 mb-1.5" style={{ color: '#374151' }}>Route Name <span style={{ color: '#ef4444' }}>*</span></label>
                                 <input
                                     type="text" required placeholder="e.g. Current Data"
                                     value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
-                                    className="form-input"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium placeholder-gray-400"
+                                    style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb', outline: 'none' }}
                                 />
-                                <p className="text-[11px] text-gray-400 mt-1">Use a short, descriptive name (lowercase, hyphens allowed).</p>
+                                <p className="text-[11px] text-gray-400 mt-1" style={{ color: '#9ca3af', marginTop: '6px' }}>Use a short, descriptive name (lowercase, hyphens allowed).</p>
                             </div>
                             <div>
-                                <label className="block text-sm font-bold text-gray-900 mb-1.5">Description (Optional)</label>
+                                <label className="block text-[13px] font-bold text-gray-700 mb-1.5" style={{ color: '#374151' }}>Description (Optional)</label>
                                 <input
                                     type="text" placeholder="e.g. Fetches real-time sensor data"
                                     value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
-                                    className="form-input"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium placeholder-gray-400"
+                                    style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb', outline: 'none' }}
                                 />
-                                <p className="text-[11px] text-gray-400 mt-1 flex justify-between">
+                                <p className="text-[11px] text-gray-400 mt-1 flex justify-between" style={{ color: '#9ca3af', marginTop: '6px' }}>
                                     <span>Briefly describe what this route does.</span>
                                     <span>{formData.description.length}/200</span>
                                 </p>
@@ -243,10 +245,10 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                     </div>
 
                     {/* Execution Rules */}
-                    <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm">
-                        <div className="flex items-start gap-4 mb-4">
-                            <div className="p-2.5 bg-purple-light rounded-xl text-purple shrink-0">
-                                <Command size={22} />
+                    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg shrink-0">
+                                <Command size={18} />
                             </div>
                             <div>
                                 <h4 className="text-[15px] font-bold text-gray-900 leading-none mb-1.5">Execution Rules</h4>
@@ -254,11 +256,12 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                             </div>
                         </div>
                         
-                        <div className="mb-5">
-                            <label className="block text-sm font-bold text-gray-900 mb-1.5">Purpose <span className="text-red-500">*</span></label>
+                        <div className="mb-5 mt-4">
+                            <label className="block text-[13px] font-bold text-gray-700 mb-1.5" style={{ color: '#374151' }}>Purpose <span style={{ color: '#ef4444' }}>*</span></label>
                             <select 
                                 value={formData.purpose} onChange={e => setFormData({...formData, purpose: e.target.value})}
-                                className="form-select"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-gray-900 appearance-none cursor-pointer"
+                                style={{ backgroundColor: '#f9fafb', borderColor: '#e5e7eb', outline: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 16px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em' }}
                             >
                                 <option value="" disabled>Select a purpose...</option>
                                 <option value="CURRENT_DATA">Current Data</option>
@@ -277,7 +280,7 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                                     <label className="block text-sm font-bold text-gray-900 mb-1">Device Scope</label>
                                     <p className="text-xs text-gray-500 mb-3">Choose which devices this route will apply to.</p>
                                     
-                                    <div className="flex flex-col gap-2 mb-3">
+                                    <div className="flex flex-col" style={{ gap: '8px', marginBottom: '16px' }}>
                                         {[
                                             { id: 'SINGLE', title: 'Single Device', desc: 'Apply this route to one specific device.' },
                                             { id: 'SELECTED', title: 'Selected Devices', desc: 'Apply this route to multiple selected devices.' },
@@ -287,27 +290,34 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                                             return (
                                                 <label 
                                                     key={scope.id} 
-                                                    className="flex items-start gap-3 p-3 cursor-pointer rounded-xl border transition-all"
-                                                    style={{
-                                                        borderColor: isSelected ? 'var(--primary)' : 'var(--border-color)',
-                                                        backgroundColor: isSelected ? 'var(--primary-transparent)' : '#ffffff'
+                                                    className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                                    style={{ 
+                                                        borderColor: isSelected ? '#3b82f6' : '#f3f4f6', 
+                                                        backgroundColor: isSelected ? '#eff6ff' : '#ffffff'
                                                     }}
                                                 >
-                                                    <div className="flex items-center h-4 mt-0.5">
-                                                        <input 
-                                                            type="radio" 
-                                                            className="w-4 h-4 shrink-0" 
-                                                            style={{ accentColor: 'var(--primary)' }}
-                                                            name="dscope" 
-                                                            value={scope.id} 
-                                                            checked={isSelected} 
-                                                            onChange={() => setFormData({...formData, device_scope: scope.id, devices: []})} 
-                                                        />
+                                                    <div className="flex items-center">
+                                                        <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                                             style={{ 
+                                                                 borderColor: isSelected ? '#3b82f6' : '#d1d5db', 
+                                                                 backgroundColor: isSelected ? '#3b82f6' : 'transparent',
+                                                                 marginRight: '12px'
+                                                             }}>
+                                                            {isSelected && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <span className="block text-sm font-bold" style={{ color: isSelected ? '#1e3a8a' : '#111827' }}>{scope.title}</span>
+                                                            <span className="block text-[13px] mt-0.5" style={{ color: '#6b7280' }}>{scope.desc}</span>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <span className="block text-sm font-bold text-gray-900 leading-none">{scope.title}</span>
-                                                        <span className="block text-xs text-gray-500 mt-1">{scope.desc}</span>
-                                                    </div>
+                                                    <input 
+                                                        type="radio" 
+                                                        className="hidden" 
+                                                        name="dscope" 
+                                                        value={scope.id} 
+                                                        checked={isSelected} 
+                                                        onChange={() => setFormData({...formData, device_scope: scope.id, devices: []})} 
+                                                    />
                                                 </label>
                                             );
                                         })}
@@ -321,18 +331,19 @@ const CreateRouteModal = ({ workspaceId, existingRoute, onClose, onSuccess }) =>
                                         )}
 
                                         {formData.device_scope === 'SINGLE' && (
-                                            <div>
+                                            <div style={{ marginTop: '8px' }}>
                                                 <select 
                                                     value={formData.devices[0] || ''} 
                                                     onChange={e => toggleDevice(e.target.value, true)}
-                                                    className="form-select"
+                                                    className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-gray-900 appearance-none cursor-pointer"
+                                                    style={{ borderColor: '#e5e7eb', outline: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em' }}
                                                 >
                                                     <option value="" disabled>Select a device...</option>
                                                     {devices.map(d => (
                                                         <option key={d.id} value={d.id}>{d.name} ({d.device_id})</option>
                                                     ))}
                                                 </select>
-                                                <p className="text-[11px] text-gray-400 mt-1">Select the device for this route.</p>
+                                                <p className="text-[11px] text-gray-400 mt-1" style={{ color: '#9ca3af', marginTop: '8px', marginBottom: '8px' }}>Select the device for this route.</p>
                                             </div>
                                         )}
                                         

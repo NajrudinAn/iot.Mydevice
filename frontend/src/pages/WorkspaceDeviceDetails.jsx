@@ -233,13 +233,17 @@ export default function WorkspaceDeviceDetails() {
               )}
               
               {!isEditingName && (
-                <span className={`badge ${device.status?.toUpperCase() === 'ONLINE' ? 'badge-success' : 'badge-neutral'}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-500' : 'bg-slate-400'}`}></span>
+                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
                   {device.status?.toUpperCase() === 'ONLINE' ? 'Online' : 'Offline'}
                 </span>
               )}
             </div>
-            <p className="font-mono text-sm text-muted">{device.device_id}</p>
+            <div className="mt-2">
+              <span className="font-mono text-[13px] text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-md font-medium tracking-wide shadow-sm">
+                {device.device_id}
+              </span>
+            </div>
           </div>
           <div>
             <Button variant="danger" icon={Trash2} onClick={handleDelete} loading={isDeleting}>Remove Device</Button>
@@ -251,7 +255,7 @@ export default function WorkspaceDeviceDetails() {
         
         {/* Row 1: Info and Status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 glass-panel p-6 flex-column border border-gray-100">
+          <div className="md:col-span-2 bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] border border-gray-100 p-6 flex-column hover:shadow-[0_8px_30px_-4px_rgba(15,23,42,0.08)] transition-shadow">
             <h3 className="font-bold text-main mb-6 flex-align gap-2">
               <Server size={18} className="text-blue" />
               Device Information
@@ -276,7 +280,7 @@ export default function WorkspaceDeviceDetails() {
             </div>
           </div>
 
-          <div className="md:col-span-1 glass-panel p-6 flex-column border border-gray-100">
+          <div className="md:col-span-1 bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] border border-gray-100 p-6 flex-column hover:shadow-[0_8px_30px_-4px_rgba(15,23,42,0.08)] transition-shadow">
             <h3 className="font-bold text-main mb-6 flex-align gap-2">
               <CheckCircle2 size={18} className="text-blue" />
               Status
@@ -307,7 +311,7 @@ export default function WorkspaceDeviceDetails() {
         </div>
 
         {/* Row 2: Capabilities / Commands */}
-        <div className="glass-panel p-6 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-[0_4px_20px_-4px_rgba(15,23,42,0.05)] border border-gray-100 p-6 flex-column hover:shadow-[0_8px_30px_-4px_rgba(15,23,42,0.08)] transition-shadow">
           <DeviceCommandPanel 
             workspaceId={workspaceId} 
             deviceId={deviceId} 

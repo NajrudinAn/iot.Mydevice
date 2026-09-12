@@ -8,7 +8,9 @@ export default function PortalLayout({ children }) {
   const navigate = useNavigate();
 
   return (
-    <div className="app-container" style={{ backgroundColor: 'var(--bg-base)' }}>
+    <div className="app-container" style={{ backgroundColor: '#f8fafc', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at top right, rgba(59,130,246,0.06) 0%, transparent 40%), radial-gradient(circle at bottom left, rgba(16,185,129,0.04) 0%, transparent 40%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none' }} />
       <header className="app-topbar" style={{ 
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
         backgroundColor: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)',
@@ -50,14 +52,21 @@ export default function PortalLayout({ children }) {
         </div>
       </header>
 
-      <main style={{ 
+      <style>{`
+        .hide-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
+      <main className="hide-scroll" style={{ 
         flex: 1,
         overflowY: 'auto',
         height: '100vh',
         width: '100%',
         maxWidth: '1200px',
         margin: '0 auto',
-        padding: '100px 2rem 2rem 2rem'
+        padding: '100px 2rem 2rem 2rem',
+        position: 'relative',
+        zIndex: 1,
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none'
       }}>
         {children}
       </main>

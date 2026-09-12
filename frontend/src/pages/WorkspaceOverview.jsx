@@ -106,45 +106,106 @@ export default function WorkspaceOverview() {
   const offlineCount = workspace?.offline_devices || 0;
 
   return (
-    <div>
-      <div className="flex-between mb-8">
+    <div style={{ position: 'relative', zIndex: 1 }}>
+      <style>{`
+        .overview-stat-card {
+          background: #ffffff;
+          border-radius: 16px;
+          box-shadow: 0 4px 15px -3px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
+          border: 1px solid rgba(226, 232, 240, 0.8);
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        @media (max-width: 768px) {
+          .overview-stat-card {
+            padding: 1rem;
+          }
+        }
+        .overview-stat-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px -5px rgba(15, 23, 42, 0.06);
+        }
+        .stat-icon-wrapper {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 0.75rem;
+        }
+        .stat-blue { background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(59,130,246,0.05) 100%); color: #2563eb; border: 1px solid rgba(59,130,246,0.2); }
+        .stat-green { background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(16,185,129,0.05) 100%); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .stat-red { background: linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+        .stat-purple { background: linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(139,92,246,0.05) 100%); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.2); }
+        
+        .stat-title {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 0.25rem;
+        }
+        .stat-value {
+          font-size: 2rem;
+          font-weight: 800;
+          color: #0f172a;
+          line-height: 1;
+        }
+      `}</style>
+      
+      <div className="flex-between mb-10">
         <div>
-          <h1 className="text-2xl font-bold mb-1" style={{ letterSpacing: '-0.025em', color: 'var(--text-main)' }}>Workspace Overview</h1>
-          <p className="text-muted" style={{ fontSize: '0.95rem' }}>High-level metrics and recent activity across your workspace.</p>
+          <h1 className="text-3xl font-bold mb-2" style={{ letterSpacing: '-0.025em', color: 'var(--text-main)' }}>Workspace Overview</h1>
+          <p className="text-muted" style={{ fontSize: '1rem' }}>High-level metrics and recent activity across your workspace.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
-          <div className="flex-between mb-2 z-10">
-            <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Total Devices</h3>
-            <Server size={18} className="text-blue" />
+        <div className="overview-stat-card">
+          <div className="flex-between items-start mb-1 z-10">
+            <div className="stat-icon-wrapper stat-blue">
+              <Server size={20} />
+            </div>
           </div>
-          <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : deviceCount}</div>
+          <h3 className="stat-title z-10">Total Devices</h3>
+          <div className="stat-value z-10">{loading ? <Skeleton className="h-10 w-16 mt-1" /> : deviceCount}</div>
         </div>
 
-        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
-          <div className="flex-between mb-2 z-10">
-            <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Online Devices</h3>
-            <Wifi size={18} className="text-green" />
+        <div className="overview-stat-card">
+          <div className="flex-between items-start mb-1 z-10">
+            <div className="stat-icon-wrapper stat-green">
+              <Wifi size={20} />
+            </div>
           </div>
-          <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : onlineCount}</div>
+          <h3 className="stat-title z-10">Online Devices</h3>
+          <div className="stat-value z-10">{loading ? <Skeleton className="h-10 w-16 mt-1" /> : onlineCount}</div>
         </div>
 
-        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
-          <div className="flex-between mb-2 z-10">
-            <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Offline Devices</h3>
-            <WifiOff size={18} className="text-red" />
+        <div className="overview-stat-card">
+          <div className="flex-between items-start mb-1 z-10">
+            <div className="stat-icon-wrapper stat-red">
+              <WifiOff size={20} />
+            </div>
           </div>
-          <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : offlineCount}</div>
+          <h3 className="stat-title z-10">Offline Devices</h3>
+          <div className="stat-value z-10">{loading ? <Skeleton className="h-10 w-16 mt-1" /> : offlineCount}</div>
         </div>
 
-        <div className="ds-card p-6 flex-col justify-center relative overflow-hidden">
-          <div className="flex-between mb-2 z-10">
-            <h3 className="text-sm font-bold text-muted uppercase tracking-wider">Applications</h3>
-            <LayoutGrid size={18} className="text-purple" />
+        <div className="overview-stat-card">
+          <div className="flex-between items-start mb-1 z-10">
+            <div className="stat-icon-wrapper stat-purple">
+              <LayoutGrid size={20} />
+            </div>
           </div>
-          <div className="text-3xl font-black text-main z-10">{loading ? <Skeleton className="h-8 w-16 mt-1" /> : applications.length}</div>
+          <h3 className="stat-title z-10">Applications</h3>
+          <div className="stat-value z-10">{loading ? <Skeleton className="h-10 w-16 mt-1" /> : applications.length}</div>
         </div>
       </div>
 

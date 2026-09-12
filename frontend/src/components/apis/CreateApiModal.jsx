@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createApi, getRoutes } from '../../api/apiManagement';
-import { X, Key } from 'lucide-react';
+import { X, Key, Package, Layers, Command, Check } from 'lucide-react';
 import Modal from '../ui/Modal';
 
 const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
@@ -68,15 +68,23 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
         }
     };
 
+    const modalTitle = (
+        <div className="flex items-start gap-4 -mt-1 -ml-1">
+            <div className="p-3 bg-purple-50 rounded-xl text-purple-600 shrink-0 flex items-center justify-center">
+                <Package size={24} />
+            </div>
+            <div className="flex flex-col">
+                <span className="text-xl font-bold text-gray-900 tracking-tight leading-none mb-1.5">Create New API Package</span>
+                <span className="text-sm font-medium text-gray-500">Group routes to issue API credentials.</span>
+            </div>
+        </div>
+    );
+
     const modalFooter = (
-        <div className="flex w-full justify-end items-center">
-            <div className="flex space-x-3">
-                <button type="button" onClick={handleClose} className="bg-white py-2 px-5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                    Cancel
-                </button>
-                <button type="submit" form="create-api-form" disabled={loading || !name || selectedRoutes.length === 0} className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    {loading ? 'Creating...' : 'Create API'}
-                </button>
+        <div className="flex justify-end w-full">
+            <div className="flex gap-3">
+                <button type="button" onClick={handleClose} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">Cancel</button>
+                <button type="submit" form="create-api-form" disabled={loading || !name || selectedRoutes.length === 0} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm">{loading ? 'Creating...' : 'Create API'}</button>
             </div>
         </div>
     );
@@ -85,116 +93,191 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
         <Modal 
             isOpen={true} 
             onClose={handleClose} 
-            title="Create New API Package"
-            className="max-w-2xl w-full"
+            title={modalTitle}
+            className="max-w-2xl w-full !p-0 !overflow-hidden bg-white"
             footer={modalFooter}
         >
-            <p className="text-sm text-gray-500 mb-6">Group routes to issue API credentials.</p>
-            <form id="create-api-form" onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">API Name</label>
-                            <input
-                                type="text"
-                                required
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                placeholder="e.g. Mobile App API v1"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description (Optional)</label>
-                            <textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                rows="2"
-                                placeholder="Describe the purpose of this API package..."
-                            />
-                        </div>
-
-                        <div>
-                            <h4 className="text-lg font-semibold text-gray-900 border-b pb-2 mb-4">Authentication</h4>
-                            <div className="space-y-3">
-                                <label className={`block border p-4 rounded-lg cursor-pointer transition-colors ${authMode === 'PUBLIC_READ_ONLY' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50 bg-white'}`}>
-                                    <div className="flex items-center">
-                                        <input type="radio" name="auth_mode" value="PUBLIC_READ_ONLY" checked={authMode === 'PUBLIC_READ_ONLY'} onChange={() => setAuthMode('PUBLIC_READ_ONLY')} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" />
-                                        <div className="ml-3">
-                                            <span className="block text-sm font-medium text-gray-900">Public (Read-Only)</span>
-                                            <span className="block text-sm text-gray-500 mt-1">No authentication required. Cannot execute commands.</span>
-                                        </div>
-                                    </div>
-                                </label>
-
-                                <label className={`block border p-4 rounded-lg cursor-pointer transition-colors ${authMode === 'APPLICATION_SESSION' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50 bg-white'}`}>
-                                    <div className="flex items-center">
-                                        <input type="radio" name="auth_mode" value="APPLICATION_SESSION" checked={authMode === 'APPLICATION_SESSION'} onChange={() => setAuthMode('APPLICATION_SESSION')} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" />
-                                        <div className="ml-3">
-                                            <span className="block text-sm font-medium text-gray-900">Application Session</span>
-                                            <span className="block text-sm text-gray-500 mt-1">Requires an authenticated user session.</span>
-                                        </div>
-                                    </div>
-                                </label>
-
-                                <label className={`block border p-4 rounded-lg cursor-pointer transition-colors ${authMode === 'API_KEY_SECRET' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:bg-gray-50 bg-white'}`}>
-                                    <div className="flex items-center">
-                                        <input type="radio" name="auth_mode" value="API_KEY_SECRET" checked={authMode === 'API_KEY_SECRET'} onChange={() => setAuthMode('API_KEY_SECRET')} className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" />
-                                        <div className="ml-3">
-                                            <span className="block text-sm font-medium text-gray-900">API Key + Secret</span>
-                                            <span className="block text-sm text-gray-500 mt-1">Requires programmatic API credentials.</span>
-                                        </div>
-                                    </div>
-                                </label>
+            <div className="p-2 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                <form id="create-api-form" onSubmit={handleSubmit} className="space-y-6">
+                    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="p-2 bg-blue-50 text-blue-500 rounded-lg shrink-0">
+                                <Layers size={18} />
+                            </div>
+                            <div>
+                                <h3 className="text-[15px] font-bold text-gray-900">Basic Information</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Give your API package a clear name and description.</p>
                             </div>
                         </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Include Routes</label>
-                            {availableRoutes.length === 0 ? (
-                                <div className="text-sm text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                    No routes available. Please create reusable routes first.
-                                </div>
-                            ) : (
-                                <div className="border border-gray-200 rounded-lg max-h-72 overflow-y-auto divide-y divide-gray-100 shadow-sm bg-white">
-                                    {availableRoutes.filter(route => {
-                                        if (authMode === 'PUBLIC_READ_ONLY') {
-                                            return route.purpose !== 'COMMAND' && route.method === 'GET';
-                                        }
-                                        return true;
-                                    }).length === 0 ? (
-                                        <div className="p-4 text-sm text-gray-500 italic text-center">
-                                            No routes available for the selected authentication mode. (Command/Write routes cannot be public).
-                                        </div>
-                                    ) : availableRoutes.filter(route => {
-                                        if (authMode === 'PUBLIC_READ_ONLY') {
-                                            return route.purpose !== 'COMMAND' && route.method === 'GET';
-                                        }
-                                        return true;
-                                    }).map(route => (
-                                        <label key={route.id} className="flex items-start p-3 hover:bg-indigo-50 cursor-pointer transition-colors group">
-                                            <div className="flex-shrink-0 pt-0.5">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedRoutes.includes(route.id)}
-                                                    onChange={() => toggleRoute(route.id)}
-                                                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                                />
-                                            </div>
-                                            <div className="ml-3 flex-1">
-                                                <span className="block text-sm font-medium text-gray-900 group-hover:text-indigo-900">{route.name}</span>
-                                                <span className="block text-xs text-gray-500 font-mono mt-1 bg-gray-100 group-hover:bg-white inline-block px-1.5 py-0.5 rounded"><span className="text-indigo-600 font-bold">{route.method}</span> /{route.endpoint_slug}</span>
-                                            </div>
-                                            <div className="flex-shrink-0">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                    {route.purpose}
-                                                </span>
-                                            </div>
-                                        </label>
-                                    ))}
-                                </div>
-                            )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 mt-4" style={{ gap: '20px' }}>
+                            <div>
+                                <label className="block text-[13px] font-bold text-gray-700 mb-1.5" style={{ color: '#374151' }}>API Name <span style={{ color: '#ef4444' }}>*</span></label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium placeholder-gray-400"
+                                    placeholder="e.g. Mobile App API v1"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[13px] font-bold text-gray-700 mb-1.5">Description (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-medium placeholder-gray-400"
+                                    placeholder="Briefly describe this API package..."
+                                />
+                            </div>
                         </div>
-                    </form>
+                    </div>
+
+                    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="p-2 bg-indigo-50 text-indigo-500 rounded-lg shrink-0">
+                                <Key size={18} />
+                            </div>
+                            <div>
+                                <h3 className="text-[15px] font-bold text-gray-900">Authentication Mode</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Define how clients authenticate against this API.</p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col" style={{ gap: '8px', marginBottom: '8px' }}>
+                            <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                style={{ 
+                                    borderColor: authMode === 'PUBLIC_READ_ONLY' ? '#3b82f6' : '#f3f4f6', 
+                                    backgroundColor: authMode === 'PUBLIC_READ_ONLY' ? '#eff6ff' : '#ffffff'
+                                }}>
+                                <div className="flex items-center">
+                                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                         style={{ 
+                                             borderColor: authMode === 'PUBLIC_READ_ONLY' ? '#3b82f6' : '#d1d5db', 
+                                             backgroundColor: authMode === 'PUBLIC_READ_ONLY' ? '#3b82f6' : 'transparent',
+                                             marginRight: '12px'
+                                         }}>
+                                        {authMode === 'PUBLIC_READ_ONLY' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="block text-sm font-bold" style={{ color: authMode === 'PUBLIC_READ_ONLY' ? '#1e3a8a' : '#111827' }}>Public (Read-Only)</span>
+                                        <span className="block text-[13px] mt-0.5" style={{ color: '#6b7280' }}>No authentication required. Cannot execute commands.</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                style={{ 
+                                    borderColor: authMode === 'APPLICATION_SESSION' ? '#3b82f6' : '#f3f4f6', 
+                                    backgroundColor: authMode === 'APPLICATION_SESSION' ? '#eff6ff' : '#ffffff'
+                                }}>
+                                <div className="flex items-center">
+                                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                         style={{ 
+                                             borderColor: authMode === 'APPLICATION_SESSION' ? '#3b82f6' : '#d1d5db', 
+                                             backgroundColor: authMode === 'APPLICATION_SESSION' ? '#3b82f6' : 'transparent',
+                                             marginRight: '12px'
+                                         }}>
+                                        {authMode === 'APPLICATION_SESSION' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="block text-sm font-bold" style={{ color: authMode === 'APPLICATION_SESSION' ? '#1e3a8a' : '#111827' }}>Application Session</span>
+                                        <span className="block text-[13px] mt-0.5" style={{ color: '#6b7280' }}>Requires an authenticated user session (cookies/tokens).</span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                style={{ 
+                                    borderColor: authMode === 'API_KEY_SECRET' ? '#3b82f6' : '#f3f4f6', 
+                                    backgroundColor: authMode === 'API_KEY_SECRET' ? '#eff6ff' : '#ffffff'
+                                }}>
+                                <div className="flex items-center">
+                                    <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                                         style={{ 
+                                             borderColor: authMode === 'API_KEY_SECRET' ? '#3b82f6' : '#d1d5db', 
+                                             backgroundColor: authMode === 'API_KEY_SECRET' ? '#3b82f6' : 'transparent',
+                                             marginRight: '12px'
+                                         }}>
+                                        {authMode === 'API_KEY_SECRET' && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                                    </div>
+                                    <div className="flex-1">
+                                        <span className="block text-sm font-bold" style={{ color: authMode === 'API_KEY_SECRET' ? '#1e3a8a' : '#111827' }}>API Key + Secret</span>
+                                        <span className="block text-[13px] mt-0.5" style={{ color: '#6b7280' }}>Requires programmatic API credentials in headers.</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div className="flex items-start gap-3 mb-5">
+                            <div className="p-2 bg-green-50 text-green-500 rounded-lg shrink-0">
+                                <Command size={18} />
+                            </div>
+                            <div>
+                                <h3 className="text-[15px] font-bold text-gray-900">Include Routes</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Select the reusable routes to expose in this API package.</p>
+                            </div>
+                        </div>
+                        {availableRoutes.length === 0 ? (
+                            <div className="text-[13px] font-medium text-gray-500 bg-gray-50 p-6 rounded-xl border border-gray-200 text-center">
+                                No routes available. Please create reusable routes first.
+                            </div>
+                        ) : (
+                            <div className="border border-gray-200 rounded-xl max-h-72 overflow-y-auto divide-y divide-gray-100 shadow-sm bg-gray-50/30 custom-scrollbar">
+                                {availableRoutes.filter(route => {
+                                    if (authMode === 'PUBLIC_READ_ONLY') {
+                                        return route.purpose !== 'COMMAND' && route.method === 'GET';
+                                    }
+                                    return true;
+                                }).length === 0 ? (
+                                    <div className="p-6 text-[13px] font-medium text-gray-500 text-center">
+                                        No routes available for the selected authentication mode.<br/>
+                                        <span className="text-xs mt-1 block">Command/Write routes cannot be public.</span>
+                                    </div>
+                                ) : availableRoutes.filter(route => {
+                                    if (authMode === 'PUBLIC_READ_ONLY') {
+                                        return route.purpose !== 'COMMAND' && route.method === 'GET';
+                                    }
+                                    return true;
+                                }).map(route => (
+                                    <label key={route.id} className="cursor-pointer transition-colors group hover:bg-white" style={{ display: 'flex', alignItems: 'center', padding: '14px', backgroundColor: selectedRoutes.includes(route.id) ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
+                                        <div className="flex-shrink-0 pt-0.5">
+                                            <div className="w-5 h-5 rounded-[6px] border-2 flex items-center justify-center shrink-0 transition-colors"
+                                                 style={{
+                                                     borderColor: selectedRoutes.includes(route.id) ? '#3b82f6' : '#d1d5db',
+                                                     backgroundColor: selectedRoutes.includes(route.id) ? '#3b82f6' : '#ffffff',
+                                                     marginRight: '12px'
+                                                 }}>
+                                                {selectedRoutes.includes(route.id) && <Check size={14} color="#ffffff" strokeWidth={3} />}
+                                            </div>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <span className="block text-[14px] font-bold" style={{ color: selectedRoutes.includes(route.id) ? '#1e3a8a' : '#111827' }}>{route.name}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
+                                                      style={{ 
+                                                          backgroundColor: route.method === 'GET' ? '#dcfce7' : '#dbeafe', 
+                                                          color: route.method === 'GET' ? '#15803d' : '#1d4ed8' 
+                                                      }}>
+                                                    {route.method}
+                                                </span>
+                                                <span className="text-xs text-gray-500 font-mono">/{route.endpoint_slug}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex-shrink-0">
+                                            <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider" style={{ backgroundColor: '#f3f4f6', color: '#4b5563' }}>
+                                                {route.purpose}
+                                            </span>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </form>
+            </div>
         </Modal>
     );
 };

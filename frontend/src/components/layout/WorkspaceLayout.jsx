@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
@@ -28,6 +28,24 @@ export default function WorkspaceLayout({ children }) {
       setSidebarOpen(prev => !prev);
     }
   };
+
+  const wsSwitcherRef = useRef(null);
+  const profileMenuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wsSwitcherRef.current && !wsSwitcherRef.current.contains(event.target)) {
+        setShowWsSwitcher(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const basePath = `/workspaces/${workspaceId}`;
 
@@ -135,8 +153,11 @@ export default function WorkspaceLayout({ children }) {
         </div>
       </aside>
 
-      <div className="app-main" style={{ backgroundColor: 'var(--bg-base)' }}>
-        <header className="app-topbar" style={{ backgroundColor: '#ffffff', borderBottom: '1px solid var(--border-color)' }}>
+      <div className="app-main" style={{ backgroundColor: '#f8fafc', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at top right, rgba(59,130,246,0.04) 0%, transparent 50%), radial-gradient(circle at bottom left, rgba(16,185,129,0.03) 0%, transparent 50%)', pointerEvents: 'none', zIndex: 0 }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, 0.02) 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none', zIndex: 0 }} />
+        
+        <header className="app-topbar" style={{ backgroundColor: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--border-color)', position: 'relative', zIndex: 40 }}>
           <div className="flex-1 flex-align gap-4">
             {/* Hamburger — mobile only, opens the slide-in drawer */}
             <button
@@ -148,10 +169,10 @@ export default function WorkspaceLayout({ children }) {
               <Menu size={20} />
             </button>
 
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} ref={wsSwitcherRef}>
               <button 
                 className="flex-align gap-2 rounded-full text-sm font-medium transition-colors" 
-                style={{ padding: '0.5rem 1rem', background: 'var(--bg-surface-elevated)', border: '1px solid transparent', color: 'var(--text-main)', cursor: 'pointer', maxWidth: '60vw' }}
+                style={{ padding: '0.5rem 1rem', background: 'var(--bg-surface-elevated)', border: '1px solid transparent', color: 'var(--text-main)', cursor: 'pointer', maxWidth: '60vw', borderRadius: '9999px' }}
                 onClick={() => setShowWsSwitcher(!showWsSwitcher)}
                 onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--border-color)'; }}
                 onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--bg-surface-elevated)'; }}
@@ -166,13 +187,14 @@ export default function WorkspaceLayout({ children }) {
               </button>
               
               {showWsSwitcher && workspaces.length > 0 && (
-                <div className="ds-card shadow-lg" style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '280px', maxWidth: '85vw', zIndex: 100, padding: '0.5rem' }}>
-                  <div className="text-xs text-muted font-bold uppercase mb-2 px-2 pt-1" style={{ letterSpacing: '0.05em' }}>Switch Workspace</div>
+                <div className="bg-white border border-gray-200 overflow-hidden" style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', width: '280px', maxWidth: '85vw', zIndex: 100, padding: '0.5rem', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
+                  <div className="text-[11px] text-gray-500 font-bold uppercase mb-2 px-3 pt-2" style={{ letterSpacing: '0.05em' }}>Switch Workspace</div>
                   <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {workspaces.map(ws => (
                       <div 
                         key={ws.id} 
-                        className="flex-align gap-3 p-2 hover-bg-gray-50 cursor-pointer rounded transition-colors"
+                        className="flex-align gap-3 p-3 hover:bg-gray-50 cursor-pointer transition-colors m-1"
+                        style={{ borderRadius: '12px' }}
                         onClick={() => {
                           setShowWsSwitcher(false);
                           if (ws.id !== workspaceId) {
@@ -180,10 +202,10 @@ export default function WorkspaceLayout({ children }) {
                           }
                         }}
                       >
-                        <div className="ds-icon-box bg-blue-50 text-primary shrink-0" style={{ width: '1.5rem', height: '1.5rem', borderRadius: '4px' }}>
-                          <Hexagon size={14} />
+                        <div className="bg-blue-50 text-blue-600 flex items-center justify-center shrink-0" style={{ width: '2rem', height: '2rem', borderRadius: '8px' }}>
+                          <Hexagon size={16} />
                         </div>
-                        <div className="truncate text-sm font-medium text-main">{ws.name}</div>
+                        <div className="truncate text-sm font-bold text-gray-900">{ws.name}</div>
                       </div>
                     ))}
                   </div>
@@ -193,7 +215,7 @@ export default function WorkspaceLayout({ children }) {
           </div>
           
           <div className="flex-align gap-4" style={{ marginLeft: '1rem' }}>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} ref={profileMenuRef}>
               <div 
                   className="flex-align gap-3" 
                   style={{ paddingLeft: '0.75rem', borderLeft: '1px solid var(--border-color)', cursor: 'pointer' }}
@@ -209,9 +231,10 @@ export default function WorkspaceLayout({ children }) {
               </div>
 
               {showProfileMenu && (
-                <div className="ds-card" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', width: '200px', zIndex: 100, padding: '0.5rem' }}>
+                <div className="bg-white border border-gray-200 overflow-hidden" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', width: '200px', zIndex: 100, padding: '0.5rem', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}>
                   <div 
-                    className="flex-align gap-2 p-2 hover-bg-gray-50 cursor-pointer rounded text-red text-sm font-medium"
+                    className="flex-align gap-2 p-3 hover:bg-red-50 cursor-pointer text-red-600 text-sm font-bold transition-colors m-1"
+                    style={{ borderRadius: '12px' }}
                     onClick={() => {
                       setShowProfileMenu(false);
                       logout();
@@ -226,7 +249,7 @@ export default function WorkspaceLayout({ children }) {
           </div>
         </header>
 
-        <main className="app-content">
+        <main className="app-content px-4 md:px-12 py-6 md:py-10" style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
           {children}
         </main>
       </div>

@@ -46,12 +46,17 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
     });
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+        <div className="w-full">
             {/* Header */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '1.5rem' }}>
-                <div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>Workspace APIs</h2>
-                    <p style={{ fontSize: '0.9rem', color: '#6b7280', marginTop: '4px' }}>Manage and configure your custom API packages.</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', background: '#f8fafc', padding: '1.5rem', borderRadius: '16px', border: '1px solid #f1f5f9', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', flex: '1 1 250px' }}>
+                    <div style={{ padding: '12px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', color: '#8b5cf6', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Package size={24} />
+                    </div>
+                    <div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827', letterSpacing: '-0.025em' }}>Workspace APIs</h2>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '4px' }}>Manage and configure your custom API packages.</p>
+                    </div>
                 </div>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
@@ -62,22 +67,24 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
             </div>
 
             {/* Search and Filters */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <div style={{ position: 'relative', flex: '1 1 200px', minWidth: '0' }}>
-                    <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} size={16} />
+                    <Search style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} size={16} />
                     <input
                         type="text"
                         placeholder="Search APIs by name or description..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ width: '100%', height: '42px', paddingLeft: '38px', paddingRight: '12px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box' }}
+                        style={{ width: '100%', height: '40px', paddingLeft: '44px', paddingRight: '16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '9999px', fontSize: '14px', color: '#0f172a', outline: 'none', transition: 'all 0.2s', boxSizing: 'border-box' }}
+                        onFocus={(e) => { e.target.style.background = '#fff'; e.target.style.borderColor = '#3b82f6'; e.target.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.1)'; }}
+                        onBlur={(e) => { e.target.style.background = '#f8fafc'; e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; }}
                     />
                 </div>
                 <div style={{ flexShrink: 0 }}>
                     <select 
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{ height: '42px', padding: '0 36px 0 14px', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '10px', fontSize: '0.875rem', fontWeight: 500, color: '#374151', outline: 'none', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 10px center', backgroundRepeat: 'no-repeat', backgroundSize: '1em 1em' }}
+                        style={{ height: '40px', padding: '0 36px 0 16px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '9999px', fontSize: '13px', fontWeight: 600, color: '#475569', outline: 'none', cursor: 'pointer', appearance: 'none', backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%236b7280\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundPosition: 'right 12px center', backgroundRepeat: 'no-repeat', backgroundSize: '1.2em 1.2em', minWidth: '130px' }}
                     >
                         <option>All Status</option>
                         <option>Active</option>
@@ -106,60 +113,68 @@ const ApisTab = ({ workspaceId, onSelectApi }) => {
                     </button>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
                     {filteredApis.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">No APIs match your search.</div>
+                        <div style={{ textAlign: 'center', padding: '48px', color: '#94a3b8' }}>No APIs match your search.</div>
                     ) : (
                         filteredApis.map((api) => (
                             <div
                                 key={api.id}
                                 onClick={() => onSelectApi(api.id)}
-                                className={`bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer group ${api.status !== 'ACTIVE' ? 'opacity-70' : ''}`}
+                                style={{
+                                    background: '#fff', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '24px', 
+                                    boxShadow: '0 4px 20px -2px rgba(15,23,42,0.03)', cursor: 'pointer', transition: 'all 0.2s',
+                                    opacity: api.status === 'ACTIVE' ? 1 : 0.6, display: 'flex', flexDirection: 'column', gap: '20px'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(15,23,42,0.05)'; }}
+                                onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(15,23,42,0.03)'; }}
                             >
                                 {/* Top Half */}
-                                <div className="flex items-start justify-between">
-                                    <div className="flex gap-4">
-                                        <div className="w-14 h-14 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
-                                            <Package size={28} strokeWidth={1.5} className="text-purple-600" />
+                                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                        <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <Package size={24} style={{ color: '#8b5cf6' }} />
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-3">
-                                                <h3 className="text-[18px] font-bold text-gray-900">{api.name}</h3>
-                                                <span className={`badge gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase ${api.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${api.status === 'ACTIVE' ? 'bg-green-500' : 'bg-slate-400'}`}></div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: 0 }}>{api.name}</h3>
+                                                <div style={{ 
+                                                    display: 'inline-flex', alignItems: 'center', 
+                                                    background: api.status === 'ACTIVE' ? '#ecfdf5' : '#f1f5f9', 
+                                                    color: api.status === 'ACTIVE' ? '#059669' : '#64748b', 
+                                                    padding: '4px 12px', borderRadius: '9999px', 
+                                                    fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', 
+                                                    letterSpacing: '0.05em', border: api.status === 'ACTIVE' ? '1px solid #d1fae5' : '1px solid #e2e8f0'
+                                                }}>
+                                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', marginRight: '6px', background: api.status === 'ACTIVE' ? '#10b981' : '#94a3b8' }}></div>
                                                     {api.status}
-                                                </span>
+                                                </div>
                                             </div>
-                                            <p className="text-[15px] text-gray-500 mt-0.5">{api.description || 'No description provided.'}</p>
+                                            <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{api.description || 'No description provided.'}</p>
                                         </div>
                                     </div>
-                                    <div className="shrink-0 p-1 text-gray-400 hover:bg-gray-50 rounded-lg">
+                                    <div style={{ padding: '4px', color: '#94a3b8', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#0f172a'; }} onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}>
                                         <MoreHorizontal size={20} />
                                     </div>
                                 </div>
                                 
                                 {/* Bottom Half */}
-                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginTop: '1rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #f1f5f9' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <div style={{ paddingRight: '20px' }}>
-                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.route_count}</p>
-                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Routes</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{api.route_count}</p>
+                                            <p style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Routes</p>
                                         </div>
-                                        <div style={{ width: '1px', height: '36px', background: '#e5e7eb' }}></div>
+                                        <div style={{ width: '1px', height: '32px', background: '#e2e8f0' }}></div>
                                         <div style={{ padding: '0 20px' }}>
-                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.credential_count}</p>
-                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>API Keys</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{api.credential_count}</p>
+                                            <p style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>API Keys</p>
                                         </div>
-                                        <div style={{ width: '1px', height: '36px', background: '#e5e7eb' }}></div>
+                                        <div style={{ width: '1px', height: '32px', background: '#e2e8f0' }}></div>
                                         <div style={{ paddingLeft: '20px' }}>
-                                            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#111827', lineHeight: 1, marginBottom: '2px' }}>{api.user_count}</p>
-                                            <p style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Users</p>
+                                            <p style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', lineHeight: 1, marginBottom: '4px' }}>{api.user_count}</p>
+                                            <p style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>Users</p>
                                         </div>
-                                    </div>
-                                    
-                                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '6px 14px', background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.05)', cursor: 'pointer', flexShrink: 0 }}>
-                                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1f2937' }}>Manage</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '5px', color: '#6b7280' }}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                                     </div>
                                 </div>
                             </div>
