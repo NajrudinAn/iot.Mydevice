@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, CheckCircle2, Download, Terminal, Settings2, Code, Cpu, Bot, FileCode2, BookOpen, Key, Wifi, Activity, TerminalSquare } from 'lucide-react';
+import { Copy, CheckCircle2, Download, Terminal, Settings2, Code, Cpu, Bot, FileCode2, Info, ChevronRight, Hash, Type, AlignLeft, List } from 'lucide-react';
 
 const WorkspaceSdkDocs = () => {
     const [activeTab, setActiveTab] = useState('python');
@@ -53,213 +53,330 @@ The SDK uses a "Blueprint API". You define properties and actions, and the cloud
 
 Please analyze my code and provide the exact snippets to add. Provide full, copy-pastable code.`;
 
+    const ParamRow = ({ name, type, req, desc }) => (
+        <div className="flex flex-col sm:flex-row sm:items-start py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-4">
+            <div className="w-40 shrink-0">
+                <code className="text-sm font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">{name}</code>
+            </div>
+            <div className="w-24 shrink-0 flex items-center gap-1.5">
+                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100 uppercase tracking-wider">{type}</span>
+                {req && <span className="text-[10px] text-red-500 font-bold">*</span>}
+            </div>
+            <div className="flex-1 text-sm text-gray-600">{desc}</div>
+        </div>
+    );
+
+    const MethodCard = ({ title, code, desc, children }) => (
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-gray-50/50 px-5 py-4 border-b border-gray-200">
+                <h4 className="font-bold text-gray-900 text-lg mb-1">{title}</h4>
+                <p className="text-sm text-gray-500">{desc}</p>
+            </div>
+            <div className="p-5 border-b border-gray-100">
+                <code className="text-sm font-mono text-blue-700 bg-blue-50 px-3 py-2 rounded-lg block overflow-x-auto border border-blue-100">
+                    {code}
+                </code>
+            </div>
+            {children && (
+                <div className="px-5 py-2 bg-white">
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 mt-2">Parameters</div>
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+
+    const CodeBlock = ({ code }) => (
+        <pre className="bg-gray-900 text-gray-100 rounded-xl p-5 overflow-x-auto text-sm shadow-inner border border-gray-800 leading-relaxed font-mono">
+            {code}
+        </pre>
+    );
+
     const getDocsContent = (lang) => {
         switch (lang) {
             case 'python':
                 return (
-                    <div className="space-y-6 text-gray-700">
-                        <div className="prose max-w-none">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                <FileCode2 className="text-blue-500" /> Python (v2.0)
+                    <div className="space-y-10 text-gray-700 animate-in fade-in duration-300">
+                        {/* 1. Setup */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span> 
+                                Installation & Setup
                             </h3>
-                            <p>
-                                The Python SDK is perfect for Raspberry Pi, desktop simulators, and backend server agents. 
-                                It requires Python 3.7+ and the <code>paho-mqtt</code> library.
-                            </p>
-                        </div>
-                        
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Terminal size={18} className="text-gray-500" /> 1. Installation
-                            </h4>
-                            <div className="bg-gray-900 text-gray-100 rounded-lg p-3 flex justify-between items-center">
-                                <code>pip install paho-mqtt</code>
-                                <button onClick={() => handleCopy("pip install paho-mqtt", "py_install")} className="text-gray-400 hover:text-white">
-                                    {copiedIndex === 'py_install' ? <CheckCircle2 size={16} className="text-green-400" /> : <Copy size={16} />}
-                                </button>
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-4">
+                                <div className="bg-gray-900 text-gray-100 rounded-lg p-3 flex justify-between items-center shadow-inner">
+                                    <code className="font-mono">pip install paho-mqtt</code>
+                                    <button onClick={() => handleCopy("pip install paho-mqtt", "py_install")} className="text-gray-400 hover:text-white transition-colors">
+                                        {copiedIndex === 'py_install' ? <CheckCircle2 size={18} className="text-green-400" /> : <Copy size={18} />}
+                                    </button>
+                                </div>
+                                <p className="text-sm mt-3 text-gray-600 flex items-center gap-2">
+                                    <Info size={16} className="text-blue-500" />
+                                    Place <code className="bg-gray-200 px-1.5 py-0.5 rounded text-gray-800">mydevice.py</code> in the same directory as your Python script.
+                                </p>
                             </div>
-                            <p className="text-sm mt-2 text-gray-600">Also, place <code>mydevice.py</code> in the same folder as your script.</p>
-                        </div>
+                        </section>
 
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Key size={18} className="text-gray-500" /> 2. Connection & Setup
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">Import the library and create a device instance using your Device ID and Secret Key.</p>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`from mydevice import MyDevice
+                        {/* 2. API Reference */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span> 
+                                API Reference (Step-by-Step)
+                            </h3>
+                            
+                            <MethodCard 
+                                title="Initialize Device" 
+                                desc="Connect your script to a specific device instance on the platform."
+                                code='device = MyDevice("DEVICE_ID", "SECRET_KEY")'
+                            >
+                                <ParamRow name="device_id" type="string" req={true} desc="The unique identifier for your device from the dashboard." />
+                                <ParamRow name="secret_key" type="string" req={true} desc="The authentication secret key for the device." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Reading (Read-only Sensor)" 
+                                desc="Define a read-only telemetry property, like a temperature sensor or status string."
+                                code='device.add_reading(name, label, data_type="number", unit="")'
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Unique internal ID (e.g., 'temperature'). Must be lowercase, no spaces." />
+                                <ParamRow name="label" type="string" req={true} desc="Human-readable name displayed on the dashboard UI." />
+                                <ParamRow name="data_type" type="string" req={false} desc="'number', 'boolean', or 'string'. Default is 'number'." />
+                                <ParamRow name="unit" type="string" req={false} desc="Unit of measurement (e.g., '°C', '%')." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Switch (Controllable)" 
+                                desc="Automatically generates a Toggle switch on the dashboard. Triggers a callback when pressed."
+                                code='device.add_switch(name, label, on_change)'
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Unique internal ID." />
+                                <ParamRow name="label" type="string" req={true} desc="Dashboard UI name." />
+                                <ParamRow name="on_change" type="function" req={true} desc="Callback function that receives a boolean (True/False) when the switch is toggled." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Send Data" 
+                                desc="Push updated values to the cloud. Call this in your main loop."
+                                code='device.send(name, value)'
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="The property name you defined earlier." />
+                                <ParamRow name="value" type="any" req={true} desc="The actual sensor reading or state value." />
+                            </MethodCard>
+                        </section>
+
+                        {/* 3. Full Example */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span> 
+                                Complete Implementation Example
+                            </h3>
+                            <p className="text-gray-600 mb-4 text-sm">
+                                Putting it all together. This script initializes the device, defines its capabilities, connects to the cloud, and loops forever to send data.
+                            </p>
+                            <div className="relative group">
+                                <CodeBlock code={`from mydevice import MyDevice
 import time
 
-# Create device instance
-device = MyDevice("YOUR_DEVICE_ID", "YOUR_SECRET_KEY")`}
-                            </pre>
-                        </div>
+# 1. Initialize
+device = MyDevice("DEV-12345", "YOUR_SECRET_KEY")
 
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Activity size={18} className="text-gray-500" /> 3. Defining Capabilities (Blueprint API)
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">
-                                Define what your device can measure and what it can control. The platform will automatically build the dashboard UI based on this.
-                            </p>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`# Read-only Telemetry (e.g. Sensors)
+# 2. Define Capabilities
 device.add_reading("temperature", "Room Temp", "number", unit="°C")
 device.add_reading("status_msg", "System Status", "string")
 
-# Controllable Switch (Generates a UI Toggle)
 def handle_light(is_on):
     if is_on:
-        print("Light turned ON")
+        print("Hardware: Turning light ON")
     else:
-        print("Light turned OFF")
+        print("Hardware: Turning light OFF")
         
 device.add_switch("main_light", "Main Light", on_change=handle_light)
 
-# Stateless Action (Generates a UI Button)
-def handle_reboot(params):
-    print("Rebooting device...")
-    
-device.add_action("reboot", "Reboot Device", on_execute=handle_reboot)`}
-                            </pre>
-                        </div>
-
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Wifi size={18} className="text-gray-500" /> 4. Connect and Send Data
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">
-                                Finally, call <code>connect()</code> to negotiate the schema, and use <code>send()</code> inside your main loop to publish telemetry updates.
-                            </p>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`# Connect to the cloud (starts background MQTT thread)
+# 3. Connect to the cloud (Starts background MQTT thread)
 device.connect()
+print("Connected to MyDevice Platform!")
 
-# Main Loop
+# 4. Main Loop
 while True:
-    # Send telemetry updates
-    # The SDK optimizes this and only sends if the value actually changed
+    # Send telemetry updates. 
+    # (The SDK optimizes this and only sends if the value changed)
     device.send("temperature", 24.5)
     
-    time.sleep(5)`}
-                            </pre>
-                        </div>
+    time.sleep(5)`} />
+                                <button 
+                                    onClick={() => handleCopy("from mydevice import MyDevice\nimport time\n\ndevice = MyDevice('DEV-12345', 'YOUR_SECRET_KEY')\n\ndevice.add_reading('temperature', 'Room Temp', 'number', unit='°C')\n\ndef handle_light(is_on):\n    print('Light', is_on)\ndevice.add_switch('main_light', 'Main Light', on_change=handle_light)\n\ndevice.connect()\n\nwhile True:\n    device.send('temperature', 24.5)\n    time.sleep(5)", "py_full")} 
+                                    className="absolute top-3 right-3 p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded border border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    {copiedIndex === 'py_full' ? <CheckCircle2 size={16} className="text-green-400" /> : <Copy size={16} />}
+                                </button>
+                            </div>
+                        </section>
                     </div>
                 );
             case 'node':
                 return (
-                    <div className="space-y-6 text-gray-700">
-                        <div className="prose max-w-none">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                <Code className="text-green-500" /> Node.js (v2.0)
+                    <div className="space-y-10 text-gray-700 animate-in fade-in duration-300">
+                        {/* 1. Setup */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-green-100 text-green-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span> 
+                                Installation & Setup
                             </h3>
-                            <p>
-                                The Node.js SDK is ideal for edge gateways, headless devices, and javascript automation environments. 
-                                It requires the standard <code>mqtt</code> NPM package.
-                            </p>
-                        </div>
-                        
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Terminal size={18} className="text-gray-500" /> 1. Installation
-                            </h4>
-                            <div className="bg-gray-900 text-gray-100 rounded-lg p-3 flex justify-between items-center">
-                                <code>npm install mqtt</code>
-                                <button onClick={() => handleCopy("npm install mqtt", "js_install")} className="text-gray-400 hover:text-white">
-                                    {copiedIndex === 'js_install' ? <CheckCircle2 size={16} className="text-green-400" /> : <Copy size={16} />}
-                                </button>
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-4">
+                                <div className="bg-gray-900 text-gray-100 rounded-lg p-3 flex justify-between items-center shadow-inner">
+                                    <code className="font-mono">npm install mqtt</code>
+                                </div>
+                                <p className="text-sm mt-3 text-gray-600 flex items-center gap-2">
+                                    <Info size={16} className="text-blue-500" />
+                                    Place <code className="bg-gray-200 px-1.5 py-0.5 rounded text-gray-800">mydevice-sdk.js</code> in your project directory.
+                                </p>
                             </div>
-                            <p className="text-sm mt-2 text-gray-600">Also, place <code>mydevice-sdk.js</code> in your project folder.</p>
-                        </div>
+                        </section>
 
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Key size={18} className="text-gray-500" /> 2. Connection & Setup
-                            </h4>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`const { MyDevice } = require('./mydevice-sdk');
+                        {/* 2. API Reference */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-green-100 text-green-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span> 
+                                API Reference (Step-by-Step)
+                            </h3>
+                            
+                            <MethodCard 
+                                title="Initialize Device" 
+                                desc="Create a new device instance."
+                                code="const device = new MyDevice('DEVICE_ID', 'SECRET_KEY');"
+                            >
+                                <ParamRow name="deviceId" type="string" req={true} desc="Your device ID." />
+                                <ParamRow name="secretKey" type="string" req={true} desc="Your secret key." />
+                            </MethodCard>
 
-// Create device instance
-const device = new MyDevice('YOUR_DEVICE_ID', 'YOUR_SECRET_KEY');`}
-                            </pre>
-                        </div>
+                            <MethodCard 
+                                title="Add Reading" 
+                                desc="Define telemetry properties."
+                                code="device.addReading(name, label, type = 'number', unit = '')"
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Internal property ID." />
+                                <ParamRow name="label" type="string" req={true} desc="Dashboard UI label." />
+                                <ParamRow name="type" type="string" req={false} desc="'number', 'boolean', 'string'." />
+                                <ParamRow name="unit" type="string" req={false} desc="Unit of measurement." />
+                            </MethodCard>
 
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Activity size={18} className="text-gray-500" /> 3. Defining Capabilities (Blueprint API)
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">
-                                You can add readings, switches, sliders, and actions.
-                            </p>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`// Read-only Telemetry
+                            <MethodCard 
+                                title="Add Slider (Controllable)" 
+                                desc="Generates a slider UI for numeric control."
+                                code="device.addSlider(name, label, min, max, callback, step)"
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Internal property ID." />
+                                <ParamRow name="min/max" type="number" req={true} desc="Numeric bounds." />
+                                <ParamRow name="callback" type="function" req={true} desc="Receives the new float value." />
+                            </MethodCard>
+                        </section>
+
+                        {/* 3. Full Example */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-green-100 text-green-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span> 
+                                Complete Implementation Example
+                            </h3>
+                            <CodeBlock code={`const { MyDevice } = require('./mydevice-sdk');
+
+// 1. Initialize
+const device = new MyDevice('DEV-12345', 'YOUR_SECRET_KEY');
+
+// 2. Define Capabilities
 device.addReading('temperature', 'Room Temp', 'number', '°C');
 
-// Controllable Switch
-device.addSwitch('main_light', 'Main Light', (val) => {
-    console.log(val ? 'Light ON' : 'Light OFF');
+device.addSlider('fan_speed', 'Fan Speed', 0, 100, (speed) => {
+    console.log(\`Hardware: Setting fan speed to \${speed}%\`);
 });
 
-// Controllable Slider
-device.addSlider('fan_speed', 'Fan Speed', 0, 100, (speed) => {
-    console.log(\`Fan speed set to \${speed}%\`);
-});`}
-                            </pre>
-                        </div>
-
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Wifi size={18} className="text-gray-500" /> 4. Connect and Send Data
-                            </h4>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`// Connect to cloud
+// 3. Connect to cloud
 device.connect();
 
-// Send telemetry every 5 seconds
+// 4. Main Loop
 setInterval(() => {
     device.send('temperature', 25.1);
-}, 5000);`}
-                            </pre>
-                        </div>
+}, 5000);`} />
+                        </section>
                     </div>
                 );
             case 'arduino':
                 return (
-                    <div className="space-y-6 text-gray-700">
-                        <div className="prose max-w-none">
-                            <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                <Cpu className="text-teal-500" /> Arduino C++ (v2.0)
+                    <div className="space-y-10 text-gray-700 animate-in fade-in duration-300">
+                        {/* 1. Setup */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span> 
+                                Installation & Setup
                             </h3>
-                            <p>
-                                The C++ SDK is highly optimized for microcontrollers like the ESP32 and ESP8266. 
-                                It uses minimal memory and handles network disconnections smoothly.
-                            </p>
-                        </div>
-                        
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Terminal size={18} className="text-gray-500" /> 1. Installation
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">
-                                In the Arduino IDE Library Manager, install <strong>PubSubClient</strong> and <strong>ArduinoJson</strong>. 
-                                Then place <code>MyDevice.h</code> in the same folder as your <code>.ino</code> sketch.
-                            </p>
-                        </div>
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-4">
+                                <p className="text-sm text-gray-700 mb-3">
+                                    Open the Arduino IDE Library Manager and install:
+                                </p>
+                                <ul className="list-disc list-inside text-sm text-gray-600 font-mono mb-4 bg-white p-3 rounded border">
+                                    <li>PubSubClient</li>
+                                    <li>ArduinoJson (v6+)</li>
+                                </ul>
+                                <p className="text-sm text-gray-600 flex items-center gap-2">
+                                    <Info size={16} className="text-blue-500" />
+                                    Place <code className="bg-gray-200 px-1.5 py-0.5 rounded text-gray-800">MyDevice.h</code> in the same folder as your <code>.ino</code> sketch.
+                                </p>
+                            </div>
+                        </section>
 
-                        <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                            <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <TerminalSquare size={18} className="text-gray-500" /> 2. Complete Example Sketch
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-3">
-                                The Arduino implementation requires you to manage the network connection, but the SDK handles all the MQTT and JSON logic.
-                            </p>
-                            <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm">
-{`#include <WiFi.h>
+                        {/* 2. API Reference */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span> 
+                                API Reference (Step-by-Step)
+                            </h3>
+                            
+                            <MethodCard 
+                                title="Initialize Device" 
+                                desc="Construct the device object globally."
+                                code='MyDevice device("DEVICE_ID", "SECRET_KEY", wifiClient);'
+                            >
+                                <ParamRow name="deviceId" type="string" req={true} desc="Your device ID." />
+                                <ParamRow name="secretKey" type="string" req={true} desc="Your secret key." />
+                                <ParamRow name="client" type="Client&" req={true} desc="Underlying network client (WiFiClient, EthernetClient)." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Reading" 
+                                desc="Define telemetry properties."
+                                code='device.addReading(name, label, type, unit);'
+                            >
+                                <ParamRow name="name" type="const char*" req={true} desc="Internal property ID." />
+                                <ParamRow name="label" type="const char*" req={true} desc="Dashboard UI label." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Switch (Controllable)" 
+                                desc="Generates a switch UI. Callback uses ArduinoJson JsonVariant."
+                                code='device.addSwitch(name, label, [](JsonVariant val) { ... });'
+                            >
+                                <ParamRow name="name" type="const char*" req={true} desc="Internal property ID." />
+                                <ParamRow name="callback" type="void (*)(JsonVariant)" req={true} desc="Function called when toggled. Use val.as<bool>()." />
+                            </MethodCard>
+
+                             <MethodCard 
+                                title="Network Lifecycle" 
+                                desc="Must be called in setup() and loop()."
+                                code={'device.begin(); // in setup()\ndevice.loop();  // in loop()'}
+                            />
+                        </section>
+
+                        {/* 3. Full Example */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-teal-100 text-teal-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span> 
+                                Complete Implementation Example
+                            </h3>
+                            <CodeBlock code={`#include <WiFi.h>
 #include "MyDevice.h"
 
 // 1. Initialize Network and Device
 WiFiClient wifiClient;
-MyDevice device("YOUR_DEVICE_ID", "YOUR_SECRET_KEY", wifiClient);
+MyDevice device("DEV-12345", "YOUR_SECRET_KEY", wifiClient);
 
 void setup() {
     Serial.begin(115200);
@@ -268,12 +385,13 @@ void setup() {
     WiFi.begin("YOUR_SSID", "YOUR_WIFI_PASS");
     while (WiFi.status() != WL_CONNECTED) delay(500);
 
-    // 2. Define Capabilities (Blueprint API)
+    // 2. Define Capabilities
     device.addReading("temperature", "Temperature", "number", "°C");
     
     // Switch callback uses ArduinoJson JsonVariant
     device.addSwitch("main_light", "Main Light", [](JsonVariant val) {
-        digitalWrite(LED_BUILTIN, val.as<bool>() ? HIGH : LOW);
+        bool isOn = val.as<bool>();
+        digitalWrite(LED_BUILTIN, isOn ? HIGH : LOW);
     });
 
     // 3. Begin SDK
@@ -281,16 +399,15 @@ void setup() {
 }
 
 void loop() {
-    // 4. Maintain connection and process commands
+    // 4. Maintain connection (handles reconnects & inbound messages)
     device.loop();
     
     // 5. Send telemetry data
     device.send("temperature", 23.5);
     
     delay(10); // Small delay to prevent tight loop blocking
-}`}
-                            </pre>
-                        </div>
+}`} />
+                        </section>
                     </div>
                 );
             default:
@@ -299,87 +416,109 @@ void loop() {
     };
 
     return (
-        <div className="p-6 md:p-8 max-w-5xl mx-auto w-full min-h-[500px]">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-10">
-                <div>
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">SDK Documentation</h1>
-                    <p className="text-gray-500 text-[15px] max-w-3xl leading-relaxed">
-                        A complete guide to integrating the MyDevice Platform into your edge hardware and software agents. 
-                        The SDK uses a "Blueprint API", meaning you just define your sensors and switches in the code, and 
-                        the cloud platform automatically builds the dashboard and API routes for you.
-                    </p>
-                </div>
-                <div className="flex gap-3 flex-shrink-0">
+        <div className="p-4 md:p-8 max-w-5xl mx-auto w-full min-h-[500px]">
+            {/* Header Area */}
+            <div className="mb-10 text-center md:text-left">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-4">SDK Integration Guide</h1>
+                <p className="text-gray-600 text-[15px] md:text-[16px] max-w-3xl leading-relaxed">
+                    A comprehensive guide to integrating the MyDevice Platform into your edge hardware and software agents. 
+                    The SDK uses a <strong>"Blueprint API"</strong>: you simply define your sensors and switches in the code, and 
+                    the cloud platform automatically builds the dashboard UI and API routes for you.
+                </p>
+            </div>
+
+            {/* AI Assistant Help Banner - Now visually separated and distinct */}
+            <div className="mb-12 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-white">
+                        <Bot size={24} />
+                        <h4 className="font-bold text-lg m-0">Integrating via AI? (ChatGPT / Claude)</h4>
+                    </div>
                     <button 
                         onClick={() => handleCopy(aiPromptTemplate, 'ai_prompt')}
-                        className="flex items-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors border border-purple-200"
+                        className="flex items-center gap-2 bg-white text-purple-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"
                     >
-                        <Bot size={18} /> 
+                        {copiedIndex === 'ai_prompt' ? <CheckCircle2 size={18} className="text-green-500" /> : <Copy size={18} />}
                         {copiedIndex === 'ai_prompt' ? 'Copied Prompt!' : 'Copy AI Prompt'}
                     </button>
                 </div>
-            </div>
-
-            {/* AI Assistant Help Banner */}
-            <div className="mb-10 p-5 bg-purple-50 rounded-xl border border-purple-100 flex gap-4">
-                <Bot className="text-purple-600 shrink-0 mt-1" size={24} />
-                <div>
-                    <h4 className="font-bold text-purple-900 mb-2">Integrating via ChatGPT or Claude?</h4>
-                    <p className="text-sm text-purple-800 leading-relaxed">
-                        If you have existing code (like a motor controller or complex sensor array), do not rewrite it manually. 
-                        Click the <strong>"Copy AI Prompt"</strong> button above and paste it into your favorite LLM along with your existing code. 
-                        The AI will analyze your logic and seamlessly inject the SDK connection functions without breaking your hardware.
+                <div className="p-6 bg-purple-50">
+                    <p className="text-sm text-purple-900 leading-relaxed max-w-4xl">
+                        If you have existing code (like a motor controller, sensor loop, or complex logic), do not rewrite it manually. 
+                        Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your existing code. 
+                        The AI will analyze your logic and seamlessly inject the SDK without breaking your hardware.
                     </p>
                 </div>
             </div>
 
-            {/* Platform Tabs */}
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-8">
-                <button
-                    onClick={() => setActiveTab('python')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-lg transition-all ${
-                        activeTab === 'python' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                    }`}
-                >
-                    <FileCode2 size={18} /> Python
-                </button>
-                <button
-                    onClick={() => setActiveTab('node')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-lg transition-all ${
-                        activeTab === 'node' ? 'bg-white text-green-600 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                    }`}
-                >
-                    <Code size={18} /> Node.js
-                </button>
-                <button
-                    onClick={() => setActiveTab('arduino')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-lg transition-all ${
-                        activeTab === 'arduino' ? 'bg-white text-teal-600 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                    }`}
-                >
-                    <Cpu size={18} /> Arduino C++
-                </button>
-            </div>
+            {/* Main Content Area */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                
+                {/* Platform Tabs */}
+                <div className="flex border-b border-gray-200 bg-gray-50/50 p-2 gap-2 overflow-x-auto">
+                    <button
+                        onClick={() => setActiveTab('python')}
+                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
+                            activeTab === 'python' ? 'bg-white text-blue-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                        <FileCode2 size={18} /> Python
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('node')}
+                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
+                            activeTab === 'node' ? 'bg-white text-green-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                        <Code size={18} /> Node.js
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('arduino')}
+                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
+                            activeTab === 'arduino' ? 'bg-white text-teal-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                    >
+                        <Cpu size={18} /> Arduino C++
+                    </button>
+                </div>
 
-            {/* Dynamic Documentation Content */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-                {getDocsContent(activeTab)}
+                {/* Dynamic Documentation Content */}
+                <div className="p-6 md:p-10">
+                    {getDocsContent(activeTab)}
+                </div>
             </div>
             
-            <div className="mt-10 p-6 bg-blue-50 rounded-xl border border-blue-100 flex flex-col md:flex-row gap-5 items-start">
-                <Settings2 className="text-blue-500 shrink-0 md:mt-1" size={28} />
-                <div>
-                    <h4 className="font-bold text-blue-900 text-lg mb-2">How the Blueprint API Works</h4>
-                    <p className="text-sm text-blue-800 leading-relaxed mb-4">
-                        Unlike traditional IoT platforms where you must manually map MQTT topics and configure JSON schemas in a web portal, 
-                        the MyDevice SDK uses an inverted approach. You define your capabilities directly in code using <code>add_reading</code>, <code>add_switch</code>, etc. 
-                    </p>
-                    <ul className="text-sm text-blue-800 space-y-2 list-disc list-inside">
-                        <li>The SDK automatically generates a schema capability payload upon connection.</li>
-                        <li>The Cloud Dashboard reads this schema and instantly generates the correct UI widgets.</li>
-                        <li>The Cloud API router automatically maps standard REST endpoints (<code>POST /api/commands</code>) to your device's specific callbacks.</li>
-                        <li>Data payloads are deduplicated; <code>send()</code> only triggers network traffic if the value has actually changed since the last tick.</li>
-                    </ul>
+            {/* Architecture Explainer */}
+            <div className="mt-12 p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 shadow-sm">
+                <div className="flex items-start gap-4">
+                    <div className="bg-white p-3 rounded-xl shadow-sm">
+                        <Settings2 className="text-blue-600" size={28} />
+                    </div>
+                    <div>
+                        <h4 className="font-bold text-gray-900 text-xl mb-3">How the Blueprint API Works</h4>
+                        <p className="text-[15px] text-gray-700 leading-relaxed mb-5">
+                            Unlike traditional IoT platforms where you must manually map MQTT topics and configure JSON schemas in a web portal, 
+                            the MyDevice SDK uses an inverted approach. You define your capabilities directly in code.
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-white p-4 rounded-xl border border-blue-50">
+                                <div className="font-bold text-blue-900 text-sm mb-1">1. Auto Schema Generation</div>
+                                <div className="text-sm text-gray-600">The SDK automatically generates a capability payload upon connection.</div>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-blue-50">
+                                <div className="font-bold text-blue-900 text-sm mb-1">2. Instant Dashboard UI</div>
+                                <div className="text-sm text-gray-600">The Cloud Dashboard reads this schema and instantly builds the correct widgets.</div>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-blue-50">
+                                <div className="font-bold text-blue-900 text-sm mb-1">3. Automated Routing</div>
+                                <div className="text-sm text-gray-600">REST endpoints (<code>POST /api/commands</code>) are mapped directly to your C++/Python callbacks.</div>
+                            </div>
+                            <div className="bg-white p-4 rounded-xl border border-blue-50">
+                                <div className="font-bold text-blue-900 text-sm mb-1">4. Smart Deduplication</div>
+                                <div className="text-sm text-gray-600"><code>send()</code> only triggers network traffic if the value has actually changed since the last tick.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
