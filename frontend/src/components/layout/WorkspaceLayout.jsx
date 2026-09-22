@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   LogOut, ArrowLeft, Shield, Users, Server, 
   Box, Database, Search, Bell, HelpCircle, Hexagon,
-  ActivitySquare, Code, Key, LayoutDashboard, Menu, X, Settings, Terminal, Activity, ChevronDown, Plus
+  ActivitySquare, Code, Key, LayoutDashboard, Menu, X, Settings, Terminal, Activity, ChevronDown, Plus, BookOpen
 } from 'lucide-react';
 import { getPlatformWorkspaces, platformClient } from '../../api/client';
 
