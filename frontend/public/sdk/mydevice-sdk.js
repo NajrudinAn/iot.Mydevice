@@ -1,7 +1,11 @@
 /**
- * MyDevice Node.js SDK v1.0
- * =========================
- * A simple library to connect your device to the MyDevice IoT Platform.
+ * MyDevice Node.js SDK v2.0 (Blueprint API)
+ * =========================================
+ * A comprehensive library to connect your device to the MyDevice IoT Platform.
+ *
+ * This SDK uses a declarative Blueprint API. You define what your device has
+ * (Properties) and what it can do (Actions). The SDK automatically handles
+ * MQTT connectivity, capability mapping, state syncing, and command routing.
  *
  * Installation:
  *   npm install mqtt
@@ -9,60 +13,32 @@
  *     const { MyDevice } = require('./mydevice-sdk');
  *
  * Usage:
- *   const device = new MyDevice('DEV-001-ABCD', 'your_secret_key');
+ *   const device = new MyDevice('DEV-001', 'secret');
  *
- *   // Register capabilities
- *   device.addCapability('motor_control', 'Motor Control', 'Control actuators', 'motor_status.fan_speed');
- *   device.addAction('motor_control', 'SET_FAN_SPEED', 'Set Fan Speed', '0=off, 3=high', {
- *       speed: { type: 'number', min: 0, max: 3, step: 1, required: true }
+ *   // 1. Read-only Telemetry
+ *   device.addProperty('temperature', 'Temperature', 'number', { unit: '°C', writable: false });
+ *
+ *   // 2. Controllable Property (Switch)
+ *   device.addProperty('light', 'Main Light', 'boolean', { 
+ *      writable: true, 
+ *      onChange: (val) => console.log(`Light is now ${val}`)
  *   });
  *
- *   // Handle commands
- *   device.onCommand('SET_FAN_SPEED', (params) => {
- *       console.log('Fan speed:', params.speed);
- *       return true; // true=COMPLETED, false=FAILED
- *   });
+ *   // 3. Stateless Action
+ *   device.addAction('reboot', 'Reboot Device', 'Restarts the device', {}, (params) => reboot());
  *
- *   // Connect
  *   device.connect();
  *
- *   // Send telemetry
  *   setInterval(() => {
- *       device.send('sensor_1', { temperature: 25.4, humidity: 60 });
+ *       device.updateProperty('temperature', readSensor());
  *   }, 5000);
  */
 
 const mqtt = require('mqtt');
 
-class Capability {
-    constructor(name, label, description = '', statePath = '') {
-        this.name = name;
-        this.label = label;
-        this.description = description;
-        this.statePath = statePath;
-        this.actions = [];
-    }
-
-    addAction(name, label, description = '', parameters = {}) {
-        this.actions.push({ name, label, description, parameters });
-        return this;
-    }
-
-    toJSON() {
-        const obj = {
-            name: this.name,
-            label: this.label,
-            description: this.description,
-        };
-        if (this.actions.length > 0) obj.actions = this.actions;
-        if (this.statePath) obj.state_mapping = { path: this.statePath, unit: 'metrics' };
-        return obj;
-    }
-}
-
 class MyDevice {
     /**
-     * @param {string} deviceId   - Your device ID (e.g. 'DEV-001-ABCD')
+     * @param {string} deviceId   - Your device ID
      * @param {string} secretKey  - Your device secret key
      * @param {string} [broker]   - MQTT broker host (default: 'mydevice.in')
      * @param {number} [port]     - MQTT broker port (default: 1883)
@@ -80,91 +56,193 @@ class MyDevice {
         this._tCmdAck = `devices/${deviceId}/command/ack`;
         this._tCaps   = `devices/${deviceId}/capabilities`;
 
-        // Internal state
-        this._capabilities = [];
-        this._handlers = {};
+        // State and Blueprints
+        this._properties = {};
+        this._actions = {};
+        this._stateCache = {};
+
+        // Internals
         this._client = null;
         this._connected = false;
     }
 
-    // ── Capabilities ─────────────────────────────────────────────────
+    // ── Blueprint API ────────────────────────────────────────────────
 
     /**
-     * Register a capability group.
-     * @param {string} name        - Snake_case ID, e.g. 'motor_control'
-     * @param {string} label       - Human label
-     * @param {string} [description]
-     * @param {string} [statePath] - Telemetry key path for state display
-     * @returns {Capability} - call .addAction() on it
+     * Define a property (telemetry state).
+     * @param {string} name - ID of the property (e.g. 'fan_speed')
+     * @param {string} label - Human-readable name
+     * @param {string} dataType - 'number', 'boolean', 'string'
+     * @param {object} options - Configuration options
+     * @param {string} [options.unit] - e.g. '°C', '%'
+     * @param {number} [options.min] - Minimum value (for numbers)
+     * @param {number} [options.max] - Maximum value (for numbers)
+     * @param {number} [options.step] - Step value (for numbers)
+     * @param {string[]} [options.options] - List of strings for enum types
+     * @param {boolean} [options.writable] - Can this be controlled from the platform?
+     * @param {function} [options.onChange] - Callback function(value) triggered when changed from platform.
      */
-    addCapability(name, label, description = '', statePath = '') {
-        const cap = new Capability(name, label, description, statePath);
-        this._capabilities.push(cap);
-        return cap;
+    addProperty(name, label, dataType = 'number', {
+        unit = '', min = null, max = null, step = null, options = null, writable = false, onChange = null
+    } = {}) {
+        const prop = {
+            name, label, type: dataType, unit, writable, onChange
+        };
+        
+        if (dataType === 'number') {
+            if (min !== null) prop.min = min;
+            if (max !== null) prop.max = max;
+            if (step !== null) prop.step = step;
+        } else if (options) {
+            prop.options = options;
+        }
+        
+        this._properties[name] = prop;
     }
 
     /**
-     * Add an action to an existing capability.
-     * @param {string} capName    - Must match a name from addCapability()
-     * @param {string} actionName - Command type string
-     * @param {string} label      - Human label
-     * @param {string} [description]
-     * @param {object} [parameters] - { paramName: { type, min, max, step, required } }
+     * Define a stateless action (e.g., Reboot, Calibrate).
+     * @param {string} name - ID of the action
+     * @param {string} label - Human-readable name
+     * @param {string} description - Short description
+     * @param {object} parameters - Parameter configurations { paramName: { type, min, max, required } }
+     * @param {function} onExecute - Callback function(paramsDict) triggered when executed.
      */
-    addAction(capName, actionName, label, description = '', parameters = {}) {
-        const cap = this._capabilities.find(c => c.name === capName);
-        if (cap) cap.addAction(actionName, label, description, parameters);
-        return this;
+    addAction(name, label, description = '', parameters = {}, onExecute = null) {
+        this._actions[name] = {
+            name, label, description, parameters, onExecute
+        };
     }
-
-    /** Publish all registered capabilities to the platform (retained). */
-    publishCapabilities() {
-        if (!this._capabilities.length) return;
-        const payload = this._capabilities.map(c => c.toJSON());
-        this._client.publish(this._tCaps, JSON.stringify(payload), { retain: true });
-    }
-
-    // ── Commands ─────────────────────────────────────────────────────
 
     /**
-     * Register a handler for a command type.
-     * Handler receives params object, returns true (COMPLETED) or false (FAILED).
-     *
-     * @param {string} commandType
-     * @param {function} handler - (params) => boolean
+     * Update the local state of a property and automatically publish to the platform.
+     * @param {string} name - Property name
+     * @param {any} value - New value
+     * @param {boolean} forceSend - Send even if value hasn't changed locally
      */
-    onCommand(commandType, handler) {
-        this._handlers[commandType] = handler;
-        return this;
+    updateProperty(name, value, forceSend = false) {
+        if (!this._properties[name]) {
+            console.warn(`[MyDevice] Warning: Property '${name}' not defined.`);
+            return;
+        }
+
+        if (!forceSend && this._stateCache[name] === value) {
+            return;
+        }
+        this._stateCache[name] = value;
+
+        if (this._connected) {
+            this._sendTelemetry({ [name]: value });
+        }
     }
 
-    // ── Telemetry ────────────────────────────────────────────────────
-
     /**
-     * Send telemetry data.
-     * @param {string} source - Logical group name, e.g. 'sensor_1'
-     * @param {object} fields - Key=value pairs of telemetry data
-     *
-     * Example:
-     *   device.send('sensor_1', { temperature: 25.4, humidity: 60 });
+     * Update multiple properties at once and send a single telemetry payload.
+     * @param {object} updatesDict - { propName: value }
      */
-    send(source = 'sensor_1', fields = {}) {
-        if (!this._client) return;
-        this._client.publish(this._tData, JSON.stringify({
+    updateProperties(updatesDict) {
+        const changed = {};
+        for (const [name, value] of Object.entries(updatesDict)) {
+            if (this._properties[name]) {
+                if (this._stateCache[name] !== value) {
+                    this._stateCache[name] = value;
+                    changed[name] = value;
+                }
+            } else {
+                console.warn(`[MyDevice] Warning: Property '${name}' not defined.`);
+            }
+        }
+        
+        if (Object.keys(changed).length > 0 && this._connected) {
+            this._sendTelemetry(changed);
+        }
+    }
+
+    // ── Platform Syncing ─────────────────────────────────────────────
+
+    _generateCapabilitiesSchema() {
+        const capabilities = [];
+        
+        // 1. Map Properties
+        if (Object.keys(this._properties).length > 0) {
+            const stateCap = {
+                name: 'device_state',
+                label: 'Device State',
+                description: 'Device properties and sensors',
+                actions: []
+            };
+            
+            for (const [pName, p] of Object.entries(this._properties)) {
+                if (p.writable) {
+                    const actionDef = {
+                        name: `SET_${pName.toUpperCase()}`,
+                        label: `Set ${p.label}`,
+                        description: `Update ${pName}`,
+                        parameters: {
+                            [pName]: { type: p.type, required: true }
+                        }
+                    };
+                    if (p.min !== undefined) actionDef.parameters[pName].min = p.min;
+                    if (p.max !== undefined) actionDef.parameters[pName].max = p.max;
+                    if (p.step !== undefined) actionDef.parameters[pName].step = p.step;
+                    if (p.options) actionDef.parameters[pName].options = p.options;
+                    
+                    stateCap.actions.push(actionDef);
+                }
+            }
+            capabilities.push(stateCap);
+        }
+        
+        // 2. Map Actions
+        if (Object.keys(this._actions).length > 0) {
+            const actionCap = {
+                name: 'system_actions',
+                label: 'System Actions',
+                description: 'Stateless device commands',
+                actions: []
+            };
+            for (const [aName, a] of Object.entries(this._actions)) {
+                const formattedParams = {};
+                for (const [pName, pConfig] of Object.entries(a.parameters)) {
+                    formattedParams[pName] = typeof pConfig === 'object' ? pConfig : { type: 'string', required: true };
+                }
+                actionCap.actions.push({
+                    name: aName,
+                    label: a.label,
+                    description: a.description,
+                    parameters: formattedParams
+                });
+            }
+            capabilities.push(actionCap);
+        }
+        
+        return capabilities;
+    }
+
+    _publishSchema() {
+        const schema = this._generateCapabilitiesSchema();
+        if (schema && schema.length > 0) {
+            this._client.publish(this._tCaps, JSON.stringify(schema), { retain: true });
+        }
+    }
+
+    _sendTelemetry(dataDict) {
+        const payload = {
             device_id: this.deviceId,
-            source,
-            data: fields,
-        }));
+            source: 'state',
+            data: dataDict
+        };
+        this._client.publish(this._tData, JSON.stringify(payload));
     }
 
-    // ── Connection ───────────────────────────────────────────────────
+    // ── Connection & Networking ──────────────────────────────────────
 
-    /** Connect to the MyDevice platform. */
     connect() {
         this._client = mqtt.connect(`mqtt://${this.broker}:${this.port}`, {
             clientId: this.deviceId,
             username: this.deviceId,
             password: this.secretKey,
+            reconnectPeriod: 3000,
             will: {
                 topic: this._tStatus,
                 payload: JSON.stringify({ device_id: this.deviceId, status: 'offline' }),
@@ -176,8 +254,12 @@ class MyDevice {
             this._connected = true;
             this._client.subscribe(this._tCmd);
             this.setStatus('online');
-            this.publishCapabilities();
-            console.log(`[MyDevice] Connected as ${this.deviceId}`);
+            this._publishSchema();
+            
+            if (Object.keys(this._stateCache).length > 0) {
+                this._sendTelemetry(this._stateCache);
+            }
+            console.log(`[MyDevice] Connected successfully as ${this.deviceId}`);
         });
 
         this._client.on('close', () => {
@@ -193,14 +275,41 @@ class MyDevice {
                 const corrId  = envelope.correlation_id || 'n/a';
 
                 let status = 'REJECTED';
-                const handler = this._handlers[cmdType];
-                if (handler) {
-                    try {
-                        status = handler(params) ? 'COMPLETED' : 'FAILED';
-                    } catch (e) {
-                        status = 'FAILED';
-                        console.error(`[MyDevice] Command handler error: ${e.message}`);
+
+                if (cmdType.startsWith('SET_')) {
+                    const propName = cmdType.substring(4).toLowerCase();
+                    const targetProp = Object.keys(this._properties).find(p => p.toLowerCase() === propName);
+                    
+                    if (targetProp && this._properties[targetProp].writable) {
+                        if (params[targetProp] !== undefined) {
+                            const val = params[targetProp];
+                            try {
+                                if (this._properties[targetProp].onChange) {
+                                    this._properties[targetProp].onChange(val);
+                                }
+                                this.updateProperty(targetProp, val, true);
+                                status = 'COMPLETED';
+                            } catch (e) {
+                                console.error(`[MyDevice] Property handler error: ${e.message}`);
+                                status = 'FAILED';
+                            }
+                        } else {
+                            console.error(`[MyDevice] Missing parameter '${targetProp}' in command`);
+                            status = 'FAILED';
+                        }
                     }
+                } else if (this._actions[cmdType]) {
+                    try {
+                        if (this._actions[cmdType].onExecute) {
+                            this._actions[cmdType].onExecute(params);
+                        }
+                        status = 'COMPLETED';
+                    } catch (e) {
+                        console.error(`[MyDevice] Action handler error: ${e.message}`);
+                        status = 'FAILED';
+                    }
+                } else {
+                    console.error(`[MyDevice] Unknown command: ${cmdType}`);
                 }
 
                 if (cmdId !== 'n/a') {
@@ -218,7 +327,6 @@ class MyDevice {
         return this;
     }
 
-    /** Disconnect gracefully. */
     disconnect() {
         if (this._client) {
             this.setStatus('offline');
@@ -227,12 +335,8 @@ class MyDevice {
         }
     }
 
-    /** Returns true if connected. */
     get isConnected() { return this._connected; }
 
-    // ── Status ───────────────────────────────────────────────────────
-
-    /** Publish an explicit status ("online" or "offline"). */
     setStatus(status) {
         this._client.publish(this._tStatus, JSON.stringify({
             device_id: this.deviceId,
@@ -241,4 +345,4 @@ class MyDevice {
     }
 }
 
-module.exports = { MyDevice, Capability };
+module.exports = { MyDevice };

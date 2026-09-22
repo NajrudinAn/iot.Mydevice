@@ -331,33 +331,31 @@ import time
 
 device = MyDevice("${did}", "YOUR_SECRET_KEY")
 
-# Register a capability with an action
-cap = device.add_capability("motor_control", "Motor Control",
-                            "Control actuators", "motor_status.fan_speed")
-cap.add_action("SET_FAN_SPEED", "Set Fan Speed", "0=off, 3=high",
-               speed={"type": "number", "min": 0, "max": 3, "step": 1, "required": True})
+# 1. Read-only Sensor
+device.add_property("temperature", "Temperature", "number", unit="°C", writable=False)
 
-# Handle incoming commands
-@device.on_command("SET_FAN_SPEED")
-def handle_fan(params):
-    print(f"Fan speed -> {params['speed']}")
-    return True   # True = COMPLETED, False = FAILED
+# 2. Controllable Switch (generates a UI toggle)
+device.add_property("main_light", "Main Light", "boolean", writable=True, 
+                    on_change=lambda val: print(f"Light is now {val}"))
 
-# Connect to MyDevice platform
+# 3. Stateless Action (generates a UI button)
+device.add_action("reboot", "Reboot Device", on_execute=lambda params: print("Rebooting!"))
+
+# Connect to the MyDevice platform in the background
 device.connect()
 
 # Send telemetry in a loop
 try:
     while True:
-        device.send("sensor_1", temperature=25.4, humidity=60)
-        device.send("motor_status", fan_speed=2, pump_active=True)
+        # Automatic state tracking! Only publishes if value actually changes.
+        device.update_property("temperature", 25.4)
         time.sleep(5)
 except KeyboardInterrupt:
     device.disconnect()
 `;
 
           const arduinoExample = `#include <WiFi.h>          // Use <ESP8266WiFi.h> for ESP8266
-#include "MyDevice.h"      // Place MyDevice.h in sketch folder or Arduino libraries
+#include "MyDevice.h"      // Place MyDevice.h in sketch folder
 
 const char* WIFI_SSID  = "YOUR_WIFI_SSID";
 const char* WIFI_PASS  = "YOUR_WIFI_PASSWORD";
@@ -368,35 +366,35 @@ MyDevice   device("${did}", "YOUR_SECRET_KEY", wifiClient);
 void setup() {
     Serial.begin(115200);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
+    
+    // Non-blocking WiFi connection
     while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
     Serial.println("\\nWiFi connected");
 
-    // Register capabilities
-    device.addCapability("motor_control", "Motor Control",
-                         "Control actuators", "motor_status.fan_speed");
-    device.addAction("motor_control", "SET_FAN_SPEED", "Set Fan Speed", "0=off, 3=high");
-    device.addNumberParam("speed", 0, 3, 1);
+    // 1. Read-only Sensor
+    device.addProperty("temperature", "Temperature", "number", false, nullptr, "°C");
 
-    // Handle commands
-    device.onCommand("SET_FAN_SPEED", [](JsonObject p) {
-        int speed = p["speed"];
-        Serial.printf("Fan speed -> %d\\n", speed);
-        return true;   // true = COMPLETED, false = FAILED
+    // 2. Controllable Switch
+    device.addProperty("main_light", "Main Light", "boolean", true, [](JsonVariant val) {
+        digitalWrite(LED_BUILTIN, val.as<bool>());
+    });
+
+    // 3. Stateless Action
+    device.addAction("reboot", "Reboot Device", "Restarts hardware", [](JsonObject p) {
+        ESP.restart();
     });
 
     device.begin();
 }
 
 void loop() {
-    device.loop();
+    device.loop(); // Must be called continuously
 
-    // Send telemetry every 5 seconds
+    // Update telemetry (automatically publishes changes)
     static unsigned long lastMs = 0;
     if (millis() - lastMs > 5000) {
         lastMs = millis();
-        device.addField("temperature", 25.4f);
-        device.addField("humidity", 60);
-        device.send("sensor_1");
+        device.updateProperty("temperature", 25.4f);
     }
 }
 `;
@@ -405,26 +403,24 @@ void loop() {
 
 const device = new MyDevice('${did}', 'YOUR_SECRET_KEY');
 
-// Register capabilities
-device.addCapability('motor_control', 'Motor Control',
-                     'Control actuators', 'motor_status.fan_speed');
-device.addAction('motor_control', 'SET_FAN_SPEED', 'Set Fan Speed', '0=off, 3=high', {
-    speed: { type: 'number', min: 0, max: 3, step: 1, required: true }
+// 1. Read-only Sensor
+device.addProperty('temperature', 'Temperature', 'number', { unit: '°C' });
+
+// 2. Controllable Switch
+device.addProperty('main_light', 'Main Light', 'boolean', { 
+    writable: true, 
+    onChange: (val) => console.log(\`Light is now \${val}\`) 
 });
 
-// Handle commands
-device.onCommand('SET_FAN_SPEED', (params) => {
-    console.log('Fan speed ->', params.speed);
-    return true;   // true = COMPLETED, false = FAILED
-});
+// 3. Stateless Action
+device.addAction('reboot', 'Reboot', 'Restarts', {}, (params) => console.log('Rebooting!'));
 
 // Connect
 device.connect();
 
 // Send telemetry every 5 seconds
 setInterval(() => {
-    device.send('sensor_1', { temperature: 25.4, humidity: 60 });
-    device.send('motor_status', { fan_speed: 2, pump_active: true });
+    device.updateProperty('temperature', 25.4);
 }, 5000);
 `;
 
@@ -448,10 +444,9 @@ setInterval(() => {
               apiRef: [
                 { fn: 'MyDevice(id, key)', desc: 'Create device instance' },
                 { fn: 'device.connect()', desc: 'Connect to the platform' },
-                { fn: 'device.send(source, **fields)', desc: 'Send telemetry data' },
-                { fn: 'device.add_capability(...)', desc: 'Register a capability group' },
-                { fn: 'cap.add_action(...)', desc: 'Add an action to a capability' },
-                { fn: '@device.on_command(type)', desc: 'Decorator to handle a command' },
+                { fn: 'device.add_property(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.add_action(...)', desc: 'Define stateless command' },
+                { fn: 'device.update_property(k, v)', desc: 'Publish telemetry' },
                 { fn: 'device.disconnect()', desc: 'Graceful shutdown' },
               ]
             },
@@ -475,10 +470,9 @@ setInterval(() => {
                 { fn: 'MyDevice(id, key, client)', desc: 'Create device instance' },
                 { fn: 'device.begin()', desc: 'Connect (call in setup())' },
                 { fn: 'device.loop()', desc: 'Process MQTT (call in loop())' },
-                { fn: 'device.addField(key, val)', desc: 'Queue a telemetry field' },
-                { fn: 'device.send(source)', desc: 'Publish queued fields' },
-                { fn: 'device.addCapability(...)', desc: 'Register a capability' },
-                { fn: 'device.onCommand(type, fn)', desc: 'Handle a command' },
+                { fn: 'device.addProperty(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.addAction(...)', desc: 'Define stateless command' },
+                { fn: 'device.updateProperty(k, v)', desc: 'Publish telemetry' },
               ]
             },
             nodejs: {
@@ -500,10 +494,9 @@ setInterval(() => {
               apiRef: [
                 { fn: "new MyDevice(id, key)", desc: 'Create device instance' },
                 { fn: 'device.connect()', desc: 'Connect to the platform' },
-                { fn: 'device.send(source, fields)', desc: 'Send telemetry data' },
-                { fn: 'device.addCapability(...)', desc: 'Register a capability' },
-                { fn: 'device.addAction(...)', desc: 'Add an action' },
-                { fn: 'device.onCommand(type, fn)', desc: 'Handle a command' },
+                { fn: 'device.addProperty(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.addAction(...)', desc: 'Define stateless command' },
+                { fn: 'device.updateProperty(k, v)', desc: 'Publish telemetry' },
                 { fn: 'device.disconnect()', desc: 'Graceful shutdown' },
               ]
             },
