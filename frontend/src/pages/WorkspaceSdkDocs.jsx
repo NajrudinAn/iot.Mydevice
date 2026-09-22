@@ -19,13 +19,39 @@ IMPORTANT RULES:
 2. Only add the code needed to send telemetry data and receive commands via the SDK.
 3. My Device ID is "YOUR_DEVICE_ID" and Secret Key is "YOUR_SECRET_KEY".
 
-Here is how the SDK works (Blueprint API):
-- Use \`add_reading(name, label, type, unit)\` to define read-only sensors (telemetry).
-- Use \`add_switch(name, label, callback)\` or \`add_slider(name, label, min, max, callback)\` to define controllable components. 
-- Use \`send(name, value)\` to push data updates in the main loop.
-- The SDK automatically handles the MQTT connection, reconnects, and command routing.
+SDK CAPABILITIES & FULL API REFERENCE:
+The SDK uses a "Blueprint API". You define properties and actions, and the cloud auto-generates the UI.
 
-Please analyze my code and provide the exact snippets to add. Keep it clean and simple.`;
+1. INITIALIZATION:
+   - Python: \`device = MyDevice("ID", "SECRET")\`
+   - Node.js: \`const device = new MyDevice('ID', 'SECRET')\`
+   - Arduino: \`MyDevice device("ID", "SECRET", wifiClient)\`
+
+2. READ-ONLY TELEMETRY (Sensors, Status):
+   - \`add_reading(name, label, data_type="number", unit="")\`
+     Example: \`device.add_reading("temp", "Temperature", "number", "°C")\`
+
+3. CONTROLLABLE COMPONENTS (Auto-generates Dashboard UI):
+   - \`add_switch(name, label, on_change_callback)\`
+     Creates a toggle. Callback receives a boolean.
+   - \`add_slider(name, label, min_val, max_val, on_change_callback)\`
+     Creates a slider. Callback receives a float/number.
+   - \`add_property(name, label, type, unit, min, max, options, writable, on_change)\`
+     Advanced generic property (e.g., string dropdowns if options=["A", "B"]).
+
+4. STATELESS ACTIONS (Buttons/Commands):
+   - \`add_action(name, label, description, parameters_dict, on_execute_callback)\`
+     Creates a clickable button on the dashboard that triggers the callback.
+
+5. SENDING DATA:
+   - \`send(name, value)\` or \`update_property(name, value)\`
+     Push sensor data in your main loop. The SDK automatically deduplicates traffic.
+
+6. CONNECTION:
+   - Python/Node: Call \`device.connect()\` once.
+   - Arduino: Call \`device.begin()\` in setup(), and \`device.loop()\` constantly in loop().
+
+Please analyze my code and provide the exact snippets to add. Provide full, copy-pastable code.`;
 
     const getDocsContent = (lang) => {
         switch (lang) {
