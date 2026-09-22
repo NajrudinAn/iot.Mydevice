@@ -58,9 +58,9 @@ Switches automatically generate "SET" commands from the platform. The SDK handle
 ```python
 def handle_light(is_on):
     if is_on:
-        print("💡 Turning light ON")
+        print("Turning light ON")
     else:
-        print("💡 Turning light OFF")
+        print("Turning light OFF")
 
 device.add_switch("main_light", "Main Light", on_change=handle_light)
 ```
@@ -69,9 +69,9 @@ device.add_switch("main_light", "Main Light", on_change=handle_light)
 ```javascript
 device.addSwitch('main_light', 'Main Light', (isOn) => {
     if (isOn) {
-        console.log('💡 Turning light ON');
+        console.log('Turning light ON');
     } else {
-        console.log('💡 Turning light OFF');
+        console.log('Turning light OFF');
     }
 });
 ```
@@ -81,10 +81,10 @@ device.addSwitch('main_light', 'Main Light', (isOn) => {
 device.addSwitch("main_light", "Main Light", [](bool isOn) {
     if (isOn) {
         digitalWrite(LED_BUILTIN, HIGH);
-        Serial.println("💡 Light turned ON");
+        Serial.println("Light turned ON");
     } else {
         digitalWrite(LED_BUILTIN, LOW);
-        Serial.println("💡 Light turned OFF");
+        Serial.println("Light turned OFF");
     }
 });
 ```
@@ -95,7 +95,7 @@ Sliders let you set numeric values with specific bounds.
 **Python:**
 ```python
 def handle_fan(speed):
-    print(f"🌪️ Setting fan speed to {speed}")
+    print(f"Setting fan speed to {speed}")
 
 device.add_slider("fan_speed", "Fan Speed", min_val=0, max_val=100, step=1, on_change=handle_fan)
 ```
@@ -103,7 +103,7 @@ device.add_slider("fan_speed", "Fan Speed", min_val=0, max_val=100, step=1, on_c
 **Node.js:**
 ```javascript
 device.addSlider('fan_speed', 'Fan Speed', 0, 100, (speed) => {
-    console.log(`🌪️ Setting fan speed to ${speed}`);
+    console.log(`Setting fan speed to ${speed}`);
 });
 ```
 
@@ -111,7 +111,7 @@ device.addSlider('fan_speed', 'Fan Speed', 0, 100, (speed) => {
 ```cpp
 device.addSlider("fan_speed", "Fan Speed", 0, 100, [](float speed) {
     analogWrite(FAN_PIN, speed);
-    Serial.println("🌪️ Fan speed updated");
+    Serial.println("Fan speed updated");
 });
 ```
 
@@ -126,7 +126,7 @@ Actions are commands that do not represent continuous state (e.g., Reboot, Calib
 **Python:**
 ```python
 def handle_reboot(params):
-    print("🔄 Rebooting hardware...")
+    print("Rebooting hardware...")
 
 device.add_action("reboot", "Reboot Device", "Restarts hardware", on_execute=handle_reboot)
 ```
@@ -134,14 +134,14 @@ device.add_action("reboot", "Reboot Device", "Restarts hardware", on_execute=han
 **Node.js:**
 ```javascript
 device.addAction('reboot', 'Reboot Device', 'Restarts hardware', {}, (params) => {
-    console.log('🔄 Rebooting hardware...');
+    console.log('Rebooting hardware...');
 });
 ```
 
 **Arduino:**
 ```cpp
 device.addAction("reboot", "Reboot Device", "Restarts hardware", [](JsonObject params) {
-    Serial.println("🔄 Rebooting hardware...");
+    Serial.println("Rebooting hardware...");
     ESP.restart();
 });
 ```

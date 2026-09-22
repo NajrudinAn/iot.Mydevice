@@ -338,15 +338,15 @@ device.add_reading("status_msg", "Status", data_type="string")
 # 2. Controllable Switch (generates a UI toggle)
 def handle_light(is_on):
     if is_on:
-        print("💡 Turning light ON")
+        print("Turning light ON")
     else:
-        print("💡 Turning light OFF")
+        print("Turning light OFF")
 
 device.add_switch("main_light", "Main Light", on_change=handle_light)
 
 # 3. Stateless Action (generates a UI button)
 def handle_reboot(params):
-    print("🔄 Rebooting device...")
+    print("Rebooting device...")
 
 device.add_action("reboot", "Reboot Device", on_execute=handle_reboot)
 

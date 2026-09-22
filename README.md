@@ -139,7 +139,7 @@ device.add_reading("temperature", "Temperature", data_type="number", unit="°C")
 
 # 2. Controllable Switch (generates a UI toggle automatically)
 def handle_light(is_on):
-    print("💡 Turning light ON" if is_on else "💡 Turning light OFF")
+    print("Turning light ON" if is_on else "Turning light OFF")
 
 device.add_switch("main_light", "Main Light", on_change=handle_light)
 
