@@ -156,19 +156,19 @@ void loop() {
                     <div 
                         key={key}
                         onClick={() => setActiveTab(key)}
-                        className={\`p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 \${
+                        className={`p-5 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
                             activeTab === key 
                             ? 'border-blue-500 bg-blue-50 shadow-md transform -translate-y-1' 
                             : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow'
-                        }\`}
+                        }`}
                     >
                         <div className="flex items-center gap-3 mb-2">
                             {data.icon}
-                            <h3 className={\`font-bold \${activeTab === key ? 'text-blue-900' : 'text-gray-800'}\`}>
+                            <h3 className={`font-bold ${activeTab === key ? 'text-blue-900' : 'text-gray-800'}`}>
                                 {data.title}
                             </h3>
                         </div>
-                        <p className={\`text-sm \${activeTab === key ? 'text-blue-700' : 'text-gray-500'}\`}>
+                        <p className={`text-sm ${activeTab === key ? 'text-blue-700' : 'text-gray-500'}`}>
                             {data.desc}
                         </p>
                     </div>
