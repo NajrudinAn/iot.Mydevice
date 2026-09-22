@@ -120,6 +120,9 @@ export default function WorkspaceLayout({ children }) {
             <NavLink to={`${basePath}/apis`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
               <Code size={18} /> APIs
             </NavLink>
+            <NavLink to={`${basePath}/sdk`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
+              <Box size={18} /> SDK Integration
+            </NavLink>
             <NavLink to={`${basePath}/applications`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
               <LayoutDashboard size={18} /> Applications
             </NavLink>

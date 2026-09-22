@@ -28,6 +28,7 @@ import Spinner from './components/ui/Spinner';
 import UserPortal from './pages/UserPortal';
 import WorkspaceApis from './pages/WorkspaceApis';
 import WorkspaceApiDetails from './pages/WorkspaceApiDetails';
+import WorkspaceSdkDocs from './pages/WorkspaceSdkDocs';
 
 const ProtectedPlatformRoute = ({ children, breadcrumb }) => {
   const { user, loading } = useAuth();
@@ -164,6 +165,7 @@ export default function App() {
             <Route path="/workspaces/:workspaceId/data/:deviceId/source/:sourceId" element={<ProtectedWorkspaceRoute><WorkspaceDataDeviceView /></ProtectedWorkspaceRoute>} />
             <Route path="/workspaces/:workspaceId/apis" element={<ProtectedWorkspaceRoute><WorkspaceApis /></ProtectedWorkspaceRoute>} />
             <Route path="/workspaces/:workspaceId/apis/:apiId" element={<ProtectedWorkspaceRoute><WorkspaceApiDetails /></ProtectedWorkspaceRoute>} />
+            <Route path="/workspaces/:workspaceId/sdk" element={<ProtectedWorkspaceRoute><WorkspaceSdkDocs /></ProtectedWorkspaceRoute>} />
             <Route path="/workspaces/:workspaceId/applications" element={<ProtectedWorkspaceRoute><ApplicationsList /></ProtectedWorkspaceRoute>} />
             <Route path="/workspaces/:workspaceId/users" element={<ProtectedWorkspaceRoute><WorkspaceUsers /></ProtectedWorkspaceRoute>} />
             <Route path="/workspaces/:workspaceId/settings" element={<ProtectedWorkspaceRoute><WorkspaceSettings /></ProtectedWorkspaceRoute>} />
