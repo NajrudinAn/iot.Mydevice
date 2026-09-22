@@ -120,9 +120,6 @@ export default function WorkspaceLayout({ children }) {
             <NavLink to={`${basePath}/apis`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
               <Code size={18} /> APIs
             </NavLink>
-            <NavLink to={`${basePath}/sdk`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
-              <Box size={18} /> SDK Integration
-            </NavLink>
             <NavLink to={`${basePath}/applications`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
               <LayoutDashboard size={18} /> Applications
             </NavLink>
@@ -141,6 +138,14 @@ export default function WorkspaceLayout({ children }) {
             <div className="sidebar-section-title text-muted text-xs font-bold uppercase mb-2 px-3" style={{ letterSpacing: '0.05em' }}>Settings</div>
             <NavLink to={`${basePath}/settings`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
               <Settings size={18} /> Settings
+            </NavLink>
+          </div>
+
+          {/* DEVELOPER DOCS */}
+          <div className="mb-6">
+            <div className="sidebar-section-title text-muted text-xs font-bold uppercase mb-2 px-3" style={{ letterSpacing: '0.05em' }}>Developer</div>
+            <NavLink to={`${basePath}/sdk`} className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`} onClick={handleMobileNav}>
+              <BookOpen size={18} /> SDK Documentation
             </NavLink>
           </div>
         </div>
