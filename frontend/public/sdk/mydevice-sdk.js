@@ -100,8 +100,8 @@ class MyDevice {
         this._properties[name] = prop;
     }
 
-    addSensor(name, label, unit = '') {
-        this.addProperty(name, label, 'number', { unit, writable: false });
+    addReading(name, label, dataType = 'number', unit = '') {
+        this.addProperty(name, label, dataType, { unit, writable: false });
     }
 
     addSwitch(name, label, onChange) {

@@ -30,22 +30,25 @@ Place `MyDevice.h` in your sketch folder and `#include "MyDevice.h"`.
 
 Properties represent the state of your device. We provide ultra-simple **Semantic Helpers** so you can easily define the exact type of property without complex configurations.
 
-### Read-Only Sensors
-Read-only properties continuously stream data to the platform but cannot be controlled from the UI.
+### Read-Only Data (Telemetry, Status, etc.)
+Read-only properties continuously stream data to the platform but cannot be controlled from the UI. You can send numbers (like sensors) or strings (like status messages).
 
 **Python:**
 ```python
-device.add_sensor("temperature", "Temperature", "°C")
+device.add_reading("temperature", "Temperature", data_type="number", unit="°C")
+device.add_reading("status_msg", "System Status", data_type="string")
 ```
 
 **Node.js:**
 ```javascript
-device.addSensor('temperature', 'Temperature', '°C');
+device.addReading('temperature', 'Temperature', 'number', '°C');
+device.addReading('status_msg', 'System Status', 'string');
 ```
 
 **Arduino:**
 ```cpp
-device.addSensor("temperature", "Temperature", "°C");
+device.addReading("temperature", "Temperature", "number", "°C");
+device.addReading("status_msg", "System Status", "string");
 ```
 
 ### Controllable Switches (Booleans)
@@ -53,18 +56,36 @@ Switches automatically generate "SET" commands from the platform. The SDK handle
 
 **Python:**
 ```python
-device.add_switch("main_light", "Main Light", on_change=lambda val: set_light(val))
+def handle_light(is_on):
+    if is_on:
+        print("💡 Turning light ON")
+    else:
+        print("💡 Turning light OFF")
+
+device.add_switch("main_light", "Main Light", on_change=handle_light)
 ```
 
 **Node.js:**
 ```javascript
-device.addSwitch('main_light', 'Main Light', (val) => setLight(val));
+device.addSwitch('main_light', 'Main Light', (isOn) => {
+    if (isOn) {
+        console.log('💡 Turning light ON');
+    } else {
+        console.log('💡 Turning light OFF');
+    }
+});
 ```
 
 **Arduino:**
 ```cpp
 device.addSwitch("main_light", "Main Light", [](bool isOn) {
-    digitalWrite(LED_BUILTIN, isOn ? HIGH : LOW);
+    if (isOn) {
+        digitalWrite(LED_BUILTIN, HIGH);
+        Serial.println("💡 Light turned ON");
+    } else {
+        digitalWrite(LED_BUILTIN, LOW);
+        Serial.println("💡 Light turned OFF");
+    }
 });
 ```
 
@@ -73,18 +94,24 @@ Sliders let you set numeric values with specific bounds.
 
 **Python:**
 ```python
-device.add_slider("fan_speed", "Fan Speed", min_val=0, max_val=100, step=1, on_change=lambda val: set_fan(val))
+def handle_fan(speed):
+    print(f"🌪️ Setting fan speed to {speed}")
+
+device.add_slider("fan_speed", "Fan Speed", min_val=0, max_val=100, step=1, on_change=handle_fan)
 ```
 
 **Node.js:**
 ```javascript
-device.addSlider('fan_speed', 'Fan Speed', 0, 100, (val) => setFan(val));
+device.addSlider('fan_speed', 'Fan Speed', 0, 100, (speed) => {
+    console.log(`🌪️ Setting fan speed to ${speed}`);
+});
 ```
 
 **Arduino:**
 ```cpp
-device.addSlider("fan_speed", "Fan Speed", 0, 100, [](float val) {
-    analogWrite(FAN_PIN, val);
+device.addSlider("fan_speed", "Fan Speed", 0, 100, [](float speed) {
+    analogWrite(FAN_PIN, speed);
+    Serial.println("🌪️ Fan speed updated");
 });
 ```
 
@@ -98,17 +125,23 @@ Actions are commands that do not represent continuous state (e.g., Reboot, Calib
 
 **Python:**
 ```python
-device.add_action("reboot", "Reboot Device", "Restarts hardware", on_execute=lambda params: reboot())
+def handle_reboot(params):
+    print("🔄 Rebooting hardware...")
+
+device.add_action("reboot", "Reboot Device", "Restarts hardware", on_execute=handle_reboot)
 ```
 
 **Node.js:**
 ```javascript
-device.addAction('reboot', 'Reboot Device', 'Restarts hardware', {}, (params) => reboot());
+device.addAction('reboot', 'Reboot Device', 'Restarts hardware', {}, (params) => {
+    console.log('🔄 Rebooting hardware...');
+});
 ```
 
 **Arduino:**
 ```cpp
 device.addAction("reboot", "Reboot Device", "Restarts hardware", [](JsonObject params) {
+    Serial.println("🔄 Rebooting hardware...");
     ESP.restart();
 });
 ```
@@ -125,6 +158,7 @@ device.connect() # Non-blocking background thread by default
 
 while True:
     device.send("temperature", read_sensor())
+    device.send("status_msg", "System OK")
     time.sleep(5)
 ```
 
@@ -134,6 +168,7 @@ device.connect();
 
 setInterval(() => {
     device.send('temperature', readSensor());
+    device.send('status_msg', 'System OK');
 }, 5000);
 ```
 
@@ -147,6 +182,7 @@ void loop() {
     device.loop(); // Must be called continuously
     
     device.send("temperature", readSensor());
+    device.send("status_msg", "System OK");
 }
 ```
 

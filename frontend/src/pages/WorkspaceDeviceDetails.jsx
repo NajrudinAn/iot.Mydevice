@@ -331,14 +331,24 @@ import time
 
 device = MyDevice("${did}", "YOUR_SECRET_KEY")
 
-# 1. Read-only Sensor
-device.add_sensor("temperature", "Temperature", "°C")
+# 1. Read-only Data (Telemetry, Status, etc.)
+device.add_reading("temperature", "Temperature", data_type="number", unit="°C")
+device.add_reading("status_msg", "Status", data_type="string")
 
 # 2. Controllable Switch (generates a UI toggle)
-device.add_switch("main_light", "Main Light", on_change=lambda val: print(f"Light is now {val}"))
+def handle_light(is_on):
+    if is_on:
+        print("💡 Turning light ON")
+    else:
+        print("💡 Turning light OFF")
+
+device.add_switch("main_light", "Main Light", on_change=handle_light)
 
 # 3. Stateless Action (generates a UI button)
-device.add_action("reboot", "Reboot Device", on_execute=lambda params: print("Rebooting!"))
+def handle_reboot(params):
+    print("🔄 Rebooting device...")
+
+device.add_action("reboot", "Reboot Device", on_execute=handle_reboot)
 
 # Connect to the MyDevice platform in the background
 device.connect()
@@ -348,6 +358,7 @@ try:
     while True:
         # Automatic state tracking! Only publishes if value actually changes.
         device.send("temperature", 25.4)
+        device.send("status_msg", "System OK")
         time.sleep(5)
 except KeyboardInterrupt:
     device.disconnect()
@@ -370,16 +381,25 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
     Serial.println("\\nWiFi connected");
 
-    // 1. Read-only Sensor
-    device.addSensor("temperature", "Temperature", "°C");
+    // 1. Read-only Data (Telemetry, Status, etc.)
+    device.addReading("temperature", "Temperature", "number", "°C");
+    device.addReading("status_msg", "Status", "string");
 
     // 2. Controllable Switch
     device.addSwitch("main_light", "Main Light", [](bool isOn) {
-        digitalWrite(LED_BUILTIN, isOn);
+        if (isOn) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            Serial.println("Light turned ON");
+        } else {
+            digitalWrite(LED_BUILTIN, LOW);
+            Serial.println("Light turned OFF");
+        }
     });
 
     // 3. Stateless Action
     device.addAction("reboot", "Reboot Device", "Restarts hardware", [](JsonObject p) {
+        Serial.println("Rebooting device...");
+        delay(1000);
         ESP.restart();
     });
 
@@ -394,6 +414,7 @@ void loop() {
     if (millis() - lastMs > 5000) {
         lastMs = millis();
         device.send("temperature", 25.4f);
+        device.send("status_msg", "System OK");
     }
 }
 `;
@@ -402,14 +423,23 @@ void loop() {
 
 const device = new MyDevice('${did}', 'YOUR_SECRET_KEY');
 
-// 1. Read-only Sensor
-device.addSensor('temperature', 'Temperature', '°C');
+// 1. Read-only Data
+device.addReading('temperature', 'Temperature', 'number', '°C');
+device.addReading('status_msg', 'Status', 'string');
 
 // 2. Controllable Switch
-device.addSwitch('main_light', 'Main Light', (val) => console.log(\`Light is now \${val}\`));
+device.addSwitch('main_light', 'Main Light', (isOn) => {
+    if (isOn) {
+        console.log('Turning light ON');
+    } else {
+        console.log('Turning light OFF');
+    }
+});
 
 // 3. Stateless Action
-device.addAction('reboot', 'Reboot', 'Restarts', {}, (params) => console.log('Rebooting!'));
+device.addAction('reboot', 'Reboot', 'Restarts device', {}, (params) => {
+    console.log('Rebooting device...');
+});
 
 // Connect
 device.connect();
@@ -417,6 +447,7 @@ device.connect();
 // Send telemetry every 5 seconds
 setInterval(() => {
     device.send('temperature', 25.4);
+    device.send('status_msg', 'System OK');
 }, 5000);
 `;
 
@@ -440,7 +471,7 @@ setInterval(() => {
               apiRef: [
                 { fn: 'MyDevice(id, key)', desc: 'Create device instance' },
                 { fn: 'device.connect()', desc: 'Connect to the platform' },
-                { fn: 'device.add_sensor(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.add_reading(...)', desc: 'Define telemetry/state' },
                 { fn: 'device.add_switch(...)', desc: 'Define controllable toggle' },
                 { fn: 'device.add_action(...)', desc: 'Define stateless command' },
                 { fn: 'device.send(k, v)', desc: 'Publish telemetry' },
@@ -467,7 +498,7 @@ setInterval(() => {
                 { fn: 'MyDevice(id, key, client)', desc: 'Create device instance' },
                 { fn: 'device.begin()', desc: 'Connect (call in setup())' },
                 { fn: 'device.loop()', desc: 'Process MQTT (call in loop())' },
-                { fn: 'device.addSensor(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.addReading(...)', desc: 'Define telemetry/state' },
                 { fn: 'device.addSwitch(...)', desc: 'Define controllable toggle' },
                 { fn: 'device.addAction(...)', desc: 'Define stateless command' },
                 { fn: 'device.send(k, v)', desc: 'Publish telemetry' },
@@ -492,7 +523,7 @@ setInterval(() => {
               apiRef: [
                 { fn: "new MyDevice(id, key)", desc: 'Create device instance' },
                 { fn: 'device.connect()', desc: 'Connect to the platform' },
-                { fn: 'device.addSensor(...)', desc: 'Define telemetry/state' },
+                { fn: 'device.addReading(...)', desc: 'Define telemetry/state' },
                 { fn: 'device.addSwitch(...)', desc: 'Define controllable toggle' },
                 { fn: 'device.addAction(...)', desc: 'Define stateless command' },
                 { fn: 'device.send(k, v)', desc: 'Publish telemetry' },

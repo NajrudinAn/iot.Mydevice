@@ -105,9 +105,9 @@ class MyDevice:
             
         self._properties[name] = prop
 
-    def add_sensor(self, name, label, unit=""):
-        """Define a read-only sensor."""
-        self.add_property(name, label, data_type="number", unit=unit, writable=False)
+    def add_reading(self, name, label, data_type="number", unit=""):
+        """Define any read-only data (e.g. sensor telemetry, status strings)."""
+        self.add_property(name, label, data_type=data_type, unit=unit, writable=False)
 
     def add_switch(self, name, label, on_change):
         """Define a controllable on/off switch."""

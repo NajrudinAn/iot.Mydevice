@@ -120,8 +120,8 @@ public:
 
     // ── Semantic Helpers (Super Simple API) ─────────────────────────
 
-    void addSensor(const char* name, const char* label, const char* unit = "") {
-        addProperty(name, label, "number", false, nullptr, unit);
+    void addReading(const char* name, const char* label, const char* type = "number", const char* unit = "") {
+        addProperty(name, label, type, false, nullptr, unit);
     }
 
     void addSwitch(const char* name, const char* label, MDPropertyChangeHandler onChange) {
