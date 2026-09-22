@@ -1,11 +1,25 @@
-# DevSync IoT Platform
+<div align="center">
+  <img src="frontend/public/logo.png" alt="MyDevice Logo" width="150" />
+  <h1>MyDevice IoT Platform</h1>
+  <p><strong>A Lightweight, Reusable, and Scalable IoT Management Platform</strong></p>
 
-**DevSync** is a lightweight, reusable IoT platform that connects IoT devices, collects and stores telemetry, provides secure device control, and allows developers to build applications, dashboards, custom frontends, and external integrations through controlled APIs.
+  <!-- Badges -->
+  <p>
+    <a href="https://github.com/NajrudinAn/iot.Mydevice/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+    <img src="https://img.shields.io/badge/Node.js-18%2B-green.svg" alt="Node.js Version">
+    <img src="https://img.shields.io/badge/PostgreSQL-14%2B-blue.svg" alt="PostgreSQL">
+    <img src="https://img.shields.io/badge/React-18-61DAFB.svg" alt="React">
+    <img src="https://img.shields.io/badge/MQTT-Mosquitto-orange.svg" alt="MQTT">
+  </p>
+</div>
 
-## What problem does this solve?
-When developers create a new IoT device or application, they repeatedly have to implement boilerplate code for Wi-Fi, MQTT connection, authentication, telemetry, and reconnect logic. **DevSync eliminates this boilerplate.** 
+---
 
-By providing a reusable C++ IoT Connector and a complete, multi-tenant backend architecture (with dashboards and APIs), you can focus entirely on your specific hardware sensors and your custom frontend design.
+## ⚡ What is MyDevice?
+
+When developers create a new IoT device or application, they repeatedly have to implement boilerplate code for Wi-Fi, MQTT connection, authentication, telemetry syncing, and reconnect logic. **MyDevice eliminates this boilerplate.** 
+
+By providing highly abstract SDKs (Python, Node.js, Arduino/C++) and a complete, multi-tenant backend architecture with dynamic dashboards and APIs, you can focus entirely on your specific hardware sensors and your custom application logic.
 
 ---
 
@@ -13,53 +27,57 @@ By providing a reusable C++ IoT Connector and a complete, multi-tenant backend a
 
 ```mermaid
 graph LR
-    subgraph "Device Layer"
-        ESP32[ESP32 / NodeMCU]
-        Connector[IoTConnector]
+    subgraph "Hardware / Edge Layer"
+        ESP32[ESP32 / Raspberry Pi]
+        SDK[MyDevice SDK]
         Sensors[Sensors/Actuators]
         ESP32 --- Sensors
-        ESP32 --- Connector
+        ESP32 --- SDK
     end
 
     subgraph "Broker Layer"
         Mosquitto((Mosquitto MQTT))
     end
 
-    subgraph "Backend Layer"
+    subgraph "Cloud Backend Layer"
         Node[Node.js / Express]
         Postgres[(PostgreSQL)]
         Node --- Postgres
     end
 
     subgraph "Application Layer"
-        Dashboard[DevSync Dashboard]
-        CustomApp[Custom Frontend/App]
+        Dashboard[MyDevice Dashboard]
+        CustomApp[Hosted Sub-Apps]
     end
 
-    Connector -- "MQTT (Auth)" --> Mosquitto
-    Mosquitto -- "MQTT Hook" --> Node
+    SDK -- "MQTT (Auth TCP:1883)" --> Mosquitto
+    Mosquitto -- "MQTT Hooks" --> Node
     Node -- "REST API (JWT)" --> Dashboard
-    Node -- "REST API (API Key)" --> CustomApp
+    Node -- "Wildcard Subdomains" --> CustomApp
 ```
 
-### Technology Stack
-- **Backend:** Node.js (Express), Mosquitto MQTT Broker
+### 💻 Technology Stack
+- **Backend:** Node.js (Express), Mosquitto MQTT Broker (Native)
 - **Database:** PostgreSQL
 - **Frontend:** React + Vite + TailwindCSS
-- **Hardware:** ESP32/NodeMCU using C++ (Arduino Framework)
+- **Hardware/SDK:** Python, Node.js, and C++ (Arduino Framework)
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Quick Start Guide (Local Development)
+
+*For production server setup, please refer to the [Production Deployment Guide](DEPLOYMENT.md).*
 
 ### 1. Prerequisites
-- Node.js v20+
-- PostgreSQL 15+
+- Node.js v18+
+- PostgreSQL 14+
 - Mosquitto MQTT Broker
 
 ### 2. Environment Setup
 Clone the repository and set up your backend environment variables:
 ```bash
+git clone git@github.com:NajrudinAn/iot.Mydevice.git
+cd iot.Mydevice
 cp backend/.env.example backend/.env
 ```
 Edit `backend/.env` to include your PostgreSQL credentials and secure secrets.
@@ -68,16 +86,16 @@ Edit `backend/.env` to include your PostgreSQL credentials and secure secrets.
 Create the PostgreSQL database and run the migrations:
 ```bash
 # In psql or your db manager:
-# CREATE DATABASE iot_platform;
+# CREATE DATABASE mydevice;
 
 # Run migrations
 cd backend
 npm install
-npm run migrate
+npm run db:init
 ```
 
 ### 4. Start the Backend & MQTT
-Ensure Mosquitto is running locally on port `1883`. Then start the DevSync Node.js backend:
+Ensure Mosquitto is running locally on port `1883`. Then start the MyDevice Node.js backend:
 ```bash
 cd backend
 npm run dev
@@ -97,7 +115,7 @@ npm run dev
 ## 🛠 Using the Platform
 
 ### Step 1: Create a Workspace & Application
-1. Open the DevSync Dashboard (`http://localhost:5173`).
+1. Open the MyDevice Dashboard (`http://localhost:5173`).
 2. Log in (or register your first admin account).
 3. Create a **Workspace**.
 4. Inside the Workspace, create an **Application**.
@@ -107,52 +125,58 @@ npm run dev
 2. Note the generated **Device ID** and **Secret Key**. *(Keep the secret key safe!)*
 3. Navigate back to your Application and **assign** the newly created device to the application.
 
-### Step 3: Connect your Hardware (IoTConnector)
-In your ESP32 project, include the `IoTConnector` library:
-```cpp
-#include "IoTConnector.h"
+### Step 3: Connect your Hardware
+Use the official **MyDevice SDK**. Here is an example of the incredibly simple Python SDK:
 
-IoTConnector connector(
-    "WIFI_SSID", "WIFI_PASS", 
-    "192.168.1.X", 1883, // MQTT Broker IP
-    "DEV-YOUR-ID",       // DevSync Device ID
-    "YOUR-SECRET-KEY"    // DevSync Secret Key
-);
+```python
+from mydevice import MyDevice
+import time
 
-void setup() {
-    connector.begin();
-}
+device = MyDevice("DEVICE_ID", "YOUR_SECRET_KEY")
 
-void loop() {
-    connector.loop();
-    // Publish telemetry
-    connector.publishTelemetry("temperature", 24.5);
-}
+# 1. Read-only Data (Telemetry, Status, etc.)
+device.add_reading("temperature", "Temperature", data_type="number", unit="°C")
+
+# 2. Controllable Switch (generates a UI toggle automatically)
+def handle_light(is_on):
+    print("💡 Turning light ON" if is_on else "💡 Turning light OFF")
+
+device.add_switch("main_light", "Main Light", on_change=handle_light)
+
+# Connect & loop
+device.connect()
+while True:
+    device.send("temperature", 24.5)
+    time.sleep(5)
 ```
+*(Available in Python, Node.js, and Arduino!)*
 
 ### Step 4: View Telemetry & Build Dashboards
-1. Navigate to your Application in the DevSync dashboard.
+1. Navigate to your Application in the MyDevice dashboard.
 2. Go to **Dashboards -> Create Dashboard**.
-3. Add a Line Chart or Gauge widget, select your device, and watch real-time data flow in!
+3. Add a Line Chart or Gauge widget, select your device, and watch real-time data flow in instantly!
 
 ---
 
-## 📖 Developer Documentation
+## 📖 Comprehensive Documentation
 
-DevSync is designed to act as a headless backend for your own projects. For deeper integration, refer to our detailed documentation:
+MyDevice is designed to act as a headless backend for your own projects. For deeper integration, refer to our detailed documentation:
 
-- [API & Custom Frontend Guide](docs/DEVELOPER_GUIDE.md): Learn how to use API Keys to pull data into your own mobile app or external frontend.
-- [IoT Connector Guide](docs/IOT_CONNECTOR.md): Learn the exact MQTT flow, how to handle reconnects, and how to receive commands on your device.
-- [Security Model](docs/SECURITY_MODEL.md): Understand the tenant isolation, JWT boundaries, and MQTT authentication rules.
+- 📚 **[SDK Reference Guide](docs/SDK_REFERENCE.md):** Complete guide to connecting your hardware via Python, Node.js, and Arduino.
+- 🚀 **[Production Deployment Guide](DEPLOYMENT.md):** A step-by-step masterclass on deploying MyDevice to a fresh Ubuntu cloud server, including Nginx, Cloudflare, PM2, and native systemd Mosquitto.
 
 ---
 
-## 📊 Final Project Status
+## 📊 Project Status
 
-**DevSync is COMPLETE.** (Finalized at Phase 6O).
+**MyDevice is COMPLETE.** 
 
-The platform successfully implements multi-tenant isolation, dynamic API key generation, data retention policies, device command routing, and a lightweight React application dashboard.
+The platform successfully implements multi-tenant isolation, dynamic API key generation, data retention policies, device command routing, blueprint schema inference, and a beautiful React application dashboard.
 
 *Testing Limits:* Load tested securely up to 100 simultaneous simulated device telemetry blasts (QoS 1) with 0 dropped messages, and 200 concurrent REST API loads with an average response time of ~11ms.
 
-*Note: DevSync is designed as a mid-tier college-project scale platform and relies on a monolithic Node.js ingestion path. It is not intended for enterprise-scale Kubernetes/Kafka deployments.*
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
