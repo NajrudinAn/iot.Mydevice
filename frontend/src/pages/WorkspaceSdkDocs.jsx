@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Copy, CheckCircle2, Download, Terminal, Settings2 } from 'lucide-react';
+import { Copy, CheckCircle2, Download, Terminal, Settings2, Code, Cpu, Bot, FileCode2 } from 'lucide-react';
 
 const WorkspaceSdkDocs = () => {
     const [activeTab, setActiveTab] = useState('python');
@@ -11,12 +11,27 @@ const WorkspaceSdkDocs = () => {
         setTimeout(() => setCopiedIndex(null), 2000);
     };
 
+    const aiPromptTemplate = `I am using the MyDevice IoT SDK to connect my hardware to a cloud dashboard. 
+Please integrate this SDK into my existing code.
+
+IMPORTANT RULES:
+1. Do NOT break my existing device functionality (motor control, display logic, etc.). 
+2. Only add the code needed to send telemetry data and receive commands via the SDK.
+3. My Device ID is "YOUR_DEVICE_ID" and Secret Key is "YOUR_SECRET_KEY".
+
+Here is how the SDK works (Blueprint API):
+- Use \`add_reading(name, label, type, unit)\` to define read-only sensors.
+- Use \`add_switch(name, label, callback)\` or \`add_slider(name, label, min, max, callback)\` to define controllable components. 
+- Use \`send(name, value)\` to push data.
+
+Please analyze my code and provide the exact snippets to add.`;
+
     const sdkSnippets = {
         python: {
             install: "pip install paho-mqtt",
-            title: "Python SDK (v2.0)",
-            icon: "🐍",
-            desc: "Connect Python scripts, Raspberry Pi, or backend servers using the Blueprint API.",
+            title: "Python SDK",
+            icon: <FileCode2 size={24} className="text-blue-500" />,
+            desc: "Connect Python scripts or backend servers.",
             code: `from mydevice import MyDevice
 import time
 
@@ -29,7 +44,10 @@ device.add_reading("humidity", "Humidity", "number", unit="%")
 
 # 3. Add Controllable Switch
 def handle_light(is_on):
-    print("Turning light ON" if is_on else "Turning light OFF")
+    if is_on:
+        print("Turning light ON")
+    else:
+        print("Turning light OFF")
     
 device.add_switch("main_light", "Main Light", on_change=handle_light)
 
@@ -41,9 +59,9 @@ while True:
         },
         node: {
             install: "npm install mqtt",
-            title: "Node.js SDK (v2.0)",
-            icon: "🟢",
-            desc: "Integrate headless Node.js edge agents and gateways.",
+            title: "Node.js SDK",
+            icon: <Code size={24} className="text-green-500" />,
+            desc: "Integrate Node.js edge agents.",
             code: `const { MyDevice } = require('./mydevice-sdk');
 
 // 1. Initialize Device
@@ -65,9 +83,9 @@ setInterval(() => {
         },
         arduino: {
             install: "Install PubSubClient and ArduinoJson via Library Manager",
-            title: "Arduino C++ SDK (v2.0)",
-            icon: "⚡",
-            desc: "For ESP32, ESP8266, and Arduino connected hardware.",
+            title: "Arduino C++",
+            icon: <Cpu size={24} className="text-teal-500" />,
+            desc: "For ESP32, ESP8266, and Arduino.",
             code: `#include <WiFi.h>
 #include "MyDevice.h"
 
@@ -103,13 +121,33 @@ void loop() {
                 <div>
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-2">SDK Integration</h1>
                     <p className="text-gray-500 text-sm max-w-2xl">
-                        Download the official MyDevice SDKs to connect your hardware. The Blueprint API automatically 
-                        syncs your telemetry, states, and capabilities to the dashboard.
+                        Copy these simple examples to connect your hardware to the platform. 
+                        The SDK will automatically sync your sensors and dashboard controls without complex configuration.
                     </p>
                 </div>
-                <button className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:bg-blue-700 transition-colors">
-                    <Download size={16} /> Download SDKs
-                </button>
+                <div className="flex gap-2">
+                    <button 
+                        onClick={() => handleCopy(aiPromptTemplate, 'ai_prompt')}
+                        className="flex items-center gap-2 bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border border-purple-200"
+                    >
+                        <Bot size={16} /> 
+                        {copiedIndex === 'ai_prompt' ? 'Copied Prompt!' : 'Copy Prompt for AI'}
+                    </button>
+                    <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-blue-700 transition-colors">
+                        <Download size={16} /> Download SDKs
+                    </button>
+                </div>
+            </div>
+
+            {/* AI Assistant Help Banner */}
+            <div className="mb-8 p-4 bg-purple-50 rounded-xl border border-purple-100 flex gap-4">
+                <Bot className="text-purple-500 shrink-0 mt-1" />
+                <div>
+                    <h4 className="font-bold text-purple-900 mb-1">Using an AI Assistant?</h4>
+                    <p className="text-sm text-purple-800">
+                        Click the <strong>"Copy Prompt for AI"</strong> button above. You can paste this prompt into ChatGPT, Claude, or Antigravity along with your existing device code. The AI will perfectly integrate the SDK into your code without breaking your current hardware logic!
+                    </p>
+                </div>
             </div>
 
             {/* Platform Selector */}
@@ -125,7 +163,7 @@ void loop() {
                         }\`}
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl">{data.icon}</span>
+                            {data.icon}
                             <h3 className={\`font-bold \${activeTab === key ? 'text-blue-900' : 'text-gray-800'}\`}>
                                 {data.title}
                             </h3>
@@ -178,11 +216,11 @@ void loop() {
             <div className="mt-8 p-5 bg-blue-50 rounded-xl border border-blue-100 flex gap-4">
                 <Settings2 className="text-blue-500 shrink-0 mt-1" />
                 <div>
-                    <h4 className="font-bold text-blue-900 mb-1">Blueprint API Architecture</h4>
+                    <h4 className="font-bold text-blue-900 mb-1">How it works</h4>
                     <p className="text-sm text-blue-800">
-                        The SDK uses a declarative blueprint schema. By simply defining properties (like <code>add_reading</code> or <code>add_switch</code>), 
-                        the SDK automatically negotiates the schema with the cloud. The platform then generates the necessary dashboard UI elements 
-                        and command routes immediately without any manual configuration.
+                        By defining properties like <code>add_reading</code> or <code>add_switch</code>, 
+                        the SDK handles all the complex MQTT connection details automatically. It syncs your dashboard UI elements 
+                        and command routes immediately without any manual setup.
                     </p>
                 </div>
             </div>
