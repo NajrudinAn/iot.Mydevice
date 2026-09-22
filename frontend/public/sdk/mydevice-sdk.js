@@ -36,12 +36,17 @@
 
 const mqtt = require('mqtt');
 
+/**
+ * The MyDevice SDK Client.
+ * Handles MQTT connection, telemetry syncing, and command routing automatically.
+ */
 class MyDevice {
     /**
-     * @param {string} deviceId   - Your device ID
-     * @param {string} secretKey  - Your device secret key
-     * @param {string} [broker]   - MQTT broker host (default: 'mydevice.in')
-     * @param {number} [port]     - MQTT broker port (default: 1883)
+     * Initializes a new MyDevice client.
+     * @param {string} deviceId   - Your device ID (e.g. 'DEV-001').
+     * @param {string} secretKey  - Your device secret key for authentication.
+     * @param {string} [broker='mydevice.in'] - MQTT broker host address.
+     * @param {number} [port=1883] - MQTT broker port.
      */
     constructor(deviceId, secretKey, broker = 'mydevice.in', port = 1883) {
         this.deviceId = deviceId;
@@ -49,7 +54,7 @@ class MyDevice {
         this.broker = broker;
         this.port = port;
 
-        // Topics
+        // MQTT Topics mapping based on the MyDevice architecture
         this._tData   = `devices/${deviceId}/data`;
         this._tStatus = `devices/${deviceId}/status`;
         this._tCmd    = `devices/${deviceId}/command`;
@@ -69,25 +74,23 @@ class MyDevice {
     // ── Blueprint API ────────────────────────────────────────────────
 
     /**
-     * Define a property (telemetry state).
-     * @param {string} name - ID of the property (e.g. 'fan_speed')
-     * @param {string} label - Human-readable name
-     * @param {string} dataType - 'number', 'boolean', 'string'
-     * @param {object} options - Configuration options
-     * @param {string} [options.unit] - e.g. '°C', '%'
-     * @param {number} [options.min] - Minimum value (for numbers)
-     * @param {number} [options.max] - Maximum value (for numbers)
-     * @param {number} [options.step] - Step value (for numbers)
-     * @param {string[]} [options.options] - List of strings for enum types
-     * @param {boolean} [options.writable] - Can this be controlled from the platform?
-     * @param {function} [options.onChange] - Callback function(value) triggered when changed from platform.
+     * Defines a generic property on the device (telemetry, state, or controllable feature).
+     * @param {string} name - Unique identifier for the property (e.g. 'fan_speed').
+     * @param {string} label - Human-readable name for UI generation (e.g. 'Fan Speed').
+     * @param {string} [dataType='number'] - Data type: 'number', 'boolean', or 'string'.
+     * @param {object} [options={}] - Additional configuration options.
+     * @param {string} [options.unit] - Unit of measurement (e.g. '°C', '%').
+     * @param {number} [options.min] - Minimum value (for numbers).
+     * @param {number} [options.max] - Maximum value (for numbers).
+     * @param {number} [options.step] - Step increment (for numbers).
+     * @param {string[]} [options.options] - List of valid string options for enums.
+     * @param {boolean} [options.writable] - If true, the platform can send SET commands to change this property.
+     * @param {function(any):void} [options.onChange] - Callback function executed when the platform updates this property.
      */
     addProperty(name, label, dataType = 'number', {
         unit = '', min = null, max = null, step = null, options = null, writable = false, onChange = null
     } = {}) {
-        const prop = {
-            name, label, type: dataType, unit, writable, onChange
-        };
+        const prop = { name, label, type: dataType, unit, writable, onChange };
         
         if (dataType === 'number') {
             if (min !== null) prop.min = min;
@@ -100,37 +103,57 @@ class MyDevice {
         this._properties[name] = prop;
     }
 
+    /**
+     * Helper to define a read-only sensor or telemetry point.
+     * @param {string} name - Unique identifier (e.g. 'temperature').
+     * @param {string} label - Human-readable name (e.g. 'Room Temp').
+     * @param {string} [dataType='number'] - Data type ('number', 'boolean', 'string').
+     * @param {string} [unit=''] - Unit of measurement (e.g. '°C').
+     */
     addReading(name, label, dataType = 'number', unit = '') {
         this.addProperty(name, label, dataType, { unit, writable: false });
     }
 
+    /**
+     * Helper to define a controllable On/Off switch.
+     * @param {string} name - Unique identifier (e.g. 'main_light').
+     * @param {string} label - Human-readable name (e.g. 'Main Light').
+     * @param {function(boolean):void} onChange - Callback triggered when toggled from the platform.
+     */
     addSwitch(name, label, onChange) {
         this.addProperty(name, label, 'boolean', { writable: true, onChange });
     }
 
+    /**
+     * Helper to define a controllable numeric slider.
+     * @param {string} name - Unique identifier (e.g. 'fan_speed').
+     * @param {string} label - Human-readable name (e.g. 'Fan Speed').
+     * @param {number} min - Minimum value.
+     * @param {number} max - Maximum value.
+     * @param {function(number):void} onChange - Callback triggered when adjusted from the platform.
+     * @param {number} [step=null] - Step increment.
+     */
     addSlider(name, label, min, max, onChange, step = null) {
         this.addProperty(name, label, 'number', { min, max, step, writable: true, onChange });
     }
 
     /**
-     * Define a stateless action (e.g., Reboot, Calibrate).
-     * @param {string} name - ID of the action
-     * @param {string} label - Human-readable name
-     * @param {string} description - Short description
-     * @param {object} parameters - Parameter configurations { paramName: { type, min, max, required } }
-     * @param {function} onExecute - Callback function(paramsDict) triggered when executed.
+     * Defines a stateless action/command the device can execute (e.g. Reboot, Calibrate).
+     * @param {string} name - Unique identifier (e.g. 'reboot').
+     * @param {string} label - Human-readable name (e.g. 'Reboot Device').
+     * @param {string} [description=''] - Description of what the action does.
+     * @param {object} [parameters={}] - Object mapping parameter names to their types { paramName: { type: 'string', required: true } }.
+     * @param {function(object):void} [onExecute] - Callback triggered when action is executed, receives parameter object.
      */
     addAction(name, label, description = '', parameters = {}, onExecute = null) {
-        this._actions[name] = {
-            name, label, description, parameters, onExecute
-        };
+        this._actions[name] = { name, label, description, parameters, onExecute };
     }
 
     /**
-     * Update the local state of a property and automatically publish to the platform.
-     * @param {string} name - Property name
-     * @param {any} value - New value
-     * @param {boolean} forceSend - Send even if value hasn't changed locally
+     * Updates the local state of a property and automatically publishes it to the platform.
+     * @param {string} name - The property identifier to update.
+     * @param {any} value - The new value.
+     * @param {boolean} [forceSend=false] - If true, publishes to MQTT even if the local value hasn't changed.
      */
     updateProperty(name, value, forceSend = false) {
         if (!this._properties[name]) {
@@ -139,7 +162,7 @@ class MyDevice {
         }
 
         if (!forceSend && this._stateCache[name] === value) {
-            return;
+            return; // Skip sending if state unchanged
         }
         this._stateCache[name] = value;
 
@@ -149,8 +172,8 @@ class MyDevice {
     }
 
     /**
-     * Update multiple properties at once and send a single telemetry payload.
-     * @param {object} updatesDict - { propName: value }
+     * Updates multiple properties at once, pushing them to the platform in a single optimized telemetry payload.
+     * @param {object} updatesDict - Key-value map of properties to update (e.g. { temperature: 25.0, humidity: 60 }).
      */
     updateProperties(updatesDict) {
         const changed = {};
@@ -170,16 +193,25 @@ class MyDevice {
         }
     }
 
+    /**
+     * Alias for `updateProperty` for shorter syntax.
+     * @param {string} name - The property identifier.
+     * @param {any} value - The new value.
+     * @param {boolean} [forceSend=false] - Force publish to MQTT.
+     */
     send(name, value, forceSend = false) {
         this.updateProperty(name, value, forceSend);
     }
 
     // ── Platform Syncing ─────────────────────────────────────────────
 
+    /**
+     * Internal method to generate JSON schema describing the device's capabilities to the platform.
+     * @private
+     */
     _generateCapabilitiesSchema() {
         const capabilities = [];
         
-        // 1. Map Properties
         if (Object.keys(this._properties).length > 0) {
             const stateCap = {
                 name: 'device_state',
@@ -209,7 +241,6 @@ class MyDevice {
             capabilities.push(stateCap);
         }
         
-        // 2. Map Actions
         if (Object.keys(this._actions).length > 0) {
             const actionCap = {
                 name: 'system_actions',
@@ -235,6 +266,10 @@ class MyDevice {
         return capabilities;
     }
 
+    /**
+     * Internal method to publish blueprint capabilities as a retained MQTT message.
+     * @private
+     */
     _publishSchema() {
         const schema = this._generateCapabilitiesSchema();
         if (schema && schema.length > 0) {
@@ -242,6 +277,10 @@ class MyDevice {
         }
     }
 
+    /**
+     * Internal method to publish the standard JSON telemetry payload.
+     * @private
+     */
     _sendTelemetry(dataDict) {
         const payload = {
             device_id: this.deviceId,
@@ -253,6 +292,11 @@ class MyDevice {
 
     // ── Connection & Networking ──────────────────────────────────────
 
+    /**
+     * Connects to the MyDevice MQTT broker, syncs blueprints, and starts listening for commands.
+     * Automatically handles reconnects.
+     * @returns {MyDevice} Returns the current instance for chaining.
+     */
     connect() {
         this._client = mqtt.connect(`mqtt://${this.broker}:${this.port}`, {
             clientId: this.deviceId,
@@ -270,8 +314,9 @@ class MyDevice {
             this._connected = true;
             this._client.subscribe(this._tCmd);
             this.setStatus('online');
-            this._publishSchema();
+            this._publishSchema(); // Sync the blueprint to the platform
             
+            // Sync current state on connection
             if (Object.keys(this._stateCache).length > 0) {
                 this._sendTelemetry(this._stateCache);
             }
@@ -282,6 +327,7 @@ class MyDevice {
             this._connected = false;
         });
 
+        // Command routing
         this._client.on('message', (topic, payload) => {
             try {
                 const envelope = JSON.parse(payload.toString());
@@ -292,6 +338,7 @@ class MyDevice {
 
                 let status = 'REJECTED';
 
+                // 1. Property SET Commands
                 if (cmdType.startsWith('SET_')) {
                     const propName = cmdType.substring(4).toLowerCase();
                     const targetProp = Object.keys(this._properties).find(p => p.toLowerCase() === propName);
@@ -314,7 +361,9 @@ class MyDevice {
                             status = 'FAILED';
                         }
                     }
-                } else if (this._actions[cmdType]) {
+                } 
+                // 2. Stateless Actions
+                else if (this._actions[cmdType]) {
                     try {
                         if (this._actions[cmdType].onExecute) {
                             this._actions[cmdType].onExecute(params);
@@ -328,6 +377,7 @@ class MyDevice {
                     console.error(`[MyDevice] Unknown command: ${cmdType}`);
                 }
 
+                // Send ACK
                 if (cmdId !== 'n/a') {
                     this._client.publish(this._tCmdAck, JSON.stringify({
                         command_id: cmdId,
@@ -343,6 +393,9 @@ class MyDevice {
         return this;
     }
 
+    /**
+     * Disconnects from the MyDevice platform gracefully.
+     */
     disconnect() {
         if (this._client) {
             this.setStatus('offline');
@@ -351,8 +404,16 @@ class MyDevice {
         }
     }
 
+    /**
+     * Checks if the device is currently connected to the MQTT broker.
+     * @returns {boolean}
+     */
     get isConnected() { return this._connected; }
 
+    /**
+     * Manually updates the device's online/offline status on the platform.
+     * @param {string} status - 'online', 'offline', 'error', etc.
+     */
     setStatus(status) {
         this._client.publish(this._tStatus, JSON.stringify({
             device_id: this.deviceId,

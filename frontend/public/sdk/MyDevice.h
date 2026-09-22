@@ -19,11 +19,11 @@
  *       while (WiFi.status() != WL_CONNECTED) delay(500);
  *       
  *       // Read-only sensor
- *       device.addProperty("temperature", "Temperature", "number");
+ *       device.addReading("temperature", "Temperature", "number", "°C");
  *       
  *       // Controllable Switch
- *       device.addProperty("light", "Main Light", "boolean", true, [](JsonVariant val) {
- *           digitalWrite(LED_BUILTIN, val.as<bool>());
+ *       device.addSwitch("light", "Main Light", [](bool val) {
+ *           digitalWrite(LED_BUILTIN, val ? HIGH : LOW);
  *       });
  *       
  *       device.begin();
@@ -31,7 +31,7 @@
  *
  *   void loop() {
  *       device.loop();
- *       device.updateProperty("temperature", 25.4);
+ *       device.send("temperature", 25.4);
  *   }
  */
 
@@ -50,7 +50,16 @@
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+/**
+ * @brief Callback invoked when a property is updated from the platform.
+ * @param val The new value encapsulated in an ArduinoJson JsonVariant.
+ */
 typedef void (*MDPropertyChangeHandler)(JsonVariant val);
+
+/**
+ * @brief Callback invoked when an action is executed from the platform.
+ * @param params An ArduinoJson JsonObject containing action parameters.
+ */
 typedef void (*MDActionHandler)(JsonObject params);
 
 struct _MDProp {
@@ -83,8 +92,23 @@ struct _MDAction {
 
 // ─── MyDevice Class ─────────────────────────────────────────────────────────
 
+/**
+ * @class MyDevice
+ * @brief Main SDK Class for connecting devices to the MyDevice IoT platform.
+ * 
+ * Handles automated MQTT connections, blueprint schema definitions, telemetry caching,
+ * and mapping incoming commands to corresponding C++ callbacks.
+ */
 class MyDevice {
 public:
+    /**
+     * @brief Constructs a new MyDevice instance.
+     * @param deviceId Your unique device ID (e.g. "DEV-001").
+     * @param secretKey Your device's secret key.
+     * @param net The underlying Client instance (e.g., WiFiClient or EthernetClient).
+     * @param broker The MQTT broker address (default: "mydevice.in").
+     * @param port The MQTT broker port (default: 1883).
+     */
     MyDevice(const char* deviceId, const char* secretKey, Client& net,
              const char* broker = "mydevice.in", int port = 1883)
         : _did(deviceId), _key(secretKey), _broker(broker), _port(port),
@@ -99,6 +123,15 @@ public:
 
     // ── Blueprint API ───────────────────────────────────────────────
 
+    /**
+     * @brief Defines a generic property on the device (telemetry, state, or controllable feature).
+     * @param name Unique identifier for the property (e.g., "fan_speed").
+     * @param label Human-readable name for UI generation.
+     * @param type Data type: "number", "boolean", or "string".
+     * @param writable If true, the platform can send SET commands to change this property.
+     * @param onChange Callback triggered when the platform updates this property.
+     * @param unit Unit of measurement (e.g., "°C", "%").
+     */
     void addProperty(const char* name, const char* label, const char* type, 
                      bool writable = false, MDPropertyChangeHandler onChange = nullptr, 
                      const char* unit = "") {
@@ -120,46 +153,46 @@ public:
 
     // ── Semantic Helpers (Super Simple API) ─────────────────────────
 
+    /**
+     * @brief Defines read-only data (e.g., sensor telemetry, status strings).
+     * @param name Unique identifier (e.g., "temperature").
+     * @param label Human-readable name.
+     * @param type Data type (default: "number").
+     * @param unit Unit of measurement.
+     */
     void addReading(const char* name, const char* label, const char* type = "number", const char* unit = "") {
         addProperty(name, label, type, false, nullptr, unit);
     }
 
+    /**
+     * @brief Defines a controllable on/off switch.
+     * @param name Unique identifier (e.g., "main_light").
+     * @param label Human-readable name.
+     * @param onChange Callback triggered when toggled from the platform.
+     */
     void addSwitch(const char* name, const char* label, MDPropertyChangeHandler onChange) {
         addProperty(name, label, "boolean", true, onChange, "");
     }
 
+    /**
+     * @brief Defines a controllable numeric slider.
+     * @param name Unique identifier.
+     * @param label Human-readable name.
+     * @param minVal Minimum allowed value.
+     * @param maxVal Maximum allowed value.
+     * @param onChange Callback triggered when adjusted from the platform.
+     */
     void addSlider(const char* name, const char* label, float minVal, float maxVal, MDPropertyChangeHandler onChange) {
-        // In Arduino, we don't dynamically store min/max in the basic struct to save memory, 
-        // but it still registers as a writable number. The UI handles the limits.
+        // Note: min/max limits are rendered on the UI side.
         addProperty(name, label, "number", true, onChange, "");
     }
 
-    // Alias for updateProperty
-    void send(const char* name, float val, bool forceSend = false) { updateProperty(name, val, forceSend); }
-    void send(const char* name, bool val, bool forceSend = false)  { updateProperty(name, val, forceSend); }
-    void send(const char* name, const char* val, bool forceSend = false) { updateProperty(name, val, forceSend); }
-
-
-    void addAction(const char* name, const char* label, const char* desc, MDActionHandler onExecute) {
-        if (_actCount >= MD_MAX_ACTIONS) return;
-        auto& a = _actions[_actCount++];
-        strncpy(a.name, name, 31);
-        strncpy(a.label, label, 47);
-        strncpy(a.desc, desc, 95);
-        a.paramCount = 0;
-        a.onExecute = onExecute;
-    }
-
-    void addActionParam(const char* paramName, const char* type) {
-        if (_actCount == 0) return;
-        auto& a = _actions[_actCount - 1];
-        if (a.paramCount >= MD_MAX_PARAMS) return;
-        auto& p = a.params[a.paramCount++];
-        strncpy(p.name, paramName, 23);
-        strncpy(p.type, type, 11);
-        p.required = true;
-    }
-
+    /**
+     * @brief Update the local state of a property and automatically publish to the platform.
+     * @param name The property identifier to update.
+     * @param val The new value (float, bool, or string).
+     * @param forceSend If true, publishes to MQTT even if the local value hasn't changed.
+     */
     void updateProperty(const char* name, float val, bool forceSend = false) {
         for (int i=0; i<_propCount; i++) {
             if (strcmp(_props[i].name, name) == 0) {
@@ -196,8 +229,51 @@ public:
         }
     }
 
+    /**
+     * @brief Alias for updateProperty (syntactic sugar).
+     */
+    void send(const char* name, float val, bool forceSend = false) { updateProperty(name, val, forceSend); }
+    void send(const char* name, bool val, bool forceSend = false)  { updateProperty(name, val, forceSend); }
+    void send(const char* name, const char* val, bool forceSend = false) { updateProperty(name, val, forceSend); }
+
+    /**
+     * @brief Defines a stateless action/command the device can execute.
+     * @param name Unique identifier (e.g., "reboot").
+     * @param label Human-readable name.
+     * @param desc Description of what the action does.
+     * @param onExecute Callback triggered when the action is executed.
+     */
+    void addAction(const char* name, const char* label, const char* desc, MDActionHandler onExecute) {
+        if (_actCount >= MD_MAX_ACTIONS) return;
+        auto& a = _actions[_actCount++];
+        strncpy(a.name, name, 31);
+        strncpy(a.label, label, 47);
+        strncpy(a.desc, desc, 95);
+        a.paramCount = 0;
+        a.onExecute = onExecute;
+    }
+
+    /**
+     * @brief Adds a required parameter to the most recently defined action.
+     * @param paramName Name of the parameter.
+     * @param type Data type ("number", "boolean", "string").
+     */
+    void addActionParam(const char* paramName, const char* type) {
+        if (_actCount == 0) return;
+        auto& a = _actions[_actCount - 1];
+        if (a.paramCount >= MD_MAX_PARAMS) return;
+        auto& p = a.params[a.paramCount++];
+        strncpy(p.name, paramName, 23);
+        strncpy(p.type, type, 11);
+        p.required = true;
+    }
+
     // ── Lifecycle ───────────────────────────────────────────────────
 
+    /**
+     * @brief Connects to the platform, configures MQTT buffers, and syncs blueprints.
+     * Call this inside setup().
+     */
     void begin() {
         _mqtt.setServer(_broker, _port);
         _mqtt.setBufferSize(MD_BUF * 2);
@@ -205,6 +281,10 @@ public:
         _reconnect();
     }
 
+    /**
+     * @brief Maintains the MQTT connection and processes incoming commands.
+     * Call this constantly inside loop().
+     */
     void loop() {
         if (!_mqtt.connected()) _reconnect();
         _mqtt.loop();
@@ -220,6 +300,9 @@ public:
         }
     }
 
+    /**
+     * @brief Checks if the device is currently connected to the MQTT broker.
+     */
     bool isConnected() { return _mqtt.connected(); }
 
 private:
@@ -235,6 +318,9 @@ private:
     _MDProp    _props[MD_MAX_PROPS];      int _propCount;
     _MDAction  _actions[MD_MAX_ACTIONS];  int _actCount;
 
+    /**
+     * @brief Generates and publishes the capabilities schema to the platform.
+     */
     void _publishSchema() {
         DynamicJsonDocument doc(MD_BUF * 2);
         JsonArray arr = doc.to<JsonArray>();
@@ -291,6 +377,9 @@ private:
         _mqtt.publish(_tCaps, buf, true);
     }
 
+    /**
+     * @brief Packages updated state variables into a JSON telemetry payload.
+     */
     void _sendTelemetry() {
         StaticJsonDocument<MD_BUF> doc;
         doc["device_id"] = _did;
@@ -311,6 +400,9 @@ private:
         _mqtt.publish(_tData, buf);
     }
 
+    /**
+     * @brief Evaluates connection state and handles MQTT reconnect sequences.
+     */
     void _reconnect() {
         if (_mqtt.connected()) return;
         
@@ -342,6 +434,9 @@ private:
         }
     }
 
+    /**
+     * @brief MQTT packet handler for processing commands and firing callbacks.
+     */
     void _onMsg(char* topic, byte* payload, unsigned int len) {
         StaticJsonDocument<512> doc;
         if (deserializeJson(doc, payload, len)) return;

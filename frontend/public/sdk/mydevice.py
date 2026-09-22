@@ -13,22 +13,30 @@ Installation:
         from mydevice import MyDevice
 
 Usage:
+    from mydevice import MyDevice
+    import time
+
     device = MyDevice("DEV-001", "secret")
     
     # 1. Read-only Telemetry
-    device.add_property("temperature", "Temperature", "number", unit="°C", writable=False)
+    device.add_reading("temperature", "Temperature", "number", unit="°C")
     
     # 2. Controllable Property (Switch)
-    device.add_property("light", "Main Light", "boolean", writable=True, 
-                        on_change=lambda val: print(f"Light is now {val}"))
+    def handle_light(is_on):
+        print(f"Light is now {is_on}")
+        
+    device.add_switch("light", "Main Light", on_change=handle_light)
                         
     # 3. Stateless Action
-    device.add_action("reboot", "Reboot Device", on_execute=lambda params: reboot())
+    def reboot(params):
+        print("Rebooting...")
+        
+    device.add_action("reboot", "Reboot Device", on_execute=reboot)
 
     device.connect()
     
     while True:
-        device.update_property("temperature", read_sensor())
+        device.send("temperature", read_sensor())
         time.sleep(5)
 """
 
@@ -36,20 +44,31 @@ import paho.mqtt.client as mqtt
 import json
 import time
 import threading
+from typing import Any, Callable, Dict, List, Optional, Union
 
 
 class MyDevice:
     """
-    MyDevice IoT SDK — connect, define properties/actions, and auto-sync state.
+    MyDevice IoT SDK Client.
+    Handles connection, telemetry state caching, blueprint publishing, and command routing automatically.
     """
 
-    def __init__(self, device_id, secret_key, broker="mydevice.in", port=1883):
+    def __init__(self, device_id: str, secret_key: str, broker: str = "mydevice.in", port: int = 1883):
+        """
+        Initialize a new MyDevice client.
+        
+        Args:
+            device_id: Your unique device ID (e.g. 'DEV-001').
+            secret_key: The secret key for MQTT authentication.
+            broker: MQTT broker host address.
+            port: MQTT broker port.
+        """
         self.device_id = device_id
         self.secret_key = secret_key
         self.broker = broker
         self.port = port
 
-        # Topics
+        # Internal Topics mapping
         self._t_data = f"devices/{device_id}/data"
         self._t_status = f"devices/{device_id}/status"
         self._t_cmd = f"devices/{device_id}/command"
@@ -57,35 +76,39 @@ class MyDevice:
         self._t_caps = f"devices/{device_id}/capabilities"
 
         # State and Blueprints
-        self._properties = {}
-        self._actions = {}
-        self._state_cache = {}
+        self._properties: Dict[str, dict] = {}
+        self._actions: Dict[str, dict] = {}
+        self._state_cache: Dict[str, Any] = {}
         
         # Internals
-        self._client = None
-        self._connected = False
+        self._client: Optional[mqtt.Client] = None
+        self._connected: bool = False
         self._reconnect_delay = 1
         self._lock = threading.Lock()
 
     # ── Blueprint API ────────────────────────────────────────────────
 
-    def add_property(self, name, label, data_type="number", unit="", 
-                     min_val=None, max_val=None, step=None, options=None, 
-                     writable=False, on_change=None):
+    def add_property(self, name: str, label: str, data_type: str = "number", unit: str = "", 
+                     min_val: Optional[float] = None, max_val: Optional[float] = None, step: Optional[float] = None, 
+                     options: Optional[List[str]] = None, writable: bool = False, 
+                     on_change: Optional[Callable[[Any], None]] = None):
         """
-        Define a property (telemetry state).
+        Defines a generic property on the device (telemetry, state, or controllable feature).
+        
         If writable=True, it automatically creates a corresponding 'SET_{NAME}' action 
         and routes incoming commands to `on_change(new_value)`.
         
         Args:
-            name: ID of the property (e.g. "fan_speed")
-            label: Human-readable name
-            data_type: "number", "boolean", "string"
-            unit: e.g. "°C", "%"
-            min_val, max_val, step: For numbers
-            options: List of strings for enum types (e.g. ["AUTO", "COOL", "HEAT"])
-            writable: Can this be controlled from the platform?
-            on_change: Callback function(value) triggered when changed from platform.
+            name: Unique identifier for the property (e.g. 'fan_speed').
+            label: Human-readable name for UI generation.
+            data_type: 'number', 'boolean', or 'string'.
+            unit: Unit of measurement (e.g. '°C', '%').
+            min_val: Minimum value (for numbers).
+            max_val: Maximum value (for numbers).
+            step: Step increment (for numbers).
+            options: List of valid string options for enum types (e.g. ["AUTO", "COOL"]).
+            writable: If True, the platform can send SET commands to change this property.
+            on_change: Callback function executed when the platform updates this property.
         """
         prop = {
             "name": name,
@@ -105,28 +128,57 @@ class MyDevice:
             
         self._properties[name] = prop
 
-    def add_reading(self, name, label, data_type="number", unit=""):
-        """Define any read-only data (e.g. sensor telemetry, status strings)."""
-        self.add_property(name, label, data_type=data_type, unit=unit, writable=False)
-
-    def add_switch(self, name, label, on_change):
-        """Define a controllable on/off switch."""
-        self.add_property(name, label, data_type="boolean", writable=True, on_change=on_change)
-
-    def add_slider(self, name, label, min_val, max_val, on_change, step=None):
-        """Define a controllable number slider."""
-        self.add_property(name, label, data_type="number", min_val=min_val, max_val=max_val, step=step, writable=True, on_change=on_change)
-
-    def add_action(self, name, label, description="", parameters=None, on_execute=None):
+    def add_reading(self, name: str, label: str, data_type: str = "number", unit: str = ""):
         """
-        Define a stateless action (e.g., Reboot, Calibrate).
+        Helper to define read-only data (e.g. sensor telemetry, state strings).
         
         Args:
-            name: ID of the action (e.g. "reboot")
-            label: Human-readable name
-            description: Short description
-            parameters: Dict of parameter configurations.
-            on_execute: Callback function(params_dict) triggered when executed.
+            name: Unique identifier (e.g. 'temperature').
+            label: Human-readable name (e.g. 'Room Temp').
+            data_type: 'number', 'boolean', 'string'.
+            unit: Unit of measurement.
+        """
+        self.add_property(name, label, data_type=data_type, unit=unit, writable=False)
+
+    def add_switch(self, name: str, label: str, on_change: Callable[[bool], None]):
+        """
+        Helper to define a controllable on/off switch.
+        
+        Args:
+            name: Unique identifier (e.g. 'main_light').
+            label: Human-readable name.
+            on_change: Callback triggered when toggled from the platform.
+        """
+        self.add_property(name, label, data_type="boolean", writable=True, on_change=on_change)
+
+    def add_slider(self, name: str, label: str, min_val: float, max_val: float, 
+                   on_change: Callable[[float], None], step: Optional[float] = None):
+        """
+        Helper to define a controllable numeric slider.
+        
+        Args:
+            name: Unique identifier (e.g. 'fan_speed').
+            label: Human-readable name.
+            min_val: Minimum value.
+            max_val: Maximum value.
+            on_change: Callback triggered when adjusted from the platform.
+            step: Optional step increment.
+        """
+        self.add_property(name, label, data_type="number", min_val=min_val, max_val=max_val, 
+                          step=step, writable=True, on_change=on_change)
+
+    def add_action(self, name: str, label: str, description: str = "", 
+                   parameters: Optional[Dict[str, Any]] = None, 
+                   on_execute: Optional[Callable[[Dict[str, Any]], None]] = None):
+        """
+        Defines a stateless action/command the device can execute (e.g. Reboot, Calibrate).
+        
+        Args:
+            name: Unique identifier (e.g. 'reboot').
+            label: Human-readable name.
+            description: Description of what the action does.
+            parameters: Dictionary mapping parameter names to their configs.
+            on_execute: Callback triggered when action is executed, receives parameter dict.
         """
         self._actions[name] = {
             "name": name,
@@ -136,9 +188,14 @@ class MyDevice:
             "on_execute": on_execute
         }
 
-    def update_property(self, name, value, force_send=False):
+    def update_property(self, name: str, value: Any, force_send: bool = False):
         """
-        Update the local state of a property and automatically publish to the platform.
+        Updates the local state of a property and automatically publishes it to the platform.
+        
+        Args:
+            name: The property identifier to update.
+            value: The new value.
+            force_send: If True, publishes to MQTT even if the local value hasn't changed.
         """
         if name not in self._properties:
             print(f"[MyDevice] Warning: Property '{name}' not defined.")
@@ -153,9 +210,12 @@ class MyDevice:
         if self._connected:
             self._send_telemetry({name: value})
 
-    def update_properties(self, updates_dict):
+    def update_properties(self, updates_dict: Dict[str, Any]):
         """
-        Update multiple properties at once and send a single telemetry payload.
+        Updates multiple properties at once, pushing them to the platform in a single optimized telemetry payload.
+        
+        Args:
+            updates_dict: Key-value map of properties to update (e.g. {'temperature': 25.0, 'humidity': 60}).
         """
         changed = {}
         with self._lock:
@@ -170,13 +230,20 @@ class MyDevice:
         if changed and self._connected:
             self._send_telemetry(changed)
 
-    def send(self, name, value, force_send=False):
-        """Alias for update_property for simpler syntax."""
+    def send(self, name: str, value: Any, force_send: bool = False):
+        """
+        Alias for `update_property` for shorter syntax.
+        
+        Args:
+            name: The property identifier.
+            value: The new value.
+            force_send: Force publish to MQTT.
+        """
         self.update_property(name, value, force_send)
 
     # ── Platform Syncing ─────────────────────────────────────────────
 
-    def _generate_capabilities_schema(self):
+    def _generate_capabilities_schema(self) -> List[dict]:
         """Convert the Blueprint (Properties & Actions) into the platform JSON schema."""
         capabilities = []
         
@@ -190,7 +257,6 @@ class MyDevice:
             }
             
             for p_name, p in self._properties.items():
-                # If writable, auto-generate a SET action
                 if p["writable"]:
                     action_def = {
                         "name": f"SET_{p_name.upper()}",
@@ -240,12 +306,13 @@ class MyDevice:
         return capabilities
 
     def _publish_schema(self):
+        """Internal method to publish blueprint capabilities as a retained MQTT message."""
         schema = self._generate_capabilities_schema()
         if schema:
             self._client.publish(self._t_caps, json.dumps(schema), retain=True)
 
-    def _send_telemetry(self, data_dict):
-        """Internal method to send data."""
+    def _send_telemetry(self, data_dict: dict):
+        """Internal method to publish the standard JSON telemetry payload."""
         payload = {
             "device_id": self.device_id,
             "source": "state", # Default source for property sync
@@ -255,9 +322,14 @@ class MyDevice:
 
     # ── Connection & Networking ──────────────────────────────────────
 
-    def connect(self, blocking=False):
+    def connect(self, blocking: bool = False):
         """
-        Connect to the MyDevice platform and sync blueprints.
+        Connects to the MyDevice MQTT broker, syncs blueprints, and starts listening for commands.
+        Automatically handles reconnects.
+        
+        Args:
+            blocking: If True, blocks the main thread (useful for simple scripts).
+                      If False, runs the MQTT loop in a background thread.
         """
         self._client = mqtt.Client(client_id=self.device_id)
         self._client.username_pw_set(self.device_id, self.secret_key)
@@ -281,7 +353,7 @@ class MyDevice:
             self._client.loop_start()
 
     def disconnect(self):
-        """Graceful disconnect."""
+        """Disconnects from the MyDevice platform gracefully."""
         if self._client:
             self._client.publish(
                 self._t_status,
@@ -293,11 +365,17 @@ class MyDevice:
             self._connected = False
 
     @property
-    def is_connected(self):
+    def is_connected(self) -> bool:
+        """Returns True if currently connected to the broker."""
         return self._connected
 
-    def set_status(self, status):
-        """Explicitly set status."""
+    def set_status(self, status: str):
+        """
+        Manually updates the device's online/offline status on the platform.
+        
+        Args:
+            status: 'online', 'offline', 'error', etc.
+        """
         self._client.publish(
             self._t_status,
             json.dumps({"device_id": self.device_id, "status": status})
@@ -339,9 +417,6 @@ class MyDevice:
             if cmd_type.startswith("SET_"):
                 prop_name = cmd_type[4:].lower()
                 
-                # We need to find the actual property name case-insensitively, 
-                # or just assume the property name is strictly matching the substring.
-                # A robust check:
                 target_prop = None
                 for p_name in self._properties:
                     if p_name.lower() == prop_name:
