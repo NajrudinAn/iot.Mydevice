@@ -118,6 +118,28 @@ public:
         else p.state.sv[0] = '\0';
     }
 
+    // ── Semantic Helpers (Super Simple API) ─────────────────────────
+
+    void addSensor(const char* name, const char* label, const char* unit = "") {
+        addProperty(name, label, "number", false, nullptr, unit);
+    }
+
+    void addSwitch(const char* name, const char* label, MDPropertyChangeHandler onChange) {
+        addProperty(name, label, "boolean", true, onChange, "");
+    }
+
+    void addSlider(const char* name, const char* label, float minVal, float maxVal, MDPropertyChangeHandler onChange) {
+        // In Arduino, we don't dynamically store min/max in the basic struct to save memory, 
+        // but it still registers as a writable number. The UI handles the limits.
+        addProperty(name, label, "number", true, onChange, "");
+    }
+
+    // Alias for updateProperty
+    void send(const char* name, float val, bool forceSend = false) { updateProperty(name, val, forceSend); }
+    void send(const char* name, bool val, bool forceSend = false)  { updateProperty(name, val, forceSend); }
+    void send(const char* name, const char* val, bool forceSend = false) { updateProperty(name, val, forceSend); }
+
+
     void addAction(const char* name, const char* label, const char* desc, MDActionHandler onExecute) {
         if (_actCount >= MD_MAX_ACTIONS) return;
         auto& a = _actions[_actCount++];

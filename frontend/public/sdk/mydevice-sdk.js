@@ -100,6 +100,18 @@ class MyDevice {
         this._properties[name] = prop;
     }
 
+    addSensor(name, label, unit = '') {
+        this.addProperty(name, label, 'number', { unit, writable: false });
+    }
+
+    addSwitch(name, label, onChange) {
+        this.addProperty(name, label, 'boolean', { writable: true, onChange });
+    }
+
+    addSlider(name, label, min, max, onChange, step = null) {
+        this.addProperty(name, label, 'number', { min, max, step, writable: true, onChange });
+    }
+
     /**
      * Define a stateless action (e.g., Reboot, Calibrate).
      * @param {string} name - ID of the action
@@ -156,6 +168,10 @@ class MyDevice {
         if (Object.keys(changed).length > 0 && this._connected) {
             this._sendTelemetry(changed);
         }
+    }
+
+    send(name, value, forceSend = false) {
+        this.updateProperty(name, value, forceSend);
     }
 
     // ── Platform Syncing ─────────────────────────────────────────────

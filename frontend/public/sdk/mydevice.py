@@ -105,6 +105,18 @@ class MyDevice:
             
         self._properties[name] = prop
 
+    def add_sensor(self, name, label, unit=""):
+        """Define a read-only sensor."""
+        self.add_property(name, label, data_type="number", unit=unit, writable=False)
+
+    def add_switch(self, name, label, on_change):
+        """Define a controllable on/off switch."""
+        self.add_property(name, label, data_type="boolean", writable=True, on_change=on_change)
+
+    def add_slider(self, name, label, min_val, max_val, on_change, step=None):
+        """Define a controllable number slider."""
+        self.add_property(name, label, data_type="number", min_val=min_val, max_val=max_val, step=step, writable=True, on_change=on_change)
+
     def add_action(self, name, label, description="", parameters=None, on_execute=None):
         """
         Define a stateless action (e.g., Reboot, Calibrate).
@@ -157,6 +169,10 @@ class MyDevice:
                     
         if changed and self._connected:
             self._send_telemetry(changed)
+
+    def send(self, name, value, force_send=False):
+        """Alias for update_property for simpler syntax."""
+        self.update_property(name, value, force_send)
 
     # ── Platform Syncing ─────────────────────────────────────────────
 
