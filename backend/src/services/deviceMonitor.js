@@ -7,13 +7,13 @@ const sseEmitter = require('./sseEmitter');
 class DeviceMonitor {
     constructor() {
         this.interval = null;
-        this.TIMEOUT_MS = 15000; // 15 seconds
+        this.TIMEOUT_MS = 86400000; // 24 hours
     }
 
     start() {
         if (this.interval) return;
-        this.interval = setInterval(() => this.checkStaleDevices(), 15000); // Check every 15s
-        console.log('Device Monitor started: checking for stale devices every 15s');
+        this.interval = setInterval(() => this.checkStaleDevices(), 600000); // Check every 10 minutes
+        console.log('Device Monitor started: checking for stale devices every 10m (24h timeout)');
     }
 
     stop() {
@@ -23,12 +23,14 @@ class DeviceMonitor {
 
     async checkStaleDevices() {
         try {
-            // Find devices that are ONLINE but haven't been seen in over 60 seconds
+            // Find devices that are ONLINE but haven't been seen in over 24 hours
+            // This is a last-resort fallback for Mosquitto LWT failures.
+            // A short timeout here breaks SDKs that deduplicate data.
             const query = `
                 UPDATE devices
                 SET status = 'OFFLINE'
                 WHERE status = 'ONLINE' 
-                  AND (last_seen IS NULL OR last_seen < NOW() - INTERVAL '15 seconds')
+                  AND (last_seen IS NULL OR last_seen < NOW() - INTERVAL '24 hours')
                 RETURNING id, device_id, workspace_id, status, last_seen
             `;
             
