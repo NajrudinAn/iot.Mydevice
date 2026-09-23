@@ -302,7 +302,6 @@ class MyDevice {
             clientId: this.deviceId,
             username: this.deviceId,
             password: this.secretKey,
-            keepalive: 5,
             reconnectPeriod: 3000,
             will: {
                 topic: this._tStatus,

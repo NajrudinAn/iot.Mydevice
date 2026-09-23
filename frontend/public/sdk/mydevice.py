@@ -343,7 +343,7 @@ class MyDevice:
         self._client.on_message = self._on_message
 
         try:
-            self._client.connect(self.broker, self.port, keepalive=5)
+            self._client.connect(self.broker, self.port, keepalive=60)
         except Exception as e:
             print(f"[MyDevice] Initial connection failed: {e}. Will retry in background.")
 
