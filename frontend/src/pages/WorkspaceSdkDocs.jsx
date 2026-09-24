@@ -265,6 +265,30 @@ Wait for the user to describe their specific UI requirements and provide their A
                             </MethodCard>
 
                             <MethodCard 
+                                title="Add Slider (Controllable)" 
+                                desc="Generates a Slider UI on the dashboard. Ideal for PWM or percentage values."
+                                code='device.add_slider(name, label, min_val, max_val, on_change)'
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Unique internal ID." />
+                                <ParamRow name="label" type="string" req={true} desc="Dashboard UI name." />
+                                <ParamRow name="min_val" type="number" req={true} desc="Minimum slider value." />
+                                <ParamRow name="max_val" type="number" req={true} desc="Maximum slider value." />
+                                <ParamRow name="on_change" type="function" req={true} desc="Callback function that receives the new float value." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Action (Stateless Button)" 
+                                desc="Generates a clickable button to trigger a one-off action (e.g., Reboot, Calibrate)."
+                                code='device.add_action(name, label, description, params_dict, on_execute)'
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Unique internal ID." />
+                                <ParamRow name="label" type="string" req={true} desc="Button text." />
+                                <ParamRow name="description" type="string" req={false} desc="Subtitle explaining the action." />
+                                <ParamRow name="params_dict" type="dict" req={true} desc="Dictionary of parameters to ask the user before executing (empty {} for none)." />
+                                <ParamRow name="on_execute" type="function" req={true} desc="Callback fired when button is pressed." />
+                            </MethodCard>
+
+                            <MethodCard 
                                 title="Send Data" 
                                 desc="Push updated values to the cloud. Call this in your main loop."
                                 code='device.send(name, value)'
@@ -371,13 +395,31 @@ while True:
                             </MethodCard>
 
                             <MethodCard 
+                                title="Add Switch (Controllable)" 
+                                desc="Generates a switch UI."
+                                code="device.addSwitch(name, label, callback)"
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Internal property ID." />
+                                <ParamRow name="callback" type="function" req={true} desc="Receives boolean." />
+                            </MethodCard>
+
+                            <MethodCard 
                                 title="Add Slider (Controllable)" 
                                 desc="Generates a slider UI for numeric control."
-                                code="device.addSlider(name, label, min, max, callback, step)"
+                                code="device.addSlider(name, label, min, max, callback)"
                             >
                                 <ParamRow name="name" type="string" req={true} desc="Internal property ID." />
                                 <ParamRow name="min/max" type="number" req={true} desc="Numeric bounds." />
                                 <ParamRow name="callback" type="function" req={true} desc="Receives the new float value." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Action (Stateless Button)" 
+                                desc="Generates a clickable button."
+                                code="device.addAction(name, label, description, paramsDict, callback)"
+                            >
+                                <ParamRow name="name" type="string" req={true} desc="Internal ID." />
+                                <ParamRow name="callback" type="function" req={true} desc="Fired on click." />
                             </MethodCard>
                         </section>
 
@@ -466,6 +508,24 @@ setInterval(() => {
                             >
                                 <ParamRow name="name" type="const char*" req={true} desc="Internal property ID." />
                                 <ParamRow name="callback" type="void (*)(JsonVariant)" req={true} desc="Function called when toggled. Use val.as<bool>()." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Slider (Controllable)" 
+                                desc="Generates a slider UI."
+                                code='device.addSlider(name, label, min, max, [](JsonVariant val) { ... });'
+                            >
+                                <ParamRow name="name" type="const char*" req={true} desc="Internal property ID." />
+                                <ParamRow name="callback" type="void (*)(JsonVariant)" req={true} desc="Function called on change. Use val.as<float>()." />
+                            </MethodCard>
+
+                            <MethodCard 
+                                title="Add Action (Stateless Button)" 
+                                desc="Generates a clickable button."
+                                code='device.addAction(name, label, description, params, [](JsonVariant val) { ... });'
+                            >
+                                <ParamRow name="name" type="const char*" req={true} desc="Internal ID." />
+                                <ParamRow name="callback" type="void (*)(JsonVariant)" req={true} desc="Fired on click." />
                             </MethodCard>
 
                              <MethodCard 
