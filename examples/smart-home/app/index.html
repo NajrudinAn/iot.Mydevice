@@ -533,13 +533,15 @@
                 const card = document.getElementById(`card-${id}`);
                 if (!iconBg || !icon || !card) return;
                 
+                const iconName = icon.dataset.icon || (icon.className.match(/fa-(?!solid|regular|light|thin|duotone|brands)[a-z-]+/) || [''])[0];
+                
                 if (isActive) {
                     iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
-                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-${activeColor}-500`;
+                    icon.className = `fa-solid ${iconName} text-xl transition-colors text-${activeColor}-500`;
                     card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
                 } else {
                     iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
-                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-slate-400`;
+                    icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-400`;
                     card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
                 }
             };
@@ -590,13 +592,16 @@
                 doorBtn.dataset.locked = data.door_lock;
                 document.getElementById('lbl-door-status').innerText = data.door_lock ? 'Locked' : 'Unlocked';
                 
+                const doorIcon = document.getElementById('icon-door');
                 if (data.door_lock) { 
                     doorBtn.innerText = 'UNLOCK'; 
                     doorBtn.className = 'px-5 py-2.5 bg-slate-900 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
+                    doorIcon.dataset.icon = 'fa-lock';
                     applyStyle('door', true, 'slate');
                 } else { 
                     doorBtn.innerText = 'LOCK'; 
                     doorBtn.className = 'px-5 py-2.5 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-2xl transition-all shadow-sm text-sm';
+                    doorIcon.dataset.icon = 'fa-unlock-keyhole';
                     applyStyle('door', false, 'red');
                 }
             }
