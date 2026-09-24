@@ -157,6 +157,7 @@ time.sleep(2)
 
 print("Starting Factory Simulation...")
 try:
+    loop_count = 0
     while True:
         any_running = (machine1.state == "RUNNING" or machine2.state == "RUNNING")
         
@@ -173,6 +174,14 @@ try:
             factory.set_alarm(True)
             factory.device.update_property("alarm", True)
             
+        force = (loop_count % 2 == 0)
+        if force:
+            env.send("cooling_fan", factory.cooling_fan, force_send=True)
+            env.send("alarm", factory.alarm, force_send=True)
+            m1.send("operating_state", machine1.state, force_send=True)
+            m2.send("operating_state", machine2.state, force_send=True)
+            
+        loop_count += 1
         time.sleep(5)
 except KeyboardInterrupt:
     print("Shutting down...")

@@ -2,74 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Farm - MyDevice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); }
-        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f4; -webkit-tap-highlight-color: transparent; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); }
+        .slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .toggle-checkbox:checked { right: 0; border-color: #10B981; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #10B981; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-stone-100 to-green-50 min-h-screen text-stone-800">
-    
-    <!-- Login Modal -->
-    <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl max-w-sm w-full mx-4 slide-up">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-leaf text-2xl text-green-600"></i>
+<body class="text-stone-800 antialiased selection:bg-green-200">
+
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm items-center gap-2 slide-up transition-all">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Device Offline</span>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <!-- Login Screen -->
+    <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-gradient-to-tr from-green-600 to-emerald-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30">
+                    <i class="fa-solid fa-tractor text-3xl text-white"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-stone-800">Smart Farm Login</h2>
-                <p class="text-sm text-stone-500 mt-1">Application Authentication</p>
+                <h2 class="text-3xl font-extrabold text-stone-800 tracking-tight">Smart Farm</h2>
+                <p class="text-sm text-stone-500 mt-2 font-medium">Agriculture Control Center</p>
             </div>
-            
+
             <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
-                <div>
-                    <label class="block text-sm font-semibold text-stone-700 mb-1">Email</label>
+                <div class="space-y-4">
                     <div class="relative">
-                        <i class="fa-regular fa-envelope absolute left-3 top-3 text-stone-400"></i>
-                        <input type="email" id="email" required class="w-full border border-stone-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="you@example.com">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-regular fa-envelope text-stone-400"></i></div>
+                        <input type="email" id="email" required class="w-full bg-stone-100/50 border border-stone-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-all font-medium placeholder:font-normal" placeholder="Email address">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fa-solid fa-lock text-stone-400"></i></div>
+                        <input type="password" id="password" required class="w-full bg-stone-100/50 border border-stone-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-green-500/50 focus:border-green-500 outline-none transition-all font-medium placeholder:font-normal" placeholder="Password">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-stone-700 mb-1">Password</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3 top-3 text-stone-400"></i>
-                        <input type="password" id="password" required class="w-full border border-stone-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="••••••••">
-                    </div>
-                </div>
-                <div id="login-error" class="hidden text-sm text-red-500 font-medium text-center">Invalid credentials</div>
-                <button type="submit" id="login-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98]">
-                    Sign In
-                </button>
+                <div id="login-error" class="hidden text-sm text-red-500 font-semibold text-center bg-red-50 py-2 rounded-lg"></div>
+                <button type="submit" id="login-btn" class="w-full bg-stone-900 hover:bg-stone-800 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-stone-900/20 active:scale-[0.98] mt-4">Connect to Farm</button>
             </form>
         </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white/80 backdrop-blur-md border-b border-stone-200 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-green-100 p-2 rounded-lg"><i class="fa-solid fa-tractor text-xl text-green-700"></i></div>
-                    <div>
-                        <h1 class="text-xl font-bold text-stone-800">Agriculture Control Center</h1>
-                        <p class="text-xs text-stone-500">Connected to MyDevice</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div id="connection-status" class="text-xs font-bold px-3 py-1 rounded bg-stone-200 text-stone-600">Connecting...</div>
-                    <button onclick="logout()" class="text-stone-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-power-off text-lg"></i></button>
-                </div>
+    <!-- Main App UI -->
+    <div id="dashboard" class="hidden min-h-screen pb-24 flex flex-col items-center">
+        
+        <header class="w-full max-w-3xl pt-12 pb-6 px-6 sticky top-0 z-40 bg-[#f5f5f4]/90 backdrop-blur-xl flex justify-between items-center">
+            <div>
+                <p class="text-sm font-semibold text-stone-500 mb-1" id="greeting">Good Morning,</p>
+                <h1 class="text-2xl font-bold text-stone-900">My Farm</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="connection-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors"></div>
+                <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors">
+                    <i class="fa-solid fa-user"></i>
+                </button>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 slide-up">
-            <div id="alert-banner" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm flex items-start gap-4">
+        <main class="w-full max-w-3xl px-6 space-y-8 slide-up">
+            
+            <div id="alert-banner" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm items-start gap-4 transition-all">
                 <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mt-0.5"></i>
                 <div>
                     <h3 class="text-red-800 font-bold">Critical Soil Moisture Level</h3>
@@ -77,74 +82,117 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Weather Station -->
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
-                    <div class="bg-gradient-to-r from-blue-500 to-sky-400 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-cloud-sun-rain mr-2"></i> Weather Station</h2></div>
-                    <div class="p-6 flex-1 space-y-5">
-                        <div class="grid grid-cols-2 gap-4 text-center border-b border-stone-100 pb-5">
-                            <div><p class="text-stone-400 text-xs font-semibold uppercase">Temp</p><p class="text-2xl font-bold"><span id="w-temp">--</span>°C</p></div>
-                            <div><p class="text-stone-400 text-xs font-semibold uppercase">Humidity</p><p class="text-2xl font-bold"><span id="w-hum">--</span>%</p></div>
+            <section>
+                <h2 class="text-lg font-bold text-stone-800 mb-4">Soil & Weather Overview</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Soil Moisture -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group col-span-2 md:col-span-2 bg-gradient-to-br from-amber-50 to-orange-50">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-200 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-amber-600"><i class="fa-solid fa-mound text-xl"></i></div>
+                        <div>
+                            <p class="text-4xl font-extrabold text-stone-800 tracking-tight"><span id="s-moisture">--</span>%</p>
+                            <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mt-1">Soil Moisture</p>
                         </div>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center bg-stone-50 p-3 rounded-xl">
-                                <span class="text-sm font-medium text-stone-600">Rainfall</span>
-                                <span class="font-bold text-blue-600"><span id="w-rain">--</span> mm/h</span>
-                            </div>
-                            <div class="flex justify-between items-center bg-stone-50 p-3 rounded-xl">
-                                <span class="text-sm font-medium text-stone-600">Wind</span>
-                                <span class="font-bold"><span id="w-wind">--</span> km/h</span>
-                            </div>
+                    </div>
+                    <!-- Weather Temp -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden bg-sky-50">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-sky-200 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-sky-500"><i class="fa-solid fa-cloud-sun text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-stone-800 tracking-tight"><span id="w-temp">--</span>°</p>
+                            <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mt-1">Air Temp</p>
+                        </div>
+                    </div>
+                    <!-- Rainfall -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden bg-blue-50">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-200 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-blue-500"><i class="fa-solid fa-cloud-showers-heavy text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-stone-800 tracking-tight"><span id="w-rain">--</span><span class="text-sm">mm</span></p>
+                            <p class="text-xs font-semibold text-stone-500 uppercase tracking-wider mt-1">Rainfall</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Soil Sensor -->
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
-                    <div class="bg-gradient-to-r from-amber-600 to-orange-500 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-mound mr-2"></i> Soil Conditions</h2></div>
-                    <div class="p-6 flex-1 text-center">
-                        <p class="text-stone-500 font-semibold text-sm uppercase mb-2 mt-4">Moisture</p>
-                        <p class="text-6xl font-black text-amber-600 mb-8"><span id="s-moisture">--</span>%</p>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center"><p class="text-stone-400 text-xs uppercase mb-1">Temp</p><p class="text-lg font-bold"><span id="s-temp">--</span>°C</p></div>
-                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center"><p class="text-stone-400 text-xs uppercase mb-1">Conductivity</p><p class="text-lg font-bold"><span id="s-cond">--</span> µS</p></div>
-                        </div>
-                    </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                    <div class="glass-card p-4 rounded-2xl text-center"><p class="text-stone-400 text-[10px] uppercase font-bold tracking-widest mb-1">Air Humidity</p><p class="font-bold text-lg text-stone-700"><span id="w-hum">--</span>%</p></div>
+                    <div class="glass-card p-4 rounded-2xl text-center"><p class="text-stone-400 text-[10px] uppercase font-bold tracking-widest mb-1">Wind Speed</p><p class="font-bold text-lg text-stone-700"><span id="w-wind">--</span> km/h</p></div>
+                    <div class="glass-card p-4 rounded-2xl text-center"><p class="text-stone-400 text-[10px] uppercase font-bold tracking-widest mb-1">Soil Temp</p><p class="font-bold text-lg text-stone-700"><span id="s-temp">--</span>°C</p></div>
+                    <div class="glass-card p-4 rounded-2xl text-center"><p class="text-stone-400 text-[10px] uppercase font-bold tracking-widest mb-1">Conductivity</p><p class="font-bold text-lg text-stone-700"><span id="s-cond">--</span> µS</p></div>
                 </div>
+            </section>
 
-                <!-- Irrigation Controller -->
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
-                    <div class="bg-gradient-to-r from-teal-600 to-emerald-500 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-faucet-drip mr-2"></i> Irrigation Control</h2></div>
-                    <div class="p-6 flex-1 space-y-6">
-                        <div class="bg-teal-50 border border-teal-100 p-5 rounded-2xl flex justify-between items-center">
+            <section>
+                <h2 class="text-lg font-bold text-stone-800 mb-4">Irrigation Control</h2>
+                <div class="space-y-4">
+                    
+                    <div class="glass-card p-6 rounded-3xl bg-teal-50 border border-teal-100 flex justify-between items-center mb-6">
+                        <div>
+                            <p class="text-teal-800 text-xs font-bold uppercase tracking-wider mb-1">Current Water Flow</p>
+                            <p class="text-4xl font-black text-teal-700 tracking-tight"><span id="i-flow">--</span> <span class="text-lg font-bold">L/min</span></p>
+                        </div>
+                        <i class="fa-solid fa-water text-4xl text-teal-500/30"></i>
+                    </div>
+
+                    <!-- Pump -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-pump">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center transition-colors" id="iconbg-pump">
+                                <i class="fa-solid fa-faucet-drip text-xl text-stone-400 transition-colors" id="icon-pump"></i>
+                            </div>
                             <div>
-                                <p class="text-teal-800 text-xs font-bold uppercase mb-1">Current Flow</p>
-                                <p class="text-3xl font-black text-teal-700"><span id="i-flow">--</span> <span class="text-sm">L/min</span></p>
+                                <h3 class="font-bold text-stone-800">Main Pump</h3>
+                                <p class="text-xs text-stone-500 font-medium">Source Control</p>
                             </div>
                         </div>
-                        <div class="space-y-3">
-                            <!-- Switches -->
-                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
-                                <span class="font-semibold text-stone-700">Main Pump</span>
-                                <input type="checkbox" id="toggle-pump" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('pump', this.checked)">
-                            </div>
-                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
-                                <span class="font-semibold text-stone-700">Zone 1 Valve</span>
-                                <input type="checkbox" id="toggle-v1" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('valve_zone_1', this.checked)">
-                            </div>
-                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
-                                <span class="font-semibold text-stone-700">Zone 2 Valve</span>
-                                <input type="checkbox" id="toggle-v2" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('valve_zone_2', this.checked)">
-                            </div>
-                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-pump" class="sr-only peer" onchange="cmd('pump', this.checked)">
+                            <div class="w-14 h-8 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-teal-500"></div>
+                        </label>
                     </div>
+
+                    <!-- Valve 1 -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-v1">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center transition-colors" id="iconbg-v1">
+                                <i class="fa-solid fa-seedling text-lg text-stone-400 transition-colors" id="icon-v1"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-stone-800">Zone 1 Valve</h3>
+                                <p class="text-xs text-stone-500 font-medium">North Field</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-v1" class="sr-only peer" onchange="cmd('valve_zone_1', this.checked)">
+                            <div class="w-14 h-8 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Valve 2 -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-v2">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center transition-colors" id="iconbg-v2">
+                                <i class="fa-solid fa-wheat-awn text-lg text-stone-400 transition-colors" id="icon-v2"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-stone-800">Zone 2 Valve</h3>
+                                <p class="text-xs text-stone-500 font-medium">South Field</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-v2" class="sr-only peer" onchange="cmd('valve_zone_2', this.checked)">
+                            <div class="w-14 h-8 bg-stone-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+                        </label>
+                    </div>
+
                 </div>
-            </div>
-            
-            <div class="glass-panel p-4 rounded-xl mt-8">
-                <h3 class="font-bold mb-2">System Log</h3>
-                <div id="event-log" class="h-32 overflow-y-auto font-mono text-sm space-y-1 text-stone-600 bg-stone-50 p-2 rounded border border-stone-200"></div>
-            </div>
+            </section>
+
+            <section class="opacity-50 hover:opacity-100 transition-opacity pt-4">
+                <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 ml-2">Event Log</p>
+                <div id="event-log" class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-stone-500 bg-white/50 backdrop-blur border border-stone-200 p-3 rounded-2xl shadow-inner"></div>
+            </section>
+
         </main>
     </div>
 
@@ -160,14 +208,40 @@
         };
 
         let authToken = localStorage.getItem('farmAuthToken');
+        let appStateCache = JSON.parse(localStorage.getItem('farmStateCache') || '{}');
         let streams = [];
+        let offlineDevices = new Set();
+
+        const hour = new Date().getHours();
+        document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
 
         window.onload = () => { if (authToken) showDashboard(); };
 
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${
+                isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-stone-900 text-white'
+            }`;
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function updateCache(data) {
+            appStateCache = { ...appStateCache, ...data };
+            localStorage.setItem('farmStateCache', JSON.stringify(appStateCache));
+        }
+
         function addLog(msg) {
+            const log = document.getElementById('event-log');
             const div = document.createElement('div');
             div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            const log = document.getElementById('event-log');
             log.appendChild(div); log.scrollTop = log.scrollHeight;
         }
 
@@ -189,12 +263,14 @@
             } catch (error) {
                 err.innerText = error.message; err.classList.remove('hidden');
             } finally {
-                btn.textContent = 'Sign In'; btn.disabled = false;
+                btn.textContent = 'Connect to Farm'; btn.disabled = false;
             }
         }
 
         function logout() {
-            localStorage.removeItem('farmAuthToken'); authToken = null;
+            localStorage.removeItem('farmAuthToken'); 
+            localStorage.removeItem('farmStateCache'); 
+            authToken = null; appStateCache = {};
             streams.forEach(s => s.abort()); streams = [];
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('login-modal').classList.remove('hidden');
@@ -207,7 +283,11 @@
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             
-            // Connect to all 3 telemetry streams
+            // Instantly apply cached persistent state on load
+            processWeather(appStateCache);
+            processSoil(appStateCache);
+            processIrrigation(appStateCache);
+
             connectSSE(ROUTES.weather_telemetry, processWeather);
             connectSSE(ROUTES.soil_telemetry, processSoil);
             connectSSE(ROUTES.irr_telemetry, processIrrigation);
@@ -216,8 +296,8 @@
         async function connectSSE(route, callback) {
             const controller = new AbortController();
             streams.push(controller);
-            document.getElementById('connection-status').innerText = 'Connected via SSE';
-            document.getElementById('connection-status').className = 'text-xs font-bold px-3 py-1 rounded bg-green-100 text-green-700';
+            const indicator = document.getElementById('connection-indicator');
+            indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
 
             try {
                 const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
@@ -225,6 +305,8 @@
                     signal: controller.signal
                 });
                 if (!res.ok) throw new Error("SSE connection failed");
+
+                indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-colors';
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
@@ -243,21 +325,37 @@
                             if (line.startsWith('event: ')) eventType = line.slice(7).trim();
                             else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
                         }
-                        if (eventType === 'device_data' && dataStr) {
-                            try { callback(JSON.parse(dataStr).payload); } catch(e){}
+                        if (dataStr) {
+                            if (eventType === 'device_data') {
+                                try { callback(JSON.parse(dataStr).payload); } catch(e){}
+                            } else if (eventType === 'device_status') {
+                                try { processStatus(JSON.parse(dataStr)); } catch(e){}
+                            }
                         }
                     }
                 }
             } catch (err) {
                 if (err.name !== 'AbortError') {
                     addLog("SSE Disconnected, reconnecting...");
+                    indicator.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
                     setTimeout(() => connectSSE(route, callback), 3000);
                 }
             }
         }
 
+        function processStatus(data) {
+            if (!data || !data.deviceId) return;
+            const banner = document.getElementById('offline-banner');
+            if (data.status === 'offline') offlineDevices.add(data.deviceId);
+            else if (data.status === 'online') offlineDevices.delete(data.deviceId);
+            
+            if (offlineDevices.size > 0) { banner.classList.remove('hidden'); banner.classList.add('flex'); }
+            else { banner.classList.add('hidden'); banner.classList.remove('flex'); }
+        }
+
         function processWeather(data) {
             if(!data) return;
+            updateCache(data);
             if(data.temperature !== undefined) document.getElementById('w-temp').innerText = data.temperature;
             if(data.humidity !== undefined) document.getElementById('w-hum').innerText = data.humidity;
             if(data.rainfall !== undefined) document.getElementById('w-rain').innerText = data.rainfall;
@@ -266,32 +364,74 @@
 
         function processSoil(data) {
             if(!data) return;
+            updateCache(data);
             if(data.soil_temperature !== undefined) document.getElementById('s-temp').innerText = data.soil_temperature;
             if(data.soil_moisture !== undefined) {
                 document.getElementById('s-moisture').innerText = data.soil_moisture;
-                if(data.soil_moisture < 20) document.getElementById('alert-banner').classList.remove('hidden');
-                else document.getElementById('alert-banner').classList.add('hidden');
+                const alertBanner = document.getElementById('alert-banner');
+                if(data.soil_moisture < 20) { alertBanner.classList.remove('hidden'); alertBanner.classList.add('flex'); }
+                else { alertBanner.classList.add('hidden'); alertBanner.classList.remove('flex'); }
             }
             if(data.soil_conductivity !== undefined) document.getElementById('s-cond').innerText = data.soil_conductivity;
         }
 
         function processIrrigation(data) {
             if(!data) return;
+            updateCache(data);
+            
             if(data.water_flow !== undefined) document.getElementById('i-flow').innerText = data.water_flow;
-            if(data.pump !== undefined && document.activeElement !== document.getElementById('toggle-pump')) document.getElementById('toggle-pump').checked = data.pump;
-            if(data.valve_zone_1 !== undefined && document.activeElement !== document.getElementById('toggle-v1')) document.getElementById('toggle-v1').checked = data.valve_zone_1;
-            if(data.valve_zone_2 !== undefined && document.activeElement !== document.getElementById('toggle-v2')) document.getElementById('toggle-v2').checked = data.valve_zone_2;
+            
+            const applyStyle = (id, isActive, activeColor) => {
+                const iconBg = document.getElementById(`iconbg-${id}`);
+                const icon = document.getElementById(`icon-${id}`);
+                const card = document.getElementById(`card-${id}`);
+                if (!iconBg || !icon || !card) return;
+                if (isActive) {
+                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
+                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-${activeColor}-500`;
+                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
+                } else {
+                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-stone-100`;
+                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-stone-400`;
+                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
+                }
+            };
+
+            if(data.pump !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-pump')) document.getElementById('toggle-pump').checked = data.pump;
+                applyStyle('pump', data.pump, 'teal');
+            }
+            if(data.valve_zone_1 !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-v1')) document.getElementById('toggle-v1').checked = data.valve_zone_1;
+                applyStyle('v1', data.valve_zone_1, 'emerald');
+            }
+            if(data.valve_zone_2 !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-v2')) document.getElementById('toggle-v2').checked = data.valve_zone_2;
+                applyStyle('v2', data.valve_zone_2, 'green');
+            }
         }
 
         async function cmd(type, val) {
-            addLog(`Command: ${type} -> ${val}`);
+            addLog(`Cmd: ${type} → ${val}`);
+            const previousVal = appStateCache[type];
+            
+            // Optimistic update
+            const updateObj = { [type]: val };
+            processIrrigation(updateObj);
+
             try {
-                await fetch(`${PLATFORM_BASE_URL}${ROUTES.irr_commands}`, {
+                const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.irr_commands}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: { [type]: val } })
+                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
                 });
-            } catch(e) { addLog("Cmd Failed: " + e.message); }
+                const resData = await response.json();
+                if (!response.ok || !resData.success) throw new Error(resData.message || 'Command failed');
+            } catch(e) { 
+                addLog("Cmd Failed: " + e.message); 
+                showToast(e.message, 'error');
+                if (previousVal !== undefined) processIrrigation({ [type]: previousVal });
+            }
         }
     </script>
 </body>

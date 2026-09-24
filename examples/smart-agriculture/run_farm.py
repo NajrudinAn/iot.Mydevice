@@ -75,6 +75,7 @@ sim_air_temp = 25.0
 
 print("Starting Farm Simulation...")
 try:
+    loop_count = 0
     while True:
         # 1. Weather Logic
         # Random rain showers (10% chance to start, stops gradually)
@@ -103,7 +104,13 @@ try:
             if flow > 0: flow += (random.random() * 1.0 - 0.5)
             
         irr_state["water_flow"] = round(flow, 1)
-        irrigation_ctrl.update_properties(irr_state)
+        
+        force = (loop_count % 2 == 0)
+        if force:
+            for k, v in irr_state.items():
+                irrigation_ctrl.send(k, v, force_send=True)
+        else:
+            irrigation_ctrl.update_properties(irr_state)
 
         # 3. Soil Logic
         # Soil dries out naturally based on temp
@@ -124,6 +131,7 @@ try:
             "soil_conductivity": round(sim_soil_moisture * 12, 0)
         })
 
+        loop_count += 1
         time.sleep(5)
 except KeyboardInterrupt:
     print("Shutting down...")
