@@ -586,8 +586,8 @@ void loop() {
                     </button>
                     <button
                         onClick={() => setActiveTab('frontend')}
-                        className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all border-l ${
-                            activeTab === 'frontend' ? 'bg-white text-orange-600 shadow-sm border-gray-200 border-l-0' : 'text-gray-500 hover:text-orange-600 hover:bg-gray-100 border-gray-200'
+                        className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
+                            activeTab === 'frontend' ? 'bg-white text-orange-600 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-orange-600 hover:bg-gray-100'
                         }`}
                     >
                         <LayoutDashboard size={18} /> Frontend HTML/JS
