@@ -594,11 +594,11 @@
                 function processEnv(data) {
                     if (!data) return;
                     updateCache(data);
-                    if (data.temperature !== undefined) document.getElementById('val-temp').innerText = data.temperature;
-                    if (data.humidity !== undefined) document.getElementById('val-hum').innerText = data.humidity;
-                    if (data.air_quality !== undefined) document.getElementById('val-aqi').innerText = data.air_quality;
-                    if (data.light_level !== undefined) document.getElementById('val-light').innerText = data.light_level;
-                    if (data.power_consumption !== undefined) document.getElementById('val-power').innerText = data.power_consumption;
+                    if (data.temperature !== undefined && document.getElementById('val-temp')) document.getElementById('val-temp').innerText = data.temperature;
+                    if (data.humidity !== undefined && document.getElementById('val-hum')) document.getElementById('val-hum').innerText = data.humidity;
+                    if (data.air_quality !== undefined && document.getElementById('val-aqi')) document.getElementById('val-aqi').innerText = data.air_quality;
+                    if (data.light_level !== undefined && document.getElementById('val-light')) document.getElementById('val-light').innerText = data.light_level;
+                    if (data.power_consumption !== undefined && document.getElementById('val-power')) document.getElementById('val-power').innerText = data.power_consumption;
                 }
 
                 function processCtrl(data) {
