@@ -315,7 +315,7 @@ class MyDevice:
         """Internal method to publish the standard JSON telemetry payload."""
         payload = {
             "device_id": self.device_id,
-            "source": "", # Empty source puts fields at the root level
+            "source": "state", # Default source for property sync
             "data": data_dict
         }
         self._client.publish(self._t_data, json.dumps(payload, default=str))

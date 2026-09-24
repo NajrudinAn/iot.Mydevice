@@ -359,6 +359,27 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
         }
     };
 
+    // Immediately send current status upon connection
+    if (allowDeviceStatus && hardwareAllowedDevices.length > 0) {
+        try {
+            const statusRes = await pool.query(`
+                SELECT device_id, status, last_seen 
+                FROM devices 
+                WHERE device_id = ANY($1)
+            `, [hardwareAllowedDevices]);
+
+            for (const row of statusRes.rows) {
+                res.write(`event: device_status\ndata: ${JSON.stringify({
+                    deviceId: row.device_id,
+                    status: row.status,
+                    lastSeen: row.last_seen
+                })}\n\n`);
+            }
+        } catch (e) {
+            console.error("Error fetching initial status for SSE", e);
+        }
+    }
+
     const telemetryListener = (telemetryData) => {
         if (allowTelemetry && hardwareAllowedDevices.includes(telemetryData.deviceId)) {
             const deviceUuid = hardwareToUuidMap[telemetryData.deviceId];
@@ -374,6 +395,41 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
             }
         }
     };
+
+    // Immediately send current telemetry upon connection
+    if (allowTelemetry && hardwareAllowedDevices.length > 0) {
+        try {
+            const currentDataRes = await pool.query(`
+                SELECT sd.device_id as hardware_id, sd.payload, sd.recorded_at, d.id as device_uuid 
+                FROM devices d
+                JOIN (
+                    SELECT device_id, payload, recorded_at,
+                           ROW_NUMBER() OVER(PARTITION BY device_id ORDER BY recorded_at DESC) as rn
+                    FROM sensor_data
+                ) sd ON sd.device_id = d.device_id
+                WHERE d.device_id = ANY($1) AND sd.rn = 1
+            `, [hardwareAllowedDevices]);
+
+            for (const row of currentDataRes.rows) {
+                const deviceUuid = row.device_uuid;
+                const deviceFields = globalAllowed ? [] : allowedDataFields
+                    .filter(f => f.startsWith(`${deviceUuid}::`) || !f.includes('::'))
+                    .map(f => f.includes('::') ? f.split('::')[1] : f);
+                    
+                const filtered = filterPayloadWithFallback(row.payload, deviceFields, globalAllowed);
+                
+                if (globalAllowed || Object.keys(filtered).length > 0) {
+                    res.write(`event: device_data\ndata: ${JSON.stringify({
+                        deviceId: row.hardware_id,
+                        timestamp: row.recorded_at,
+                        payload: filtered
+                    })}\n\n`);
+                }
+            }
+        } catch (e) {
+            console.error("Error fetching initial telemetry for SSE", e);
+        }
+    }
 
     const commandStatusListener = (commandData) => {
         if (allowCommandStatus && hardwareAllowedDevices.includes(commandData.deviceId)) {
