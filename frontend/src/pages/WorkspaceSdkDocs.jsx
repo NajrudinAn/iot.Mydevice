@@ -65,6 +65,8 @@ IMPORTANT PLATFORM RULES:
 MY API DETAILS:
 - Telemetry SSE Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
 - Command POST Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
+- History GET Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
+- Current Data GET Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
 - Authorization Header: "Bearer YOUR_TOKEN"
 
 JAVASCRIPT REQUIREMENTS:
@@ -73,6 +75,7 @@ JAVASCRIPT REQUIREMENTS:
 - Parse the \`data: {...}\` payload. The hardware data is located in \`JSON.parse(dataStr).payload\`.
 - Use a \`try/catch\` block and \`setTimeout\` to automatically reconnect if the stream disconnects.
 - Create an \`async function sendCommand(propertyName, newValue)\` that sends a POST request with \`body: JSON.stringify({ type: \\\`SET_\${propertyName.toUpperCase()}\\\`, payload: { [propertyName]: newValue } })\`.
+- Create an \`async function fetchHistory()\` that fetches historical time-series data using \`?limit=100\` and renders a chart using Chart.js.
 
 Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
 - A card displaying "temperature" and "humidity".
@@ -470,10 +473,36 @@ void loop() {
                             />
                         </section>
 
-                        {/* 3. Sending Commands */}
+                        {/* 3. REST APIs */}
                         <section>
                             <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
                                 <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span> 
+                                Fetching Historical & Current Data (REST APIs)
+                            </h3>
+                            
+                            <MethodCard
+                                title="1. Current Data (Last Known State)"
+                                desc="Retrieve the most recent data payload immediately before the SSE stream connects."
+                                code={`async function fetchCurrentData() {\n    const res = await fetch('http://localhost:5001/api/v1/routes/YOUR_CURRENT_DATA_ROUTE', {\n        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }\n    });\n    const json = await res.json();\n    \n    // Returns: [ { device_id: "...", payload: { temp: 23 } } ]\n    if (json.success && json.data.length > 0) {\n        updateUI(json.data[0].payload);\n    }\n}`}
+                            />
+
+                            <MethodCard
+                                title="2. Historical Data (Charts & Graphs)"
+                                desc="Retrieve paginated time-series data for analytics."
+                                code={`async function fetchHistory(deviceId, startDate, endDate) {\n    const query = new URLSearchParams({\n        device_id: deviceId,\n        start_date: startDate.toISOString(),\n        end_date: endDate.toISOString(),\n        limit: 100 // default 500, max 1000\n    });\n    \n    const res = await fetch(\`http://localhost:5001/api/v1/routes/YOUR_HISTORY_ROUTE?\${query}\`, {\n        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }\n    });\n    const json = await res.json();\n    \n    if (json.success) {\n        renderChart(json.data);\n    }\n}`}
+                            />
+
+                            <MethodCard
+                                title="3. Device Status"
+                                desc="Retrieve the current network connectivity status of your devices."
+                                code={`async function fetchDeviceStatus() {\n    const res = await fetch('http://localhost:5001/api/v1/routes/YOUR_STATUS_ROUTE', {\n        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }\n    });\n    const json = await res.json();\n    \n    // Returns: [ { device_id: "...", status: "ONLINE", last_seen: "..." } ]\n}`}
+                            />
+                        </section>
+
+                        {/* 4. Sending Commands */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">4</span> 
                                 Sending Commands
                             </h3>
                             <MethodCard

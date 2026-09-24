@@ -20,6 +20,8 @@ IMPORTANT PLATFORM RULES:
 MY API DETAILS:
 - Telemetry SSE Route: http://localhost:5001/api/v1/routes/realtime-123456
 - Command POST Route: http://localhost:5001/api/v1/routes/command-123456
+- History GET Route: http://localhost:5001/api/v1/routes/history-123456
+- Current Data GET Route: http://localhost:5001/api/v1/routes/current-123456
 - Authorization Header: "Bearer YOUR_TOKEN"
 
 JAVASCRIPT REQUIREMENTS:
@@ -28,6 +30,7 @@ JAVASCRIPT REQUIREMENTS:
 - Parse the `data: {...}` payload. The hardware data is located in `JSON.parse(dataStr).payload`.
 - Use a `try/catch` block and `setTimeout` to automatically reconnect if the stream disconnects.
 - Create an `async function sendCommand(propertyName, newValue)` that sends a POST request with `body: JSON.stringify({ type: \`SET_\${propertyName.toUpperCase()}\`, payload: { [propertyName]: newValue } })`.
+- Create an `async function fetchHistory()` that fetches historical time-series data using `?limit=100` and renders a chart using Chart.js.
 
 Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
 - A card displaying "temperature" and "humidity".
@@ -166,9 +169,75 @@ function updateUI(data) {
 connectSSE('/api/v1/routes/realtime-123456', 'your_jwt_token', updateUI);
 ```
 
+## 3. Fetching Historical & Current Data (REST APIs)
+
+While SSE is perfect for real-time updates, you will often need to retrieve historical data for charts or fetch the last known state immediately when the dashboard loads. The MyDevice platform allows you to create specific API Routes for these purposes.
+
+All data endpoints require the `Authorization: Bearer <TOKEN>` header.
+
+### A. Current Data (Last Known State)
+Retrieves the most recent data payload for your devices. This is great for initializing your UI state before the SSE stream connects.
+
+```javascript
+async function fetchCurrentData() {
+    const res = await fetch('http://localhost:5001/api/v1/routes/YOUR_CURRENT_DATA_ROUTE', {
+        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+    });
+    const json = await res.json();
+    
+    // Returns an array of devices:
+    // [ { device_id: "...", recorded_at: "...", payload: { temp: 23, main_light: true } } ]
+    if (json.success && json.data.length > 0) {
+        updateUI(json.data[0].payload);
+    }
+}
+```
+
+### B. Historical Data (Charts & Graphs)
+Retrieves time-series data. You can filter by `device_id`, `start_date`, `end_date`, `limit`, and `page`.
+
+```javascript
+async function fetchHistory(deviceId, startDate, endDate) {
+    const query = new URLSearchParams({
+        device_id: deviceId,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+        limit: 100 // default 500, max 1000
+    });
+    
+    const res = await fetch(\`http://localhost:5001/api/v1/routes/YOUR_HISTORY_ROUTE?\${query}\`, {
+        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+    });
+    const json = await res.json();
+    
+    // Returns paginated historical data:
+    // { success: true, data: [...], pagination: { total, page, limit, totalPages } }
+    if (json.success) {
+        renderChart(json.data);
+    }
+}
+```
+
+### C. Device Status (Online/Offline)
+Retrieves the current network connectivity status of your devices.
+
+```javascript
+async function fetchDeviceStatus() {
+    const res = await fetch('http://localhost:5001/api/v1/routes/YOUR_STATUS_ROUTE', {
+        headers: { 'Authorization': 'Bearer YOUR_TOKEN' }
+    });
+    const json = await res.json();
+    
+    // Returns: [ { device_id: "...", status: "ONLINE", last_seen: "..." } ]
+    if (json.success) {
+        console.log("Device Status:", json.data);
+    }
+}
+```
+
 ---
 
-## 3. Sending Commands to Devices
+## 4. Sending Commands to Devices
 
 When you define a writable property in your Python SDK (e.g. `device.add_switch("main_light")`), the backend automatically creates a command endpoint for it.
 
