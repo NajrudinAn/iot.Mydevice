@@ -318,8 +318,22 @@
             knownDevices.add(data.deviceId);
             const status = data.status.toLowerCase();
 
-            if (status === 'offline') offlineDevices.add(data.deviceId);
-            else if (status === 'online') offlineDevices.delete(data.deviceId);
+            if (status === 'offline') {
+                offlineDevices.add(data.deviceId);
+            } else if (status === 'online') {
+                const wasOffline = offlineDevices.has(data.deviceId);
+                offlineDevices.delete(data.deviceId);
+                if (wasOffline) {
+                    addLog("Device online. Full state resync...");
+                    streams.forEach(s => s.abort());
+                    streams = [];
+                    setTimeout(() => {
+                        connectSSE(ROUTES.env_telemetry, processEnv);
+                        connectSSE(ROUTES.m1_telemetry, (d) => processMachine('m1', d));
+                        connectSSE(ROUTES.m2_telemetry, (d) => processMachine('m2', d));
+                    }, 500);
+                }
+            }
             
             const onlineCount = knownDevices.size - offlineDevices.size;
             statusTxt.innerText = `ONLINE (${onlineCount} DEVICE${onlineCount !== 1 ? 'S' : ''})`;

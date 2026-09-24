@@ -359,8 +359,22 @@
             knownDevices.add(data.deviceId);
             const status = data.status.toLowerCase();
 
-            if (status === 'offline') offlineDevices.add(data.deviceId);
-            else if (status === 'online') offlineDevices.delete(data.deviceId);
+            if (status === 'offline') {
+                offlineDevices.add(data.deviceId);
+            } else if (status === 'online') {
+                const wasOffline = offlineDevices.has(data.deviceId);
+                offlineDevices.delete(data.deviceId);
+                if (wasOffline) {
+                    addLog("Device online. Full state resync...");
+                    streams.forEach(s => s.abort());
+                    streams = [];
+                    setTimeout(() => {
+                        connectSSE(ROUTES.weather_telemetry, processWeather);
+                        connectSSE(ROUTES.soil_telemetry, processSoil);
+                        connectSSE(ROUTES.irr_telemetry, processIrrigation);
+                    }, 500);
+                }
+            }
             
             const onlineCount = knownDevices.size - offlineDevices.size;
             connText.innerText = `${onlineCount} Device${onlineCount !== 1 ? 's' : ''} Online`;

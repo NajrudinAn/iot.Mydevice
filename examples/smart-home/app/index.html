@@ -576,7 +576,18 @@
                     if (status === 'offline') {
                         offlineDevices.add(data.deviceId);
                     } else if (status === 'online') {
+                        const wasOffline = offlineDevices.has(data.deviceId);
                         offlineDevices.delete(data.deviceId);
+                        if (wasOffline) {
+                            addLog("Device online. Full state resync...");
+                            streams.forEach(s => s.abort());
+                            streams = [];
+                            window.activeStreams = 0;
+                            setTimeout(() => {
+                                connectSSE(ROUTES.env_telemetry, processEnv);
+                                connectSSE(ROUTES.ctrl_telemetry, processCtrl);
+                            }, 500);
+                        }
                     }
 
                     const onlineCount = knownDevices.size - offlineDevices.size;
