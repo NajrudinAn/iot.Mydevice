@@ -11,12 +11,16 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* slate-100 */
+            background-color: #f3f4f6;
+            /* slate-100 */
             -webkit-tap-highlight-color: transparent;
         }
 
         /* Hide scrollbar for clean app feel */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
 
         .glass-card {
             background: rgba(255, 255, 255, 0.9);
@@ -30,8 +34,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* Custom Toggle Switch */
@@ -39,7 +50,8 @@
             right: 0;
             border-color: #68D391;
         }
-        .toggle-checkbox:checked + .toggle-label {
+
+        .toggle-checkbox:checked+.toggle-label {
             background-color: #68D391;
         }
 
@@ -48,16 +60,18 @@
             -webkit-appearance: none;
             background: transparent;
         }
+
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
             height: 24px;
             width: 24px;
             border-radius: 50%;
             background: #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             margin-top: -8px;
         }
+
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 8px;
@@ -71,10 +85,13 @@
 <body class="text-slate-800 antialiased selection:bg-blue-200">
 
     <!-- Login Screen -->
-    <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
-        <div class="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
+    <div id="login-modal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        <div
+            class="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
             <div class="text-center mb-10">
-                <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+                <div
+                    class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
                     <i class="fa-solid fa-house-signal text-3xl text-white"></i>
                 </div>
                 <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Smart Home</h2>
@@ -100,9 +117,10 @@
                             placeholder="Password">
                     </div>
                 </div>
-                
-                <div id="login-error" class="hidden text-sm text-red-500 font-semibold text-center bg-red-50 py-2 rounded-lg"></div>
-                
+
+                <div id="login-error"
+                    class="hidden text-sm text-red-500 font-semibold text-center bg-red-50 py-2 rounded-lg"></div>
+
                 <button type="submit" id="login-btn"
                     class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] mt-4">
                     Continue
@@ -113,7 +131,7 @@
 
     <!-- Main App UI -->
     <div id="dashboard" class="hidden min-h-screen pb-24">
-        
+
         <!-- App Header -->
         <header class="pt-12 pb-6 px-6 sticky top-0 z-40 bg-[#f3f4f6]/90 backdrop-blur-xl">
             <div class="max-w-md mx-auto w-full flex justify-between items-center">
@@ -122,58 +140,73 @@
                     <h1 class="text-2xl font-bold text-slate-900">My Home</h1>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-600">
-                        <div id="connection-indicator" class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors"></div>
+                    <div
+                        class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-600">
+                        <div id="connection-indicator"
+                            class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors">
+                        </div>
                         <span id="connection-text">Connecting...</span>
                     </div>
-                    <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
+                    <button onclick="logout()"
+                        class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
                         <i class="fa-solid fa-user"></i>
                     </button>
                 </div>
             </div>
         </header>
 
-        <main class="max-w-md mx-auto w-full px-6 space-y-8 slide-up">
-            
+        <main class="max-w-3xl mx-auto w-full px-6 space-y-8 slide-up">
+
             <!-- Quick Environment Overview -->
             <section>
                 <div class="flex justify-between items-end mb-4">
                     <h2 class="text-lg font-bold text-slate-800">Environment</h2>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <!-- Temp -->
-                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-100 rounded-full blur-2xl opacity-60"></div>
+                    <div
+                        class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-100 rounded-full blur-2xl opacity-60">
+                        </div>
                         <div class="text-orange-500"><i class="fa-solid fa-temperature-half text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-temp">--</span>°</p>
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Temperature</p>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                                    id="val-temp">--</span>°</p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Temperature
+                            </p>
                         </div>
                     </div>
                     <!-- Hum -->
                     <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-100 rounded-full blur-2xl opacity-60">
+                        </div>
                         <div class="text-blue-500"><i class="fa-solid fa-droplet text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-hum">--</span>%</p>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                                    id="val-hum">--</span>%</p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Humidity</p>
                         </div>
                     </div>
                     <!-- AQI -->
                     <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-teal-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-teal-100 rounded-full blur-2xl opacity-60">
+                        </div>
                         <div class="text-teal-500"><i class="fa-solid fa-wind text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-aqi">--</span></p>
-                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Air Quality</p>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                                    id="val-aqi">--</span></p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Air Quality
+                            </p>
                         </div>
                     </div>
                     <!-- Power -->
                     <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-100 rounded-full blur-2xl opacity-60">
+                        </div>
                         <div class="text-purple-500"><i class="fa-solid fa-bolt-lightning text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-power">--</span><span class="text-lg">w</span></p>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                                    id="val-power">--</span><span class="text-lg">w</span></p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Usage</p>
                         </div>
                     </div>
@@ -185,13 +218,16 @@
                 <div class="flex justify-between items-end mb-4">
                     <h2 class="text-lg font-bold text-slate-800">Accessories</h2>
                 </div>
-                <div class="space-y-4">
-                    
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                     <!-- Main Light Toggle -->
-                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-mlight">
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors"
+                        id="card-mlight">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-mlight">
-                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors" id="icon-mlight"></i>
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
+                                id="iconbg-mlight">
+                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors"
+                                    id="icon-mlight"></i>
                             </div>
                             <div>
                                 <h3 class="font-bold text-slate-800">Main Light</h3>
@@ -199,16 +235,22 @@
                             </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggle-mlight" class="sr-only peer" onchange="cmd('main_light', this.checked)">
-                            <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500"></div>
+                            <input type="checkbox" id="toggle-mlight" class="sr-only peer"
+                                onchange="cmd('main_light', this.checked)">
+                            <div
+                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500">
+                            </div>
                         </label>
                     </div>
 
                     <!-- Bedroom Light Toggle -->
-                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-blight">
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors"
+                        id="card-blight">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-blight">
-                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors" id="icon-blight"></i>
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
+                                id="iconbg-blight">
+                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors"
+                                    id="icon-blight"></i>
                             </div>
                             <div>
                                 <h3 class="font-bold text-slate-800">Bed Light</h3>
@@ -216,23 +258,31 @@
                             </div>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggle-blight" class="sr-only peer" onchange="cmd('bedroom_light', this.checked)">
-                            <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500"></div>
+                            <input type="checkbox" id="toggle-blight" class="sr-only peer"
+                                onchange="cmd('bedroom_light', this.checked)">
+                            <div
+                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500">
+                            </div>
                         </label>
                     </div>
 
                     <!-- Smart Lock -->
-                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-door">
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors"
+                        id="card-door">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-door">
-                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors" id="icon-door"></i>
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
+                                id="iconbg-door">
+                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors"
+                                    id="icon-door"></i>
                             </div>
                             <div>
                                 <h3 class="font-bold text-slate-800">Front Door</h3>
                                 <p class="text-xs text-slate-500 font-medium" id="lbl-door-status">Unlocked</p>
                             </div>
                         </div>
-                        <button id="btn-door" onclick="cmd('door_lock', !document.getElementById('btn-door').dataset.locked)" data-locked="false"
+                        <button id="btn-door"
+                            onclick="cmd('door_lock', !document.getElementById('btn-door').dataset.locked)"
+                            data-locked="false"
                             class="px-5 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all active:scale-95 shadow-sm text-sm">
                             LOCK
                         </button>
@@ -247,13 +297,15 @@
                     <h2 class="text-lg font-bold text-slate-800">Climate</h2>
                 </div>
                 <div class="space-y-4">
-                    
+
                     <!-- Air Conditioner -->
                     <div class="glass-card p-5 rounded-3xl transition-colors" id="card-ac">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-ac">
-                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors" id="icon-ac"></i>
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
+                                    id="iconbg-ac">
+                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors"
+                                        id="icon-ac"></i>
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-slate-800">Air Conditioner</h3>
@@ -261,8 +313,11 @@
                                 </div>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="toggle-ac" class="sr-only peer" onchange="cmd('ac', this.checked)">
-                                <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-500"></div>
+                                <input type="checkbox" id="toggle-ac" class="sr-only peer"
+                                    onchange="cmd('ac', this.checked)">
+                                <div
+                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-500">
+                                </div>
                             </label>
                         </div>
                         <div class="px-2">
@@ -271,7 +326,8 @@
                                 <span class="text-blue-600 text-lg" id="lbl-ac-temp">22°</span>
                                 <span>30°</span>
                             </div>
-                            <input type="range" id="slider-ac" min="16" max="30" step="0.5" class="w-full" onchange="cmd('ac_temp', this.value)">
+                            <input type="range" id="slider-ac" min="16" max="30" step="0.5" class="w-full"
+                                onchange="cmd('ac_temp', this.value)">
                         </div>
                     </div>
 
@@ -279,8 +335,10 @@
                     <div class="glass-card p-5 rounded-3xl transition-colors" id="card-fan">
                         <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-fan">
-                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors" id="icon-fan"></i>
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
+                                    id="iconbg-fan">
+                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors"
+                                        id="icon-fan"></i>
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-slate-800">Ceiling Fan</h3>
@@ -288,8 +346,11 @@
                                 </div>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="toggle-fan" class="sr-only peer" onchange="cmd('fan', this.checked)">
-                                <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyan-500"></div>
+                                <input type="checkbox" id="toggle-fan" class="sr-only peer"
+                                    onchange="cmd('fan', this.checked)">
+                                <div
+                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyan-500">
+                                </div>
                             </label>
                         </div>
                         <div class="px-2">
@@ -298,7 +359,8 @@
                                 <span class="text-cyan-600 text-lg">Speed <span id="lbl-fan-speed">3</span></span>
                                 <span>5</span>
                             </div>
-                            <input type="range" id="slider-fan" min="1" max="5" step="1" class="w-full" onchange="cmd('fan_speed', this.value)">
+                            <input type="range" id="slider-fan" min="1" max="5" step="1" class="w-full"
+                                onchange="cmd('fan_speed', this.value)">
                         </div>
                     </div>
 
@@ -308,344 +370,345 @@
             <!-- Debug Logs -->
             <section class="opacity-50 hover:opacity-100 transition-opacity pt-4">
                 <p class="text-xs font-bold text-slate-400 uppercase mb-2 ml-2">Console</p>
-                <div id="event-log" class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-500 bg-white/50 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-inner">
+                <div id="event-log"
+                    class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-500 bg-white/50 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-inner">
                 </div>
             </section>
 
-    <!-- Offline Banner -->
-    <div id="offline-banner" class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm items-center gap-2 slide-up">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>Device Offline</span>
-    </div>
+            <!-- Offline Banner -->
+            <div id="offline-banner"
+                class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm items-center gap-2 slide-up">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Device Offline</span>
+            </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+            <!-- Toast Container -->
+            <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
-    <script>
-        const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://localhost:3000';
-        const PLATFORM_APP_ID = window.PLATFORM_APP_ID || 'REPLACE_WITH_APP_ID';
+            <script>
+                const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://mydevice.in';
+                const PLATFORM_APP_ID = window.PLATFORM_APP_ID || '38a37f94-7385-4f70-a6b1-0e74e53c4a24';
 
-        const ROUTES = {
-            env_telemetry: '/api/v1/routes/home-env-realtime-data-5f3f90',
-            ctrl_telemetry: '/api/v1/routes/home-ctrl-realtime-data-73a987',
-            ctrl_commands: '/api/v1/routes/home-ctrl-command-6d9b10'
-        };
+                const ROUTES = {
+                    env_telemetry: '/api/v1/routes/home-env-realtime-data-5f3f90',
+                    ctrl_telemetry: '/api/v1/routes/home-ctrl-realtime-data-73a987',
+                    ctrl_commands: '/api/v1/routes/home-ctrl-command-6d9b10'
+                };
 
-        let authToken = localStorage.getItem('homeAuthToken');
-        let appStateCache = JSON.parse(localStorage.getItem('homeStateCache') || '{}');
-        let streams = [];
-        let knownDevices = new Set();
-        let offlineDevices = new Set();
+                let authToken = localStorage.getItem('homeAuthToken');
+                let appStateCache = JSON.parse(localStorage.getItem('homeStateCache') || '{}');
+                let streams = [];
+                let knownDevices = new Set();
+                let offlineDevices = new Set();
 
-        const hour = new Date().getHours();
-        document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
+                const hour = new Date().getHours();
+                document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
 
-        window.onload = () => { 
-            if (authToken) showDashboard(); 
-        };
+                window.onload = () => {
+                    if (authToken) showDashboard();
+                };
 
-        function showToast(message, type = 'error') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            const isError = type === 'error';
-            toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${
-                isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-900 text-white'
-            }`;
-            
-            toast.innerHTML = `
+                function showToast(message, type = 'error') {
+                    const container = document.getElementById('toast-container');
+                    const toast = document.createElement('div');
+
+                    const isError = type === 'error';
+                    toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-900 text-white'
+                        }`;
+
+                    toast.innerHTML = `
                 <i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'} text-lg"></i>
                 <span>${message}</span>
             `;
-            
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
 
-        function updateCache(data) {
-            appStateCache = { ...appStateCache, ...data };
-            localStorage.setItem('homeStateCache', JSON.stringify(appStateCache));
-        }
+                    container.appendChild(toast);
+                    setTimeout(() => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateY(20px)';
+                        toast.style.transition = 'all 0.3s ease';
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                }
 
-        function addLog(msg) {
-            const log = document.getElementById('event-log');
-            const div = document.createElement('div');
-            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            log.appendChild(div); 
-            log.scrollTop = log.scrollHeight;
-        }
+                function updateCache(data) {
+                    appStateCache = { ...appStateCache, ...data };
+                    localStorage.setItem('homeStateCache', JSON.stringify(appStateCache));
+                }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('login-btn');
-            const err = document.getElementById('login-error');
-            btn.textContent = 'Authenticating...'; btn.disabled = true; err.classList.add('hidden');
+                function addLog(msg) {
+                    const log = document.getElementById('event-log');
+                    const div = document.createElement('div');
+                    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                    log.appendChild(div);
+                    log.scrollTop = log.scrollHeight;
+                }
 
-            try {
-                const res = await fetch(`${PLATFORM_BASE_URL}/api/applications/${PLATFORM_APP_ID}/auth/login`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
-                });
-                const data = await res.json();
-                if (data.success && data.token) {
-                    authToken = data.token; 
-                    localStorage.setItem('homeAuthToken', authToken); 
-                    showDashboard();
-                } else throw new Error(data.message || 'Login failed');
-            } catch (error) {
-                err.innerText = error.message; 
-                err.classList.remove('hidden');
-            } finally {
-                btn.textContent = 'Continue'; 
-                btn.disabled = false;
-            }
-        }
+                async function handleLogin(e) {
+                    e.preventDefault();
+                    const btn = document.getElementById('login-btn');
+                    const err = document.getElementById('login-error');
+                    btn.textContent = 'Authenticating...'; btn.disabled = true; err.classList.add('hidden');
 
-        function logout() {
-            localStorage.removeItem('homeAuthToken'); 
-            localStorage.removeItem('homeStateCache');
-            authToken = null;
-            appStateCache = {};
-            streams.forEach(s => s.abort()); streams = [];
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('login-modal').classList.remove('hidden');
-        }
+                    try {
+                        const res = await fetch(`${PLATFORM_BASE_URL}/api/applications/${PLATFORM_APP_ID}/auth/login`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+                        });
+                        const data = await res.json();
+                        if (data.success && data.token) {
+                            authToken = data.token;
+                            localStorage.setItem('homeAuthToken', authToken);
+                            showDashboard();
+                        } else throw new Error(data.message || 'Login failed');
+                    } catch (error) {
+                        err.innerText = error.message;
+                        err.classList.remove('hidden');
+                    } finally {
+                        btn.textContent = 'Continue';
+                        btn.disabled = false;
+                    }
+                }
 
-        function showDashboard() {
-            if (PLATFORM_APP_ID.includes('REPLACE_WITH')) {
-                alert("Please replace PLATFORM_APP_ID and ROUTES with actual Application API values."); 
-                logout(); return;
-            }
-            document.getElementById('login-modal').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
+                function logout() {
+                    localStorage.removeItem('homeAuthToken');
+                    localStorage.removeItem('homeStateCache');
+                    authToken = null;
+                    appStateCache = {};
+                    streams.forEach(s => s.abort()); streams = [];
+                    document.getElementById('dashboard').classList.add('hidden');
+                    document.getElementById('login-modal').classList.remove('hidden');
+                }
 
-            // Instantly apply cached persistent state on load
-            processEnv(appStateCache);
-            processCtrl(appStateCache);
+                function showDashboard() {
+                    if (PLATFORM_APP_ID.includes('REPLACE_WITH')) {
+                        alert("Please replace PLATFORM_APP_ID and ROUTES with actual Application API values.");
+                        logout(); return;
+                    }
+                    document.getElementById('login-modal').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
 
-            connectSSE(ROUTES.env_telemetry, processEnv);
-            connectSSE(ROUTES.ctrl_telemetry, processCtrl);
-        }
+                    // Instantly apply cached persistent state on load
+                    processEnv(appStateCache);
+                    processCtrl(appStateCache);
 
-        async function connectSSE(route, callback) {
-            const controller = new AbortController();
-            streams.push(controller);
-            
-            const indicator = document.getElementById('connection-indicator');
-            const connText = document.getElementById('connection-text');
-            indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
-            connText.innerText = 'Connecting...';
+                    connectSSE(ROUTES.env_telemetry, processEnv);
+                    connectSSE(ROUTES.ctrl_telemetry, processCtrl);
+                }
 
-            try {
-                const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'text/event-stream' },
-                    signal: controller.signal
-                });
-                if (!res.ok) throw new Error("SSE connection failed");
+                async function connectSSE(route, callback) {
+                    const controller = new AbortController();
+                    streams.push(controller);
 
-                indicator.className = 'w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-colors';
-                connText.innerText = 'Connected';
+                    const indicator = document.getElementById('connection-indicator');
+                    const connText = document.getElementById('connection-text');
+                    indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
+                    connText.innerText = 'Connecting...';
 
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
+                    try {
+                        const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
+                            headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'text/event-stream' },
+                            signal: controller.signal
+                        });
+                        if (!res.ok) throw new Error("SSE connection failed");
 
-                while (true) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    buffer += decoder.decode(value, { stream: true });
-                    const chunks = buffer.split('\n\n');
-                    buffer = chunks.pop();
+                        indicator.className = 'w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-colors';
+                        connText.innerText = 'Connected';
 
-                    for (const chunk of chunks) {
-                        let eventType = 'message', dataStr = null;
-                        for (const line of chunk.split('\n')) {
-                            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
-                            else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
-                        }
-                        if (dataStr) {
-                            if (eventType === 'device_data') {
-                                try { callback(JSON.parse(dataStr).payload); } catch (e) { }
-                            } else if (eventType === 'device_status') {
-                                try { processStatus(JSON.parse(dataStr)); } catch (e) { }
+                        const reader = res.body.getReader();
+                        const decoder = new TextDecoder();
+                        let buffer = '';
+
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            if (done) break;
+                            buffer += decoder.decode(value, { stream: true });
+                            const chunks = buffer.split('\n\n');
+                            buffer = chunks.pop();
+
+                            for (const chunk of chunks) {
+                                let eventType = 'message', dataStr = null;
+                                for (const line of chunk.split('\n')) {
+                                    if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+                                    else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
+                                }
+                                if (dataStr) {
+                                    if (eventType === 'device_data') {
+                                        try { callback(JSON.parse(dataStr).payload); } catch (e) { }
+                                    } else if (eventType === 'device_status') {
+                                        try { processStatus(JSON.parse(dataStr)); } catch (e) { }
+                                    }
+                                }
                             }
+                        }
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            addLog("SSE Disconnected, reconnecting...");
+                            indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
+                            connText.innerText = 'Disconnected';
+                            setTimeout(() => connectSSE(route, callback), 3000);
                         }
                     }
                 }
-            } catch (err) {
-                if (err.name !== 'AbortError') {
-                    addLog("SSE Disconnected, reconnecting...");
-                    indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
-                    connText.innerText = 'Disconnected';
-                    setTimeout(() => connectSSE(route, callback), 3000);
-                }
-            }
-        }
 
-        function processStatus(data) {
-            if (!data || !data.deviceId) return;
-            const banner = document.getElementById('offline-banner');
-            const connText = document.getElementById('connection-text');
-            
-            knownDevices.add(data.deviceId);
-            const status = data.status.toLowerCase();
+                function processStatus(data) {
+                    if (!data || !data.deviceId) return;
+                    const banner = document.getElementById('offline-banner');
+                    const connText = document.getElementById('connection-text');
 
-            if (status === 'offline') {
-                offlineDevices.add(data.deviceId);
-            } else if (status === 'online') {
-                offlineDevices.delete(data.deviceId);
-            }
-            
-            const onlineCount = knownDevices.size - offlineDevices.size;
-            connText.innerText = `${onlineCount} Device${onlineCount !== 1 ? 's' : ''} Online`;
+                    knownDevices.add(data.deviceId);
+                    const status = data.status.toLowerCase();
 
-            if (offlineDevices.size > 0) {
-                banner.classList.remove('hidden');
-                banner.classList.add('flex');
-            } else {
-                banner.classList.add('hidden');
-                banner.classList.remove('flex');
-            }
-        }
+                    if (status === 'offline') {
+                        offlineDevices.add(data.deviceId);
+                    } else if (status === 'online') {
+                        offlineDevices.delete(data.deviceId);
+                    }
 
-        function processEnv(data) {
-            if (!data) return;
-            updateCache(data);
-            if (data.temperature !== undefined) document.getElementById('val-temp').innerText = data.temperature;
-            if (data.humidity !== undefined) document.getElementById('val-hum').innerText = data.humidity;
-            if (data.air_quality !== undefined) document.getElementById('val-aqi').innerText = data.air_quality;
-            if (data.light_level !== undefined) document.getElementById('val-light').innerText = data.light_level;
-            if (data.power_consumption !== undefined) document.getElementById('val-power').innerText = data.power_consumption;
-        }
+                    const onlineCount = knownDevices.size - offlineDevices.size;
+                    connText.innerText = `${onlineCount} Device${onlineCount !== 1 ? 's' : ''} Online`;
 
-        function processCtrl(data) {
-            if (!data) return;
-            updateCache(data);
-            
-            const applyStyle = (id, isActive, activeColor) => {
-                const iconBg = document.getElementById(`iconbg-${id}`);
-                const icon = document.getElementById(`icon-${id}`);
-                const card = document.getElementById(`card-${id}`);
-                if (!iconBg || !icon || !card) return;
-                
-                const iconName = icon.dataset.icon || (icon.className.match(/fa-(?!solid|regular|light|thin|duotone|brands)[a-z-]+/) || [''])[0];
-                
-                if (isActive) {
-                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
-                    icon.className = `fa-solid ${iconName} text-xl transition-colors text-${activeColor}-500`;
-                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
-                } else {
-                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
-                    icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-400`;
-                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
+                    if (offlineDevices.size > 0) {
+                        banner.classList.remove('hidden');
+                        banner.classList.add('flex');
+                    } else {
+                        banner.classList.add('hidden');
+                        banner.classList.remove('flex');
+                    }
                 }
-            };
 
-            if (data.main_light !== undefined) {
-                if(document.activeElement !== document.getElementById('toggle-mlight')) document.getElementById('toggle-mlight').checked = data.main_light;
-                applyStyle('mlight', data.main_light, 'indigo');
-            }
-            if (data.bedroom_light !== undefined) {
-                if(document.activeElement !== document.getElementById('toggle-blight')) document.getElementById('toggle-blight').checked = data.bedroom_light;
-                applyStyle('blight', data.bedroom_light, 'purple');
-            }
-            if (data.ac !== undefined) {
-                if(document.activeElement !== document.getElementById('toggle-ac')) document.getElementById('toggle-ac').checked = data.ac;
-                applyStyle('ac', data.ac, 'blue');
-            }
-            if (data.fan !== undefined) {
-                if(document.activeElement !== document.getElementById('toggle-fan')) document.getElementById('toggle-fan').checked = data.fan;
-                applyStyle('fan', data.fan, 'cyan');
-                
-                const icon = document.getElementById('icon-fan');
-                if (data.fan && data.fan_speed > 0) {
-                    icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
-                } else {
-                    icon.style.animation = 'none';
+                function processEnv(data) {
+                    if (!data) return;
+                    updateCache(data);
+                    if (data.temperature !== undefined) document.getElementById('val-temp').innerText = data.temperature;
+                    if (data.humidity !== undefined) document.getElementById('val-hum').innerText = data.humidity;
+                    if (data.air_quality !== undefined) document.getElementById('val-aqi').innerText = data.air_quality;
+                    if (data.light_level !== undefined) document.getElementById('val-light').innerText = data.light_level;
+                    if (data.power_consumption !== undefined) document.getElementById('val-power').innerText = data.power_consumption;
                 }
-            }
-            if (data.ac_temp !== undefined) {
-                if(document.activeElement !== document.getElementById('slider-ac')) {
-                    document.getElementById('slider-ac').value = data.ac_temp;
-                }
-                document.getElementById('lbl-ac-temp').innerText = data.ac_temp + '°';
-            }
-            if (data.fan_speed !== undefined) {
-                if(document.activeElement !== document.getElementById('slider-fan')) {
-                    document.getElementById('slider-fan').value = data.fan_speed;
-                }
-                document.getElementById('lbl-fan-speed').innerText = data.fan_speed;
-                
-                if (appStateCache.fan) {
-                    const icon = document.getElementById('icon-fan');
-                    icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
-                }
-            }
 
-            if (data.door_lock !== undefined) {
-                const doorBtn = document.getElementById('btn-door');
-                doorBtn.dataset.locked = data.door_lock;
-                document.getElementById('lbl-door-status').innerText = data.door_lock ? 'Locked' : 'Unlocked';
-                
-                const doorIcon = document.getElementById('icon-door');
-                if (data.door_lock) { 
-                    doorBtn.innerText = 'UNLOCK'; 
-                    doorBtn.className = 'px-5 py-2.5 bg-slate-900 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
-                    doorIcon.dataset.icon = 'fa-lock';
-                    applyStyle('door', true, 'slate');
-                } else { 
-                    doorBtn.innerText = 'LOCK'; 
-                    doorBtn.className = 'px-5 py-2.5 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-2xl transition-all shadow-sm text-sm';
-                    doorIcon.dataset.icon = 'fa-unlock-keyhole';
-                    applyStyle('door', false, 'red');
-                }
-            }
-        }
+                function processCtrl(data) {
+                    if (!data) return;
+                    updateCache(data);
 
-        async function cmd(type, val) {
-            let actualVal = typeof val === 'string' ? parseFloat(val) : val;
-            addLog(`Cmd: ${type} → ${actualVal}`);
-            
-            // Revert state helper
-            const previousVal = appStateCache[type];
-            
-            // Optimistic Update
-            const updateObj = { [type]: actualVal };
-            processCtrl(updateObj); 
+                    const applyStyle = (id, isActive, activeColor) => {
+                        const iconBg = document.getElementById(`iconbg-${id}`);
+                        const icon = document.getElementById(`icon-${id}`);
+                        const card = document.getElementById(`card-${id}`);
+                        if (!iconBg || !icon || !card) return;
 
-            try {
-                const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Command failed');
+                        const iconName = icon.dataset.icon || (icon.className.match(/fa-(?!solid|regular|light|thin|duotone|brands)[a-z-]+/) || [''])[0];
+
+                        if (isActive) {
+                            iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
+                            icon.className = `fa-solid ${iconName} text-xl transition-colors text-${activeColor}-500`;
+                            card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
+                        } else {
+                            iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
+                            icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-400`;
+                            card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
+                        }
+                    };
+
+                    if (data.main_light !== undefined) {
+                        if (document.activeElement !== document.getElementById('toggle-mlight')) document.getElementById('toggle-mlight').checked = data.main_light;
+                        applyStyle('mlight', data.main_light, 'indigo');
+                    }
+                    if (data.bedroom_light !== undefined) {
+                        if (document.activeElement !== document.getElementById('toggle-blight')) document.getElementById('toggle-blight').checked = data.bedroom_light;
+                        applyStyle('blight', data.bedroom_light, 'purple');
+                    }
+                    if (data.ac !== undefined) {
+                        if (document.activeElement !== document.getElementById('toggle-ac')) document.getElementById('toggle-ac').checked = data.ac;
+                        applyStyle('ac', data.ac, 'blue');
+                    }
+                    if (data.fan !== undefined) {
+                        if (document.activeElement !== document.getElementById('toggle-fan')) document.getElementById('toggle-fan').checked = data.fan;
+                        applyStyle('fan', data.fan, 'cyan');
+
+                        const icon = document.getElementById('icon-fan');
+                        if (data.fan && data.fan_speed > 0) {
+                            icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
+                        } else {
+                            icon.style.animation = 'none';
+                        }
+                    }
+                    if (data.ac_temp !== undefined) {
+                        if (document.activeElement !== document.getElementById('slider-ac')) {
+                            document.getElementById('slider-ac').value = data.ac_temp;
+                        }
+                        document.getElementById('lbl-ac-temp').innerText = data.ac_temp + '°';
+                    }
+                    if (data.fan_speed !== undefined) {
+                        if (document.activeElement !== document.getElementById('slider-fan')) {
+                            document.getElementById('slider-fan').value = data.fan_speed;
+                        }
+                        document.getElementById('lbl-fan-speed').innerText = data.fan_speed;
+
+                        if (appStateCache.fan) {
+                            const icon = document.getElementById('icon-fan');
+                            icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
+                        }
+                    }
+
+                    if (data.door_lock !== undefined) {
+                        const doorBtn = document.getElementById('btn-door');
+                        doorBtn.dataset.locked = data.door_lock;
+                        document.getElementById('lbl-door-status').innerText = data.door_lock ? 'Locked' : 'Unlocked';
+
+                        const doorIcon = document.getElementById('icon-door');
+                        if (data.door_lock) {
+                            doorBtn.innerText = 'UNLOCK';
+                            doorBtn.className = 'px-5 py-2.5 bg-slate-900 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
+                            doorIcon.dataset.icon = 'fa-lock';
+                            applyStyle('door', true, 'slate');
+                        } else {
+                            doorBtn.innerText = 'LOCK';
+                            doorBtn.className = 'px-5 py-2.5 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-2xl transition-all shadow-sm text-sm';
+                            doorIcon.dataset.icon = 'fa-unlock-keyhole';
+                            applyStyle('door', false, 'red');
+                        }
+                    }
                 }
-                
-            } catch (e) { 
-                addLog("Cmd Failed: " + e.message); 
-                showToast(e.message, 'error');
-                
-                // Revert optimistic update
-                if (previousVal !== undefined) {
-                    processCtrl({ [type]: previousVal });
+
+                async function cmd(type, val) {
+                    let actualVal = typeof val === 'string' ? parseFloat(val) : val;
+                    addLog(`Cmd: ${type} → ${actualVal}`);
+
+                    // Revert state helper
+                    const previousVal = appStateCache[type];
+
+                    // Optimistic Update
+                    const updateObj = { [type]: actualVal };
+                    processCtrl(updateObj);
+
+                    try {
+                        const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                            body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Command failed');
+                        }
+
+                    } catch (e) {
+                        addLog("Cmd Failed: " + e.message);
+                        showToast(e.message, 'error');
+
+                        // Revert optimistic update
+                        if (previousVal !== undefined) {
+                            processCtrl({ [type]: previousVal });
+                        }
+                    }
                 }
-            }
-        }
-        
-        const style = document.createElement('style');
-        style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
-        document.head.appendChild(style);
-    </script>
+
+                const style = document.createElement('style');
+                style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+                document.head.appendChild(style);
+            </script>
 </body>
 
 </html>

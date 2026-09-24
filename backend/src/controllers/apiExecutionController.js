@@ -416,10 +416,39 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
                            ROW_NUMBER() OVER(PARTITION BY device_id ORDER BY recorded_at DESC) as rn
                     FROM sensor_data
                 ) sd ON sd.device_id = d.device_id
-                WHERE d.device_id = ANY($1) AND sd.rn = 1
+                WHERE d.device_id = ANY($1) AND sd.rn <= 50
+                ORDER BY sd.device_id, sd.rn DESC
             `, [hardwareAllowedDevices]);
 
+            const mergedByDevice = {};
             for (const row of currentDataRes.rows) {
+                const id = row.hardware_id;
+                if (!mergedByDevice[id]) {
+                    mergedByDevice[id] = {
+                        hardware_id: id,
+                        device_uuid: row.device_uuid,
+                        recorded_at: row.recorded_at,
+                        payload: {}
+                    };
+                }
+                mergedByDevice[id].recorded_at = row.recorded_at;
+                
+                const mergePayload = (source, target) => {
+                    for (const [k, v] of Object.entries(source)) {
+                        if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+                            if (!target[k] || typeof target[k] !== 'object') target[k] = {};
+                            mergePayload(v, target[k]);
+                        } else {
+                            target[k] = v;
+                        }
+                    }
+                };
+                if (row.payload) {
+                    mergePayload(row.payload, mergedByDevice[id].payload);
+                }
+            }
+
+            for (const row of Object.values(mergedByDevice)) {
                 const deviceUuid = row.device_uuid;
                 let deviceFields = globalAllowed ? [] : allowedDataFields
                     .filter(f => f.startsWith(`${deviceUuid}::`) || !f.includes('::'))
