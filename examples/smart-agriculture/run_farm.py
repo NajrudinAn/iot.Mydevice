@@ -86,13 +86,20 @@ try:
             
         sim_air_temp += (random.random() * 2.0 - 1.0)
         
-        weather_station.update_properties({
+        weather_state = {
             "temperature": round(sim_air_temp, 1),
             "humidity": round(40 + (sim_rainfall * 2), 1),
             "rainfall": round(sim_rainfall, 1),
             "wind_speed": round(5 + random.random() * 10, 1),
             "light_intensity": 10000 if sim_rainfall == 0 else 2000
-        })
+        }
+        force = (loop_count % 2 == 0)
+        
+        if force:
+            for k, v in weather_state.items():
+                weather_station.send(k, v, force_send=True)
+        else:
+            weather_station.update_properties(weather_state)
 
         # 2. Irrigation Logic
         # Calculate water flow based on pump and valves
@@ -105,7 +112,6 @@ try:
             
         irr_state["water_flow"] = round(flow, 1)
         
-        force = (loop_count % 2 == 0)
         if force:
             for k, v in irr_state.items():
                 irrigation_ctrl.send(k, v, force_send=True)
@@ -125,11 +131,17 @@ try:
             
         sim_soil_moisture = max(0, min(100, sim_soil_moisture))
 
-        soil_sensor.update_properties({
+        soil_state = {
             "soil_moisture": round(sim_soil_moisture, 1),
             "soil_temperature": round(sim_air_temp - 2.0, 1),
             "soil_conductivity": round(sim_soil_moisture * 12, 0)
-        })
+        }
+        
+        if force:
+            for k, v in soil_state.items():
+                soil_sensor.send(k, v, force_send=True)
+        else:
+            soil_sensor.update_properties(soil_state)
 
         loop_count += 1
         time.sleep(5)

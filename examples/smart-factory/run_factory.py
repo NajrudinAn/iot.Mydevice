@@ -66,7 +66,7 @@ class Machine:
         self.temp = 25.0
         print(f"[{self.name}] Reset")
 
-    def tick(self, env_temp, cooling_on):
+    def tick(self, env_temp, cooling_on, force_send=False):
         if self.state == "RUNNING":
             self.rpm = 1500 + random.randint(-50, 50)
             self.power = 120 + random.randint(-5, 5)
@@ -98,13 +98,18 @@ class Machine:
             if self.temp > env_temp:
                 self.temp -= 2.0 if cooling_on else 0.5
 
-        self.device.update_properties({
+        machine_state = {
             "operating_state": self.state,
             "rpm": self.rpm,
             "temperature": round(self.temp, 1),
             "vibration": round(self.vib, 2),
             "power_consumption": self.power
-        })
+        }
+        if force_send:
+            for k, v in machine_state.items():
+                self.device.send(k, v, force_send=True)
+        else:
+            self.device.update_properties(machine_state)
 
 
 class FactoryEnv:
@@ -128,7 +133,7 @@ class FactoryEnv:
         self.alarm = val
         print(f"[Environment] Alarm -> {val}")
         
-    def tick(self, machine_running):
+    def tick(self, machine_running, force_send=False):
         # Temp goes up if machines are running and fan is off
         if machine_running and not self.cooling_fan:
             self.temp += 0.5
@@ -137,12 +142,17 @@ class FactoryEnv:
             
         self.hum = 45.0 + random.random() * 2
         
-        self.device.update_properties({
+        env_state = {
             "temperature": round(self.temp, 1),
             "humidity": round(self.hum, 1),
             "cooling_fan": self.cooling_fan,
             "alarm": self.alarm
-        })
+        }
+        if force_send:
+            for k, v in env_state.items():
+                self.device.send(k, v, force_send=True)
+        else:
+            self.device.update_properties(env_state)
 
 # Instantiate
 machine1 = Machine(m1, "Machine 1")
@@ -160,26 +170,20 @@ try:
     loop_count = 0
     while True:
         any_running = (machine1.state == "RUNNING" or machine2.state == "RUNNING")
+        force = (loop_count % 2 == 0)
         
         # Process environment first
-        factory.tick(machine_running=any_running)
+        factory.tick(machine_running=any_running, force_send=force)
         
         # Process machines
-        machine1.tick(factory.temp, factory.cooling_fan)
-        machine2.tick(factory.temp, factory.cooling_fan)
+        machine1.tick(factory.temp, factory.cooling_fan, force_send=force)
+        machine2.tick(factory.temp, factory.cooling_fan, force_send=force)
         
         # Auto trigger alarm if any machine hits WARNING
         if (machine1.state == "WARNING" or machine2.state == "WARNING") and not factory.alarm:
             print("[Factory] Automatically triggering alarm due to machine warning!")
             factory.set_alarm(True)
             factory.device.update_property("alarm", True)
-            
-        force = (loop_count % 2 == 0)
-        if force:
-            env.send("cooling_fan", factory.cooling_fan, force_send=True)
-            env.send("alarm", factory.alarm, force_send=True)
-            m1.send("operating_state", machine1.state, force_send=True)
-            m2.send("operating_state", machine2.state, force_send=True)
             
         loop_count += 1
         time.sleep(5)

@@ -93,18 +93,26 @@ try:
         if state["fan"]: power += (20 * state["fan_speed"])
         if state["ac"]: power += 1200
         
-        # Send telemetry
-        env_device.update_properties({
+        # Prepare Environment Data
+        env_state = {
             "temperature": round(temp, 1),
             "humidity": round(hum, 1),
             "air_quality": aqi,
             "light_level": light,
             "power_consumption": power
-        })
+        }
+        
+        force = (loop_count % 2 == 0)
+        
+        # Sync Environment State
+        if force:
+            for k, v in env_state.items():
+                env_device.send(k, v, force_send=True)
+        else:
+            env_device.update_properties(env_state)
         
         # Sync control state back to platform
         # We force send every 2nd loop (10s) so new UI clients sync up immediately even if state hasn't changed.
-        force = (loop_count % 2 == 0)
         if force:
             for k, v in state.items():
                 ctrl_device.send(k, v, force_send=True)
