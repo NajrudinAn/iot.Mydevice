@@ -616,11 +616,11 @@
                         if (isActive) {
                             iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
                             icon.className = `fa-solid ${iconName} text-xl transition-colors text-${activeColor}-500`;
-                            card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
+                            card.classList.add(`border-${activeColor}-200`, 'bg-white');
                         } else {
                             iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
                             icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-400`;
-                            card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
+                            card.classList.remove('border-indigo-200', 'border-purple-200', 'border-blue-200', 'border-cyan-200', 'border-slate-200', 'border-red-200', 'bg-white');
                         }
                     };
 
