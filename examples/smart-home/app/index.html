@@ -686,6 +686,14 @@
                 }
 
                 async function cmd(type, val) {
+                    if (offlineDevices.size > 0) {
+                        showToast("Device is offline. Commands cannot be sent.", "error");
+                        if (appStateCache[type] !== undefined) {
+                            setTimeout(() => processCtrl({ [type]: appStateCache[type] }), 50);
+                        }
+                        return;
+                    }
+
                     let actualVal = typeof val === 'string' ? parseFloat(val) : val;
                     addLog(`Cmd: ${type} → ${actualVal}`);
 

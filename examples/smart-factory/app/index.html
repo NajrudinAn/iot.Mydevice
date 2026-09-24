@@ -375,6 +375,10 @@
         }
 
         async function machineCmd(machine, cmd) {
+            if (offlineDevices.size > 0) {
+                showToast("Device is offline. Commands cannot be sent.", "error");
+                return;
+            }
             let route = machine === 'm1' ? ROUTES.m1_commands : ROUTES.m2_commands;
             addLog(`SYS CMD: ${machine} -> ${cmd}`);
             try {
@@ -392,6 +396,13 @@
         }
 
         async function toggleEnv(prop) {
+            if (offlineDevices.size > 0) {
+                showToast("Device is offline. Commands cannot be sent.", "error");
+                if (appStateCache.env[prop] !== undefined) {
+                    setTimeout(() => processEnv({ [prop]: appStateCache.env[prop] }), 50);
+                }
+                return;
+            }
             const previousVal = appStateCache.env[prop];
             let newVal = !appStateCache.env[prop];
             

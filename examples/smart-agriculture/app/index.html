@@ -428,6 +428,14 @@
         }
 
         async function cmd(type, val) {
+            if (offlineDevices.size > 0) {
+                showToast("Device is offline. Commands cannot be sent.", "error");
+                if (appStateCache[type] !== undefined) {
+                    setTimeout(() => processIrrigation({ [type]: appStateCache[type] }), 50);
+                }
+                return;
+            }
+
             addLog(`Cmd: ${type} → ${val}`);
             const previousVal = appStateCache[type];
             
