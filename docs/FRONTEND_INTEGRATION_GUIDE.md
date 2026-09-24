@@ -4,6 +4,38 @@ This guide explains how to build a custom HTML/JavaScript frontend dashboard tha
 
 ---
 
+## 🤖 AI-Assisted Frontend Generation (ChatGPT / Claude)
+If you want to generate a frontend quickly using AI, copy the highly detailed prompt below, replace `YOUR_ROUTE` and `YOUR_TOKEN`, and paste it into ChatGPT or Claude along with your desired design (e.g., "Make it look like a sci-fi dashboard using TailwindCSS").
+
+```text
+I want to build a custom HTML/JS frontend dashboard for my IoT devices. 
+Please generate a single HTML file containing the UI and the JavaScript logic.
+
+IMPORTANT PLATFORM RULES:
+1. Real-time data is streamed via Server-Sent Events (SSE) from the backend.
+2. Commands are sent via standard REST POST requests.
+3. The UI must be fully reactive and dynamically update when new SSE data arrives.
+4. I want an Optimistic UI: when a user toggles a switch, update the UI instantly, then send the API request.
+
+MY API DETAILS:
+- Telemetry SSE Route: http://localhost:5001/api/v1/routes/realtime-123456
+- Command POST Route: http://localhost:5001/api/v1/routes/command-123456
+- Authorization Header: "Bearer YOUR_TOKEN"
+
+JAVASCRIPT REQUIREMENTS:
+- Create an `async function connectSSE()` using the `fetch` API and `ReadableStream`.
+- Parse the SSE chunks (separated by `\n\n`) and handle `event: device_data`.
+- Parse the `data: {...}` payload. The hardware data is located in `JSON.parse(dataStr).payload`.
+- Use a `try/catch` block and `setTimeout` to automatically reconnect if the stream disconnects.
+- Create an `async function sendCommand(propertyName, newValue)` that sends a POST request with `body: JSON.stringify({ type: \`SET_\${propertyName.toUpperCase()}\`, payload: { [propertyName]: newValue } })`.
+
+Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
+- A card displaying "temperature" and "humidity".
+- A toggle switch for "main_light" (which triggers sendCommand).
+```
+
+---
+
 ## 1. The Architecture (How it Works)
 
 The MyDevice platform uses a modern, ultra-fast real-time architecture:
