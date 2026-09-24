@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farm - MyDevice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); }
+        .slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-stone-100 to-green-50 min-h-screen text-stone-800">
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl max-w-sm w-full mx-4 slide-up">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-leaf text-2xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-stone-800">Smart Farm Login</h2>
+                <p class="text-sm text-stone-500 mt-1">Application Authentication</p>
+            </div>
+            
+            <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+                <div>
+                    <label class="block text-sm font-semibold text-stone-700 mb-1">Email</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-envelope absolute left-3 top-3 text-stone-400"></i>
+                        <input type="email" id="email" required class="w-full border border-stone-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="you@example.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-stone-700 mb-1">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3 top-3 text-stone-400"></i>
+                        <input type="password" id="password" required class="w-full border border-stone-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="••••••••">
+                    </div>
+                </div>
+                <div id="login-error" class="hidden text-sm text-red-500 font-medium text-center">Invalid credentials</div>
+                <button type="submit" id="login-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                    Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen flex flex-col">
+        <header class="bg-white/80 backdrop-blur-md border-b border-stone-200 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="bg-green-100 p-2 rounded-lg"><i class="fa-solid fa-tractor text-xl text-green-700"></i></div>
+                    <div>
+                        <h1 class="text-xl font-bold text-stone-800">Agriculture Control Center</h1>
+                        <p class="text-xs text-stone-500">Connected to MyDevice</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div id="connection-status" class="text-xs font-bold px-3 py-1 rounded bg-stone-200 text-stone-600">Connecting...</div>
+                    <button onclick="logout()" class="text-stone-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-power-off text-lg"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 slide-up">
+            <div id="alert-banner" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm flex items-start gap-4">
+                <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mt-0.5"></i>
+                <div>
+                    <h3 class="text-red-800 font-bold">Critical Soil Moisture Level</h3>
+                    <p class="text-red-600 text-sm mt-1">Zone 1 moisture has dropped below 20%. Please engage irrigation immediately.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Weather Station -->
+                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-blue-500 to-sky-400 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-cloud-sun-rain mr-2"></i> Weather Station</h2></div>
+                    <div class="p-6 flex-1 space-y-5">
+                        <div class="grid grid-cols-2 gap-4 text-center border-b border-stone-100 pb-5">
+                            <div><p class="text-stone-400 text-xs font-semibold uppercase">Temp</p><p class="text-2xl font-bold"><span id="w-temp">--</span>°C</p></div>
+                            <div><p class="text-stone-400 text-xs font-semibold uppercase">Humidity</p><p class="text-2xl font-bold"><span id="w-hum">--</span>%</p></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center bg-stone-50 p-3 rounded-xl">
+                                <span class="text-sm font-medium text-stone-600">Rainfall</span>
+                                <span class="font-bold text-blue-600"><span id="w-rain">--</span> mm/h</span>
+                            </div>
+                            <div class="flex justify-between items-center bg-stone-50 p-3 rounded-xl">
+                                <span class="text-sm font-medium text-stone-600">Wind</span>
+                                <span class="font-bold"><span id="w-wind">--</span> km/h</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Soil Sensor -->
+                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-amber-600 to-orange-500 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-mound mr-2"></i> Soil Conditions</h2></div>
+                    <div class="p-6 flex-1 text-center">
+                        <p class="text-stone-500 font-semibold text-sm uppercase mb-2 mt-4">Moisture</p>
+                        <p class="text-6xl font-black text-amber-600 mb-8"><span id="s-moisture">--</span>%</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center"><p class="text-stone-400 text-xs uppercase mb-1">Temp</p><p class="text-lg font-bold"><span id="s-temp">--</span>°C</p></div>
+                            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-center"><p class="text-stone-400 text-xs uppercase mb-1">Conductivity</p><p class="text-lg font-bold"><span id="s-cond">--</span> µS</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Irrigation Controller -->
+                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-teal-600 to-emerald-500 px-6 py-4 text-white"><h2 class="font-bold text-lg"><i class="fa-solid fa-faucet-drip mr-2"></i> Irrigation Control</h2></div>
+                    <div class="p-6 flex-1 space-y-6">
+                        <div class="bg-teal-50 border border-teal-100 p-5 rounded-2xl flex justify-between items-center">
+                            <div>
+                                <p class="text-teal-800 text-xs font-bold uppercase mb-1">Current Flow</p>
+                                <p class="text-3xl font-black text-teal-700"><span id="i-flow">--</span> <span class="text-sm">L/min</span></p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <!-- Switches -->
+                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
+                                <span class="font-semibold text-stone-700">Main Pump</span>
+                                <input type="checkbox" id="toggle-pump" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('pump', this.checked)">
+                            </div>
+                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
+                                <span class="font-semibold text-stone-700">Zone 1 Valve</span>
+                                <input type="checkbox" id="toggle-v1" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('valve_zone_1', this.checked)">
+                            </div>
+                            <div class="flex items-center justify-between p-4 border border-stone-200 rounded-xl">
+                                <span class="font-semibold text-stone-700">Zone 2 Valve</span>
+                                <input type="checkbox" id="toggle-v2" class="w-12 h-6 accent-teal-500 cursor-pointer" onchange="cmd('valve_zone_2', this.checked)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-4 rounded-xl mt-8">
+                <h3 class="font-bold mb-2">System Log</h3>
+                <div id="event-log" class="h-32 overflow-y-auto font-mono text-sm space-y-1 text-stone-600 bg-stone-50 p-2 rounded border border-stone-200"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://localhost:3000';
+        const PLATFORM_APP_ID = window.PLATFORM_APP_ID || 'REPLACE_WITH_APP_ID';
+
+        const ROUTES = {
+            weather_telemetry: '/api/v1/routes/weather_tel_route_id',
+            soil_telemetry: '/api/v1/routes/soil_tel_route_id',
+            irr_telemetry: '/api/v1/routes/irr_tel_route_id',
+            irr_commands: '/api/v1/routes/irr_cmd_route_id'
+        };
+
+        let authToken = localStorage.getItem('farmAuthToken');
+        let streams = [];
+
+        window.onload = () => { if (authToken) showDashboard(); };
+
+        function addLog(msg) {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            const log = document.getElementById('event-log');
+            log.appendChild(div); log.scrollTop = log.scrollHeight;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+            btn.textContent = 'Authenticating...'; btn.disabled = true; err.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}/api/applications/${PLATFORM_APP_ID}/auth/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+                });
+                const data = await res.json();
+                if (data.success && data.token) {
+                    authToken = data.token; localStorage.setItem('farmAuthToken', authToken); showDashboard();
+                } else throw new Error(data.message || 'Login failed');
+            } catch (error) {
+                err.innerText = error.message; err.classList.remove('hidden');
+            } finally {
+                btn.textContent = 'Sign In'; btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('farmAuthToken'); authToken = null;
+            streams.forEach(s => s.abort()); streams = [];
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            if (PLATFORM_APP_ID.includes('REPLACE_WITH')) {
+                alert("Please replace PLATFORM_APP_ID and ROUTES with actual Application API values."); logout(); return;
+            }
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            // Connect to all 3 telemetry streams
+            connectSSE(ROUTES.weather_telemetry, processWeather);
+            connectSSE(ROUTES.soil_telemetry, processSoil);
+            connectSSE(ROUTES.irr_telemetry, processIrrigation);
+        }
+
+        async function connectSSE(route, callback) {
+            const controller = new AbortController();
+            streams.push(controller);
+            document.getElementById('connection-status').innerText = 'Connected via SSE';
+            document.getElementById('connection-status').className = 'text-xs font-bold px-3 py-1 rounded bg-green-100 text-green-700';
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'text/event-stream' },
+                    signal: controller.signal
+                });
+                if (!res.ok) throw new Error("SSE connection failed");
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const chunks = buffer.split('\n\n');
+                    buffer = chunks.pop();
+
+                    for (const chunk of chunks) {
+                        let eventType = 'message', dataStr = null;
+                        for (const line of chunk.split('\n')) {
+                            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+                            else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
+                        }
+                        if (eventType === 'device_data' && dataStr) {
+                            try { callback(JSON.parse(dataStr).payload); } catch(e){}
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    addLog("SSE Disconnected, reconnecting...");
+                    setTimeout(() => connectSSE(route, callback), 3000);
+                }
+            }
+        }
+
+        function processWeather(data) {
+            if(!data) return;
+            if(data.temperature !== undefined) document.getElementById('w-temp').innerText = data.temperature;
+            if(data.humidity !== undefined) document.getElementById('w-hum').innerText = data.humidity;
+            if(data.rainfall !== undefined) document.getElementById('w-rain').innerText = data.rainfall;
+            if(data.wind_speed !== undefined) document.getElementById('w-wind').innerText = data.wind_speed;
+        }
+
+        function processSoil(data) {
+            if(!data) return;
+            if(data.soil_temperature !== undefined) document.getElementById('s-temp').innerText = data.soil_temperature;
+            if(data.soil_moisture !== undefined) {
+                document.getElementById('s-moisture').innerText = data.soil_moisture;
+                if(data.soil_moisture < 20) document.getElementById('alert-banner').classList.remove('hidden');
+                else document.getElementById('alert-banner').classList.add('hidden');
+            }
+            if(data.soil_conductivity !== undefined) document.getElementById('s-cond').innerText = data.soil_conductivity;
+        }
+
+        function processIrrigation(data) {
+            if(!data) return;
+            if(data.water_flow !== undefined) document.getElementById('i-flow').innerText = data.water_flow;
+            if(data.pump !== undefined && document.activeElement !== document.getElementById('toggle-pump')) document.getElementById('toggle-pump').checked = data.pump;
+            if(data.valve_zone_1 !== undefined && document.activeElement !== document.getElementById('toggle-v1')) document.getElementById('toggle-v1').checked = data.valve_zone_1;
+            if(data.valve_zone_2 !== undefined && document.activeElement !== document.getElementById('toggle-v2')) document.getElementById('toggle-v2').checked = data.valve_zone_2;
+        }
+
+        async function cmd(type, val) {
+            addLog(`Command: ${type} -> ${val}`);
+            try {
+                await fetch(`${PLATFORM_BASE_URL}${ROUTES.irr_commands}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: { [type]: val } })
+                });
+            } catch(e) { addLog("Cmd Failed: " + e.message); }
+        }
+    </script>
+</body>
+</html>

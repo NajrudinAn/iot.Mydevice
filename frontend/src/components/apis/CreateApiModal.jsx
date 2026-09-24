@@ -146,6 +146,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
                         </div>
                         <div className="flex flex-col" style={{ gap: '8px', marginBottom: '8px' }}>
                             <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                onClick={() => setAuthMode('PUBLIC_READ_ONLY')}
                                 style={{ 
                                     borderColor: authMode === 'PUBLIC_READ_ONLY' ? '#3b82f6' : '#f3f4f6', 
                                     backgroundColor: authMode === 'PUBLIC_READ_ONLY' ? '#eff6ff' : '#ffffff'
@@ -167,6 +168,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
                             </label>
 
                             <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                onClick={() => setAuthMode('APPLICATION_SESSION')}
                                 style={{ 
                                     borderColor: authMode === 'APPLICATION_SESSION' ? '#3b82f6' : '#f3f4f6', 
                                     backgroundColor: authMode === 'APPLICATION_SESSION' ? '#eff6ff' : '#ffffff'
@@ -188,6 +190,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
                             </label>
 
                             <label className="block border-2 p-4 rounded-xl cursor-pointer transition-colors"
+                                onClick={() => setAuthMode('API_KEY_SECRET')}
                                 style={{ 
                                     borderColor: authMode === 'API_KEY_SECRET' ? '#3b82f6' : '#f3f4f6', 
                                     backgroundColor: authMode === 'API_KEY_SECRET' ? '#eff6ff' : '#ffffff'
