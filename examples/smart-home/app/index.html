@@ -226,7 +226,7 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-mlight">
-                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors"
+                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors" data-icon="fa-lightbulb"
                                     id="icon-mlight"></i>
                             </div>
                             <div>
@@ -249,7 +249,7 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-blight">
-                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors"
+                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors" data-icon="fa-bed"
                                     id="icon-blight"></i>
                             </div>
                             <div>
@@ -272,7 +272,7 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-door">
-                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors"
+                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors" data-icon="fa-unlock-keyhole"
                                     id="icon-door"></i>
                             </div>
                             <div>
@@ -304,7 +304,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                     id="iconbg-ac">
-                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors"
+                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors" data-icon="fa-snowflake"
                                         id="icon-ac"></i>
                                 </div>
                                 <div>
@@ -337,7 +337,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                     id="iconbg-fan">
-                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors"
+                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors" data-icon="fa-fan"
                                         id="icon-fan"></i>
                                 </div>
                                 <div>
@@ -501,8 +501,11 @@
 
                     const indicator = document.getElementById('connection-indicator');
                     const connText = document.getElementById('connection-text');
-                    indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
-                    connText.innerText = 'Connecting...';
+                    
+                    if (connText.innerText === 'Disconnected' || connText.innerText === 'Connecting...') {
+                        indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
+                        connText.innerText = 'Connecting...';
+                    }
 
                     try {
                         const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
@@ -542,9 +545,11 @@
                         }
                     } catch (err) {
                         if (err.name !== 'AbortError') {
-                            addLog("SSE Disconnected, reconnecting...");
-                            indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
-                            connText.innerText = 'Disconnected';
+                            addLog(`SSE route failed: ${route}, reconnecting...`);
+                            if (knownDevices.size === 0) {
+                                indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
+                                connText.innerText = 'Disconnected';
+                            }
                             setTimeout(() => connectSSE(route, callback), 3000);
                         }
                     }
@@ -596,7 +601,7 @@
                         const card = document.getElementById(`card-${id}`);
                         if (!iconBg || !icon || !card) return;
 
-                        const iconName = icon.dataset.icon || (icon.className.match(/fa-(?!solid|regular|light|thin|duotone|brands)[a-z-]+/) || [''])[0];
+                        const iconName = icon.dataset.icon || (icon.className.match(/fa-(?!solid\b|regular\b|light\b|thin\b|duotone\b|brands\b)[a-z-]+/) || [''])[0];
 
                         if (isActive) {
                             iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
