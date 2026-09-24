@@ -441,7 +441,13 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
     if (allowTelemetry) sseEmitter.on(telemetryEventName, telemetryListener);
     if (allowCommandStatus) sseEmitter.on(commandStatusEventName, commandStatusListener);
 
+    // Keep connection alive
+    const heartbeat = setInterval(() => {
+        res.write(': heartbeat\n\n');
+    }, 30000);
+
     req.on('close', () => {
+        clearInterval(heartbeat);
         if (allowDeviceStatus) sseEmitter.off(statusEventName, statusListener);
         if (allowTelemetry) sseEmitter.off(telemetryEventName, telemetryListener);
         if (allowCommandStatus) sseEmitter.off(commandStatusEventName, commandStatusListener);
