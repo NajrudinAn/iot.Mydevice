@@ -160,6 +160,7 @@
         let authToken = localStorage.getItem('factoryAuthToken');
         let appStateCache = JSON.parse(localStorage.getItem('factoryStateCache') || '{"env":{}, "m1":{}, "m2":{}}');
         let streams = [];
+        let knownDevices = new Set();
         let offlineDevices = new Set();
 
         window.onload = () => { if (authToken) showDashboard(); };
@@ -312,8 +313,16 @@
         function processStatus(data) {
             if (!data || !data.deviceId) return;
             const banner = document.getElementById('offline-banner');
-            if (data.status === 'offline') offlineDevices.add(data.deviceId);
-            else if (data.status === 'online') offlineDevices.delete(data.deviceId);
+            const statusTxt = document.getElementById('connection-status');
+            
+            knownDevices.add(data.deviceId);
+            const status = data.status.toLowerCase();
+
+            if (status === 'offline') offlineDevices.add(data.deviceId);
+            else if (status === 'online') offlineDevices.delete(data.deviceId);
+            
+            const onlineCount = knownDevices.size - offlineDevices.size;
+            statusTxt.innerText = `ONLINE (${onlineCount} DEVICE${onlineCount !== 1 ? 'S' : ''})`;
             
             if (offlineDevices.size > 0) { banner.classList.remove('hidden'); banner.classList.add('flex'); }
             else { banner.classList.add('hidden'); banner.classList.remove('flex'); }
