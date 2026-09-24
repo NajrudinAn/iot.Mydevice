@@ -11,7 +11,7 @@ const WorkspaceSdkDocs = () => {
         setTimeout(() => setCopiedIndex(null), 2000);
     };
 
-    const aiPromptTemplate = `I am using the MyDevice IoT Platform SDK to connect my hardware to a cloud dashboard. 
+    const hardwareAiPrompt = `I am using the MyDevice IoT Platform SDK to connect my hardware to a cloud dashboard. 
 Please integrate this SDK into my existing code.
 
 IMPORTANT RULES:
@@ -52,6 +52,33 @@ The SDK uses a "Blueprint API". You define properties and actions, and the cloud
    - Arduino: Call \`device.begin()\` in setup(), and \`device.loop()\` constantly in loop().
 
 Please analyze my code and provide the exact snippets to add. Provide full, copy-pastable code.`;
+
+    const frontendAiPrompt = `I want to build a custom HTML/JS frontend dashboard for my IoT devices. 
+Please generate a single HTML file containing the UI and the JavaScript logic.
+
+IMPORTANT PLATFORM RULES:
+1. Real-time data is streamed via Server-Sent Events (SSE) from the backend.
+2. Commands are sent via standard REST POST requests.
+3. The UI must be fully reactive and dynamically update when new SSE data arrives.
+4. I want an Optimistic UI: when a user toggles a switch, update the UI instantly, then send the API request.
+
+MY API DETAILS:
+- Telemetry SSE Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
+- Command POST Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
+- Authorization Header: "Bearer YOUR_TOKEN"
+
+JAVASCRIPT REQUIREMENTS:
+- Create an \`async function connectSSE()\` using the \`fetch\` API and \`ReadableStream\`.
+- Parse the SSE chunks (separated by \`\\n\\n\`) and handle \`event: device_data\`.
+- Parse the \`data: {...}\` payload. The hardware data is located in \`JSON.parse(dataStr).payload\`.
+- Use a \`try/catch\` block and \`setTimeout\` to automatically reconnect if the stream disconnects.
+- Create an \`async function sendCommand(propertyName, newValue)\` that sends a POST request with \`body: JSON.stringify({ type: \\\`SET_\${propertyName.toUpperCase()}\\\`, payload: { [propertyName]: newValue } })\`.
+
+Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
+- A card displaying "temperature" and "humidity".
+- A toggle switch for "main_light" (which triggers sendCommand).`;
+
+    const currentAiPrompt = activeTab === 'frontend' ? frontendAiPrompt : hardwareAiPrompt;
 
     const ParamRow = ({ name, type, req, desc }) => (
         <div className="flex flex-col sm:flex-row sm:items-start py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-4">
@@ -410,6 +437,53 @@ void loop() {
                         </section>
                     </div>
                 );
+            case 'frontend':
+                return (
+                    <div className="space-y-10 text-gray-700 animate-in fade-in duration-300">
+                        {/* 1. Architecture */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">1</span> 
+                                How it Works
+                            </h3>
+                            <div className="bg-white border border-gray-200 p-5 rounded-xl text-sm leading-relaxed text-gray-700 shadow-sm">
+                                <p className="mb-3">The MyDevice platform uses an ultra-fast real-time architecture:</p>
+                                <ol className="list-decimal pl-5 space-y-2">
+                                    <li><strong>Hardware Device</strong> runs the SDK and sends telemetry over MQTT.</li>
+                                    <li><strong>The Backend</strong> buffers the state and checks permissions.</li>
+                                    <li><strong>Your HTML/JS Dashboard</strong> opens a connection via <strong>Server-Sent Events (SSE)</strong>.</li>
+                                    <li>When hardware updates, the backend pushes it directly to your Javascript instantly.</li>
+                                </ol>
+                            </div>
+                        </section>
+
+                        {/* 2. Real-Time Data (SSE) */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span> 
+                                Connect Real-Time Stream (SSE)
+                            </h3>
+                            <MethodCard
+                                title="JavaScript connectSSE()"
+                                desc="Use fetch and ReadableStream to securely stream hardware updates into your frontend."
+                                code={`let appStateCache = {};\n\nasync function connectSSE(route, authToken, callback) {\n    const res = await fetch(\`http://localhost:5001\${route}\`, {\n        headers: { 'Authorization': \`Bearer \${authToken}\`, 'Accept': 'text/event-stream' }\n    });\n    \n    const reader = res.body.getReader();\n    const decoder = new TextDecoder();\n    let buffer = '';\n\n    while (true) {\n        const { value, done } = await reader.read();\n        if (done) break;\n        \n        buffer += decoder.decode(value, { stream: true });\n        const chunks = buffer.split('\\n\\n');\n        buffer = chunks.pop();\n\n        for (const chunk of chunks) {\n            let eventType = 'message', dataStr = null;\n            for (const line of chunk.split('\\n')) {\n                if (line.startsWith('event: ')) eventType = line.slice(7).trim();\n                else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();\n            }\n            \n            if (dataStr && eventType === 'device_data') {\n                const payload = JSON.parse(dataStr).payload;\n                appStateCache = { ...appStateCache, ...payload };\n                callback(payload); // Update your UI!\n            }\n        }\n    }\n}`}
+                            />
+                        </section>
+
+                        {/* 3. Sending Commands */}
+                        <section>
+                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
+                                <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">3</span> 
+                                Sending Commands
+                            </h3>
+                            <MethodCard
+                                title="Optimistic UI Updates"
+                                desc="Standard POST request mapped to your API route. We recommend updating the UI instantly, then sending the request."
+                                code={`async function sendCommand(property_name, new_value) {\n    // 1. Instantly update UI (Optimistic)\n    updateUI({ [property_name]: new_value });\n\n    // 2. Send POST request\n    try {\n        await fetch(\`http://localhost:5001/api/v1/routes/command-123\`, {\n            method: 'POST',\n            headers: { 'Content-Type': 'application/json', 'Authorization': \`Bearer TOKEN\` },\n            body: JSON.stringify({ \n                type: \`SET_\${property_name.toUpperCase()}\`, \n                payload: { [property_name]: new_value }\n            })\n        });\n    } catch (err) {\n        alert("Command failed, reverting UI.");\n    }\n}`}
+                            />
+                        </section>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -427,26 +501,27 @@ void loop() {
                 </p>
             </div>
 
-            {/* AI Assistant Help Banner - Now visually separated and distinct */}
-            <div className="mb-12 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="bg-purple-600 px-6 py-4 flex items-center justify-between">
+            {/* AI Assistant Help Banner */}
+            <div className={`mb-12 bg-white rounded-2xl border shadow-sm overflow-hidden transition-colors duration-300 ${activeTab === 'frontend' ? 'border-orange-200' : 'border-purple-200'}`}>
+                <div className={`px-6 py-4 flex items-center justify-between ${activeTab === 'frontend' ? 'bg-orange-600' : 'bg-purple-600'}`}>
                     <div className="flex items-center gap-3 text-white">
                         <Bot size={24} />
                         <h4 className="font-bold text-lg m-0">Integrating via AI? (ChatGPT / Claude)</h4>
                     </div>
                     <button 
-                        onClick={() => handleCopy(aiPromptTemplate, 'ai_prompt')}
-                        className="flex items-center gap-2 bg-white text-purple-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors"
+                        onClick={() => handleCopy(currentAiPrompt, 'ai_prompt')}
+                        className={`flex items-center gap-2 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${activeTab === 'frontend' ? 'text-orange-700' : 'text-purple-700'}`}
                     >
                         {copiedIndex === 'ai_prompt' ? <CheckCircle2 size={18} className="text-green-500" /> : <Copy size={18} />}
                         {copiedIndex === 'ai_prompt' ? 'Copied Prompt!' : 'Copy AI Prompt'}
                     </button>
                 </div>
-                <div className="p-6 bg-purple-50">
-                    <p className="text-sm text-purple-900 leading-relaxed max-w-4xl">
-                        If you have existing code (like a motor controller, sensor loop, or complex logic), do not rewrite it manually. 
-                        Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your existing code. 
-                        The AI will analyze your logic and seamlessly inject the SDK without breaking your hardware.
+                <div className={`p-6 ${activeTab === 'frontend' ? 'bg-orange-50' : 'bg-purple-50'}`}>
+                    <p className={`text-sm leading-relaxed max-w-4xl ${activeTab === 'frontend' ? 'text-orange-900' : 'text-purple-900'}`}>
+                        {activeTab === 'frontend' 
+                            ? <span>If you want to quickly build a beautiful frontend, don't write it from scratch! Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your desired styling (e.g., "Make it look like a sci-fi dashboard"). The AI will generate a fully working UI that connects to our real-time streaming APIs.</span>
+                            : <span>If you have existing code (like a motor controller, sensor loop, or complex logic), do not rewrite it manually. Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your existing code. The AI will analyze your logic and seamlessly inject the SDK without breaking your hardware.</span>
+                        }
                     </p>
                 </div>
             </div>
@@ -479,6 +554,14 @@ void loop() {
                         }`}
                     >
                         <Cpu size={18} /> Arduino C++
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('frontend')}
+                        className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all border-l ${
+                            activeTab === 'frontend' ? 'bg-white text-orange-600 shadow-sm border-gray-200 border-l-0' : 'text-gray-500 hover:text-orange-600 hover:bg-gray-100 border-gray-200'
+                        }`}
+                    >
+                        <LayoutDashboard size={18} /> Frontend HTML/JS
                     </button>
                 </div>
 
