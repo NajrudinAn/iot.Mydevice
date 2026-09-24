@@ -383,7 +383,7 @@ private:
     void _sendTelemetry() {
         StaticJsonDocument<MD_BUF> doc;
         doc["device_id"] = _did;
-        doc["source"]    = "state";
+        doc["source"]    = "";
         JsonObject data  = doc.createNestedObject("data");
         
         for (int i = 0; i < _propCount; i++) {

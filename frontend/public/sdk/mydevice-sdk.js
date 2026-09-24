@@ -284,7 +284,7 @@ class MyDevice {
     _sendTelemetry(dataDict) {
         const payload = {
             device_id: this.deviceId,
-            source: 'state',
+            source: '',
             data: dataDict
         };
         this._client.publish(this._tData, JSON.stringify(payload));
