@@ -84,7 +84,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
         <div className="flex justify-end w-full">
             <div className="flex gap-3">
                 <button type="button" onClick={handleClose} className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors shadow-sm">Cancel</button>
-                <button type="submit" form="create-api-form" disabled={loading || !name || selectedRoutes.length === 0} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm">{loading ? 'Creating...' : 'Create API'}</button>
+                <button type="submit" form="create-api-form" disabled={loading || !name || selectedRoutes.length === 0} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm">{loading ? 'Creating...' : 'Create API'}</button>
             </div>
         </div>
     );
@@ -245,7 +245,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
                                     }
                                     return true;
                                 }).map(route => (
-                                    <label key={route.id} className="cursor-pointer transition-colors group hover:bg-white" style={{ display: 'flex', alignItems: 'center', padding: '14px', backgroundColor: selectedRoutes.includes(route.id) ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
+                                    <label key={route.id} onClick={(e) => { e.preventDefault(); toggleRoute(route.id); }} className="cursor-pointer transition-colors group hover:bg-white" style={{ display: 'flex', alignItems: 'center', padding: '14px', backgroundColor: selectedRoutes.includes(route.id) ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
                                         <div className="flex-shrink-0 pt-0.5">
                                             <div className="w-5 h-5 rounded-[6px] border-2 flex items-center justify-center shrink-0 transition-colors"
                                                  style={{
