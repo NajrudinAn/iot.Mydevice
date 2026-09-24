@@ -384,9 +384,18 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
         if (allowTelemetry && hardwareAllowedDevices.includes(telemetryData.deviceId)) {
             const deviceUuid = hardwareToUuidMap[telemetryData.deviceId];
             
-            const deviceFields = globalAllowed ? [] : allowedDataFields
+            let deviceFields = globalAllowed ? [] : allowedDataFields
                 .filter(f => f.startsWith(`${deviceUuid}::`) || !f.includes('::'))
                 .map(f => f.includes('::') ? f.split('::')[1] : f);
+                
+            // Backwards compatibility: if route allows 'state.temperature', also allow 'temperature'
+            if (!globalAllowed) {
+                const expanded = new Set(deviceFields);
+                deviceFields.forEach(f => {
+                    if (f.startsWith('state.')) expanded.add(f.substring(6));
+                });
+                deviceFields = Array.from(expanded);
+            }
                 
             const filtered = filterPayloadWithFallback(telemetryData.data, deviceFields, globalAllowed);
             
@@ -412,9 +421,18 @@ async function handleRealtime(req, res, allowedDevices, allowedDataFields, works
 
             for (const row of currentDataRes.rows) {
                 const deviceUuid = row.device_uuid;
-                const deviceFields = globalAllowed ? [] : allowedDataFields
+                let deviceFields = globalAllowed ? [] : allowedDataFields
                     .filter(f => f.startsWith(`${deviceUuid}::`) || !f.includes('::'))
                     .map(f => f.includes('::') ? f.split('::')[1] : f);
+                    
+                // Backwards compatibility: if route allows 'state.temperature', also allow 'temperature'
+                if (!globalAllowed) {
+                    const expanded = new Set(deviceFields);
+                    deviceFields.forEach(f => {
+                        if (f.startsWith('state.')) expanded.add(f.substring(6));
+                    });
+                    deviceFields = Array.from(expanded);
+                }
                     
                 const filtered = filterPayloadWithFallback(row.payload, deviceFields, globalAllowed);
                 
