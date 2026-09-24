@@ -192,3 +192,13 @@ void loop() {
 1. **Non-Blocking Auto-Reconnect:** If the Wi-Fi or MQTT connection drops, the SDK will automatically attempt to reconnect. For Arduino, this uses a non-blocking `millis()` timer so your main loop will never freeze!
 2. **Capability Sync:** Upon connection, the SDK automatically translates your blueprint into a JSON schema and publishes it to `devices/{id}/capabilities`, allowing the web dashboard to instantly render the correct UI elements.
 3. **State Sync:** The SDK maintains a local cache. It only publishes telemetry when a property's value *actually changes*.
+
+---
+
+## 6. Integrating with a Frontend UI
+
+Once your device is actively sending telemetry and listening for commands using this SDK, you can easily build a completely custom web dashboard for it using HTML/JS. 
+
+The platform provides Server-Sent Events (SSE) for ultra-low latency real-time data, and standard REST endpoints for sending commands back to the device.
+
+For a comprehensive tutorial on how to connect your web applications to the MyDevice backend, check out the [Frontend Integration Guide](./FRONTEND_INTEGRATION_GUIDE.md).
