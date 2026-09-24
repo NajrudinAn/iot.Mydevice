@@ -348,7 +348,7 @@ setInterval(() => {
                                 </ul>
                                 <p className="text-sm text-gray-600 flex items-center gap-2">
                                     <Info size={16} className="text-blue-500" />
-                                    Place <code className="bg-gray-200 px-1.5 py-0.5 rounded text-gray-800">MyDevice.h</code> in the same folder as your <code>.ino</code> sketch.
+                                    Download <a href="/sdk/MyDevice.zip" download className="text-blue-600 hover:underline">MyDevice.zip</a> and add via <strong>Sketch -{'>'} Include Library -{'>'} Add .ZIP Library</strong> in your Arduino IDE.
                                 </p>
                             </div>
                         </section>
@@ -460,16 +460,16 @@ void loop() {
                             </div>
                         </section>
 
-                        {/* 2. Real-Time Data (SSE) */}
+                        {/* 2. Real-Time Data (SSE) & Commands */}
                         <section>
                             <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
                                 <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">2</span> 
-                                Connect Real-Time Stream (SSE)
+                                Using the Frontend JavaScript SDK
                             </h3>
                             <MethodCard
-                                title="JavaScript connectSSE()"
-                                desc="Use fetch and ReadableStream to securely stream hardware updates into your frontend."
-                                code={`let appStateCache = {};\n\nasync function connectSSE(route, authToken, callback) {\n    const res = await fetch(\`http://localhost:5001\${route}\`, {\n        headers: { 'Authorization': \`Bearer \${authToken}\`, 'Accept': 'text/event-stream' }\n    });\n    \n    const reader = res.body.getReader();\n    const decoder = new TextDecoder();\n    let buffer = '';\n\n    while (true) {\n        const { value, done } = await reader.read();\n        if (done) break;\n        \n        buffer += decoder.decode(value, { stream: true });\n        const chunks = buffer.split('\\n\\n');\n        buffer = chunks.pop();\n\n        for (const chunk of chunks) {\n            let eventType = 'message', dataStr = null;\n            for (const line of chunk.split('\\n')) {\n                if (line.startsWith('event: ')) eventType = line.slice(7).trim();\n                else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();\n            }\n            \n            if (dataStr && eventType === 'device_data') {\n                const payload = JSON.parse(dataStr).payload;\n                appStateCache = { ...appStateCache, ...payload };\n                callback(payload); // Update your UI!\n            }\n        }\n    }\n}`}
+                                title="Import and Initialize"
+                                desc="Include the SDK script and connect to your streams with just a few lines of code. It automatically handles SSE parsing, reconnects, and visibility disconnects."
+                                code={`<!-- 1. Include the SDK -->\n<script src="https://mydevice.in/sdk/mydevice-frontend.js"></script>\n\n<script>\n    // 2. Initialize the Device Client\n    const client = new MyDeviceFrontend({\n        token: 'YOUR_AUTH_TOKEN',\n        telemetryRoute: '/api/v1/routes/YOUR_TELEMETRY_ROUTE',\n        commandRoute: '/api/v1/routes/YOUR_COMMAND_ROUTE'\n    });\n\n    // 3. Listen for Real-Time Updates\n    client.onData((data, deviceId) => {\n        if (data.temperature !== undefined) {\n            document.getElementById('temp').innerText = data.temperature;\n        }\n    });\n\n    // 4. Start the Stream\n    client.connectRealtime();\n\n    // 5. Send Commands Easily\n    async function turnOnFan() {\n        await client.sendCommand('cooling_fan', true);\n    }\n</script>`}
                             />
                         </section>
 
@@ -499,18 +499,7 @@ void loop() {
                             />
                         </section>
 
-                        {/* 4. Sending Commands */}
-                        <section>
-                            <h3 className="text-xl font-extrabold text-gray-900 mb-4 flex items-center gap-2 border-b pb-2">
-                                <span className="bg-orange-100 text-orange-700 w-8 h-8 rounded-lg flex items-center justify-center text-sm">4</span> 
-                                Sending Commands
-                            </h3>
-                            <MethodCard
-                                title="Optimistic UI Updates"
-                                desc="Standard POST request mapped to your API route. We recommend updating the UI instantly, then sending the request."
-                                code={`async function sendCommand(property_name, new_value) {\n    // 1. Instantly update UI (Optimistic)\n    updateUI({ [property_name]: new_value });\n\n    // 2. Send POST request\n    try {\n        await fetch(\`http://localhost:5001/api/v1/routes/command-123\`, {\n            method: 'POST',\n            headers: { 'Content-Type': 'application/json', 'Authorization': \`Bearer TOKEN\` },\n            body: JSON.stringify({ \n                type: \`SET_\${property_name.toUpperCase()}\`, \n                payload: { [property_name]: new_value }\n            })\n        });\n    } catch (err) {\n        alert("Command failed, reverting UI.");\n    }\n}`}
-                            />
-                        </section>
+
                     </div>
                 );
             default:
