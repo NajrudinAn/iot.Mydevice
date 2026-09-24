@@ -522,8 +522,10 @@ void loop() {
         <div className="p-4 md:p-8 max-w-5xl mx-auto w-full min-h-[500px]">
             {/* Header Area */}
             <div className="mb-10 text-center md:text-left">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight mb-4">SDK Integration Guide</h1>
-                <p className="text-gray-600 text-[15px] md:text-[16px] max-w-3xl leading-relaxed">
+                <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 tracking-tight mb-4">
+                    SDK Integration Guide
+                </h1>
+                <p className="text-gray-500 text-[15px] md:text-lg max-w-3xl leading-relaxed font-medium">
                     A comprehensive guide to integrating the MyDevice Platform into your edge hardware and software agents. 
                     The SDK uses a <strong>"Blueprint API"</strong>: you simply define your sensors and switches in the code, and 
                     the cloud platform automatically builds the dashboard UI and API routes for you.
@@ -531,27 +533,30 @@ void loop() {
             </div>
 
             {/* AI Assistant Help Banner */}
-            <div className={`mb-12 bg-white rounded-2xl border shadow-sm overflow-hidden transition-colors duration-300 ${activeTab === 'frontend' ? 'border-orange-200' : 'border-purple-200'}`}>
-                <div className={`px-6 py-4 flex items-center justify-between ${activeTab === 'frontend' ? 'bg-orange-600' : 'bg-purple-600'}`}>
-                    <div className="flex items-center gap-3 text-white">
-                        <Bot size={24} />
-                        <h4 className="font-bold text-lg m-0">Integrating via AI? (ChatGPT / Claude)</h4>
+            <div className="mb-12 relative group rounded-[2rem] overflow-hidden p-[2px] shadow-xl shadow-indigo-500/10">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-70 group-hover:opacity-100 transition-opacity duration-500 rounded-[2rem]"></div>
+                <div className="relative bg-white/90 backdrop-blur-xl rounded-[calc(2rem-2px)] p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                    <div className="flex gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
+                            <Bot size={24} className="text-white" />
+                        </div>
+                        <div>
+                            <h4 className="font-extrabold text-xl text-gray-900 mb-1">Integrating via AI? (ChatGPT / Claude)</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed max-w-2xl font-medium">
+                                {activeTab === 'frontend' 
+                                    ? <span>If you want to quickly build a beautiful frontend, don't write it from scratch! Click <strong>"Copy AI Prompt"</strong> to copy a highly detailed system instruction payload. Paste it into your LLM along with your desired styling.</span>
+                                    : <span>If you have existing code, do not rewrite it manually. Click <strong>"Copy AI Prompt"</strong> to copy a highly detailed system instruction payload. Paste it into your LLM along with your existing code to seamlessly inject the SDK.</span>
+                                }
+                            </p>
+                        </div>
                     </div>
                     <button 
                         onClick={() => handleCopy(currentAiPrompt, 'ai_prompt')}
-                        className={`flex items-center gap-2 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-colors ${activeTab === 'frontend' ? 'text-orange-700' : 'text-purple-700'}`}
+                        className="flex items-center gap-2 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-xl transition-all hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
                     >
-                        {copiedIndex === 'ai_prompt' ? <CheckCircle2 size={18} className="text-green-500" /> : <Copy size={18} />}
+                        {copiedIndex === 'ai_prompt' ? <CheckCircle2 size={18} className="text-green-400" /> : <Copy size={18} />}
                         {copiedIndex === 'ai_prompt' ? 'Copied Prompt!' : 'Copy AI Prompt'}
                     </button>
-                </div>
-                <div className={`p-6 ${activeTab === 'frontend' ? 'bg-orange-50' : 'bg-purple-50'}`}>
-                    <p className={`text-sm leading-relaxed max-w-4xl ${activeTab === 'frontend' ? 'text-orange-900' : 'text-purple-900'}`}>
-                        {activeTab === 'frontend' 
-                            ? <span>If you want to quickly build a beautiful frontend, don't write it from scratch! Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your desired styling (e.g., "Make it look like a sci-fi dashboard"). The AI will generate a fully working UI that connects to our real-time streaming APIs.</span>
-                            : <span>If you have existing code (like a motor controller, sensor loop, or complex logic), do not rewrite it manually. Click the <strong>"Copy AI Prompt"</strong> button to copy a highly detailed system instruction payload. Paste it into your favorite LLM along with your existing code. The AI will analyze your logic and seamlessly inject the SDK without breaking your hardware.</span>
-                        }
-                    </p>
                 </div>
             </div>
 
@@ -559,38 +564,38 @@ void loop() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 
                 {/* Platform Tabs */}
-                <div className="flex border-b border-gray-200 bg-gray-50/50 p-2 gap-2 overflow-x-auto">
+                <div className="flex bg-gray-50/80 p-2 border-b border-gray-100 gap-2 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('python')}
-                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-                            activeTab === 'python' ? 'bg-white text-blue-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${
+                            activeTab === 'python' ? 'bg-white text-blue-700 shadow-sm ring-1 ring-gray-200/50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80'
                         }`}
                     >
-                        <FileCode2 size={18} /> Python
+                        <FileCode2 size={18} className={activeTab === 'python' ? 'text-blue-600' : ''} /> Python
                     </button>
                     <button
                         onClick={() => setActiveTab('node')}
-                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-                            activeTab === 'node' ? 'bg-white text-green-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${
+                            activeTab === 'node' ? 'bg-white text-green-700 shadow-sm ring-1 ring-gray-200/50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80'
                         }`}
                     >
-                        <Code size={18} /> Node.js
+                        <Code size={18} className={activeTab === 'node' ? 'text-green-600' : ''} /> Node.js
                     </button>
                     <button
                         onClick={() => setActiveTab('arduino')}
-                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-                            activeTab === 'arduino' ? 'bg-white text-teal-700 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${
+                            activeTab === 'arduino' ? 'bg-white text-teal-700 shadow-sm ring-1 ring-gray-200/50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80'
                         }`}
                     >
-                        <Cpu size={18} /> Arduino C++
+                        <Cpu size={18} className={activeTab === 'arduino' ? 'text-teal-600' : ''} /> Arduino C++
                     </button>
                     <button
                         onClick={() => setActiveTab('frontend')}
-                        className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all ${
-                            activeTab === 'frontend' ? 'bg-white text-orange-600 shadow-sm border border-gray-200' : 'text-gray-500 hover:text-orange-600 hover:bg-gray-100'
+                        className={`flex-1 min-w-[160px] flex items-center justify-center gap-2 py-3 px-4 text-sm font-bold rounded-xl transition-all duration-300 ${
+                            activeTab === 'frontend' ? 'bg-white text-orange-600 shadow-sm ring-1 ring-gray-200/50' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100/80'
                         }`}
                     >
-                        <LayoutDashboard size={18} /> Frontend HTML/JS
+                        <LayoutDashboard size={18} className={activeTab === 'frontend' ? 'text-orange-500' : ''} /> Frontend HTML/JS
                     </button>
                 </div>
 
