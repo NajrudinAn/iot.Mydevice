@@ -3,219 +3,312 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Home - MyDevice</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* slate-100 */
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        /* Hide scrollbar for clean app feel */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
         .slide-up {
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #68D391;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #68D391;
+        }
+
+        /* Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 4px;
         }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-100 to-blue-50 min-h-screen text-slate-800">
+<body class="text-slate-800 antialiased selection:bg-blue-200">
 
-    <!-- Login Modal -->
-    <div id="login-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-        <div class="bg-white p-8 sm:p-10 rounded-2xl shadow-2xl max-w-sm w-full mx-4 slide-up">
-            <div class="text-center mb-8">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-house-chimney text-2xl text-blue-600"></i>
+    <!-- Login Screen -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-house-signal text-3xl text-white"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-800">Smart Home Login</h2>
-                <p class="text-sm text-slate-500 mt-1">Application Authentication</p>
+                <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Smart Home</h2>
+                <p class="text-sm text-slate-500 mt-2 font-medium">Sign in to control your devices</p>
             </div>
 
             <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+                <div class="space-y-4">
                     <div class="relative">
-                        <i class="fa-regular fa-envelope absolute left-3 top-3 text-slate-400"></i>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-regular fa-envelope text-slate-400"></i>
+                        </div>
                         <input type="email" id="email" required
-                            class="w-full border border-slate-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="you@example.com">
+                            class="w-full bg-slate-100/50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
+                            placeholder="Email address">
                     </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
                     <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400"></i>
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-lock text-slate-400"></i>
+                        </div>
                         <input type="password" id="password" required
-                            class="w-full border border-slate-200 rounded-xl py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                            placeholder="••••••••">
+                            class="w-full bg-slate-100/50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
+                            placeholder="Password">
                     </div>
                 </div>
-                <div id="login-error" class="hidden text-sm text-red-500 font-medium text-center">Invalid credentials
-                </div>
+                
+                <div id="login-error" class="hidden text-sm text-red-500 font-semibold text-center bg-red-50 py-2 rounded-lg"></div>
+                
                 <button type="submit" id="login-btn"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all shadow-lg active:scale-[0.98]">
-                    Sign In
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] mt-4">
+                    Continue
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="bg-blue-100 p-2 rounded-lg"><i class="fa-solid fa-house text-xl text-blue-700"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-slate-800">Smart Home Dashboard</h1>
-                    </div>
+    <!-- Main App UI -->
+    <div id="dashboard" class="hidden min-h-screen pb-24">
+        
+        <!-- App Header -->
+        <header class="pt-12 pb-6 px-6 sticky top-0 z-40 bg-[#f3f4f6]/90 backdrop-blur-xl">
+            <div class="max-w-md mx-auto w-full flex justify-between items-center">
+                <div>
+                    <p class="text-sm font-semibold text-slate-500 mb-1" id="greeting">Good Morning,</p>
+                    <h1 class="text-2xl font-bold text-slate-900">My Home</h1>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div id="connection-status" class="text-xs font-bold px-3 py-1 rounded bg-slate-200 text-slate-600">
-                        Connecting...</div>
-                    <button onclick="logout()" class="text-slate-400 hover:text-red-500 transition-colors"><i
-                            class="fa-solid fa-power-off text-lg"></i></button>
+                <div class="flex items-center gap-3">
+                    <div id="connection-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors"></div>
+                    <button onclick="logout()" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-user"></i>
+                    </button>
                 </div>
             </div>
         </header>
 
-        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 slide-up">
-
-            <!-- Sensor Row -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                <div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2">
-                    <div
-                        class="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mb-1">
-                        <i class="fa-solid fa-temperature-half"></i>
-                    </div>
-                    <p class="text-2xl font-bold text-slate-800"><span id="val-temp">--</span>°C</p>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Temperature</p>
+        <main class="max-w-md mx-auto w-full px-6 space-y-8 slide-up">
+            
+            <!-- Quick Environment Overview -->
+            <section>
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Environment</h2>
                 </div>
-                <div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mb-1">
-                        <i class="fa-solid fa-droplet"></i>
-                    </div>
-                    <p class="text-2xl font-bold text-slate-800"><span id="val-hum">--</span>%</p>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Humidity</p>
-                </div>
-                <div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2">
-                    <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-500 flex items-center justify-center mb-1">
-                        <i class="fa-solid fa-wind"></i>
-                    </div>
-                    <p class="text-2xl font-bold text-slate-800"><span id="val-aqi">--</span></p>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">AQI</p>
-                </div>
-                <div class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2">
-                    <div
-                        class="w-10 h-10 rounded-full bg-yellow-100 text-yellow-500 flex items-center justify-center mb-1">
-                        <i class="fa-solid fa-sun"></i>
-                    </div>
-                    <p class="text-2xl font-bold text-slate-800"><span id="val-light">--</span></p>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Lux</p>
-                </div>
-                <div
-                    class="glass-panel p-4 rounded-2xl flex flex-col items-center justify-center gap-2 col-span-2 md:col-span-1">
-                    <div
-                        class="w-10 h-10 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center mb-1">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <p class="text-2xl font-bold text-slate-800"><span id="val-power">--</span> W</p>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wide">Power</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Lighting & Security -->
-                <div class="glass-panel rounded-2xl overflow-hidden">
-                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                        <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-lightbulb mr-2"></i> Lighting &
-                            Security</h2>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <div
-                            class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="font-semibold">Main Light</span>
-                            <input type="checkbox" id="toggle-mlight" class="w-12 h-6 accent-purple-500 cursor-pointer"
-                                onchange="cmd('main_light', this.checked)">
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Temp -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-orange-500"><i class="fa-solid fa-temperature-half text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-temp">--</span>°</p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Temperature</p>
                         </div>
-                        <div
-                            class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="font-semibold">Bedroom Light</span>
-                            <input type="checkbox" id="toggle-blight" class="w-12 h-6 accent-purple-500 cursor-pointer"
-                                onchange="cmd('bedroom_light', this.checked)">
+                    </div>
+                    <!-- Hum -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-blue-500"><i class="fa-solid fa-droplet text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-hum">--</span>%</p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Humidity</p>
                         </div>
-                        <div
-                            class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="font-semibold">Door Lock</span>
-                            <button id="btn-door"
-                                onclick="cmd('door_lock', !document.getElementById('btn-door').dataset.locked)"
-                                data-locked="true"
-                                class="px-5 py-2 bg-red-500 text-white font-bold rounded-lg transition-colors">LOCKED</button>
+                    </div>
+                    <!-- AQI -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-teal-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-teal-500"><i class="fa-solid fa-wind text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-aqi">--</span></p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Air Quality</p>
+                        </div>
+                    </div>
+                    <!-- Power -->
+                    <div class="glass-card p-5 rounded-3xl flex flex-col justify-between h-32 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-100 rounded-full blur-2xl opacity-60"></div>
+                        <div class="text-purple-500"><i class="fa-solid fa-bolt-lightning text-xl"></i></div>
+                        <div>
+                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span id="val-power">--</span><span class="text-lg">w</span></p>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Usage</p>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Climate -->
-                <div class="glass-panel rounded-2xl overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4">
-                        <h2 class="font-bold text-lg text-white"><i class="fa-solid fa-snowflake mr-2"></i> Climate
-                            Control</h2>
-                    </div>
-                    <div class="p-6 space-y-6">
-                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="font-semibold">Air Conditioner</span>
-                                <input type="checkbox" id="toggle-ac" class="w-12 h-6 accent-blue-500 cursor-pointer"
-                                    onchange="cmd('ac', this.checked)">
+            <!-- Accessories / Controls -->
+            <section>
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Accessories</h2>
+                </div>
+                <div class="space-y-4">
+                    
+                    <!-- Main Light Toggle -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-mlight">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-mlight">
+                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors" id="icon-mlight"></i>
                             </div>
-                            <label class="text-sm text-slate-500 block mb-2">Target Temp: <span id="lbl-ac-temp"
-                                    class="font-bold text-blue-600">22</span>°C</label>
-                            <input type="range" id="slider-ac" min="16" max="30" step="0.5"
-                                class="w-full accent-blue-500" onchange="cmd('ac_temp', this.value)">
-                        </div>
-                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-100">
-                            <div class="flex justify-between items-center mb-4">
-                                <span class="font-semibold">Ceiling Fan</span>
-                                <input type="checkbox" id="toggle-fan" class="w-12 h-6 accent-blue-500 cursor-pointer"
-                                    onchange="cmd('fan', this.checked)">
+                            <div>
+                                <h3 class="font-bold text-slate-800">Main Light</h3>
+                                <p class="text-xs text-slate-500 font-medium">Living Room</p>
                             </div>
-                            <label class="text-sm text-slate-500 block mb-2">Fan Speed: <span id="lbl-fan-speed"
-                                    class="font-bold text-blue-600">3</span></label>
-                            <input type="range" id="slider-fan" min="1" max="5" step="1" class="w-full accent-blue-500"
-                                onchange="cmd('fan_speed', this.value)">
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-mlight" class="sr-only peer" onchange="cmd('main_light', this.checked)">
+                            <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Bedroom Light Toggle -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-blight">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-blight">
+                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors" id="icon-blight"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">Bed Light</h3>
+                                <p class="text-xs text-slate-500 font-medium">Bedroom</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-blight" class="sr-only peer" onchange="cmd('bedroom_light', this.checked)">
+                            <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Smart Lock -->
+                    <div class="glass-card p-5 rounded-3xl flex items-center justify-between transition-colors" id="card-door">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-door">
+                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors" id="icon-door"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-800">Front Door</h3>
+                                <p class="text-xs text-slate-500 font-medium" id="lbl-door-status">Unlocked</p>
+                            </div>
+                        </div>
+                        <button id="btn-door" onclick="cmd('door_lock', !document.getElementById('btn-door').dataset.locked)" data-locked="false"
+                            class="px-5 py-2.5 bg-slate-200 text-slate-700 font-bold rounded-2xl transition-all active:scale-95 shadow-sm text-sm">
+                            LOCK
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Climate Controls -->
+            <section>
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Climate</h2>
+                </div>
+                <div class="space-y-4">
+                    
+                    <!-- Air Conditioner -->
+                    <div class="glass-card p-5 rounded-3xl transition-colors" id="card-ac">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-ac">
+                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors" id="icon-ac"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">Air Conditioner</h3>
+                                    <p class="text-xs text-slate-500 font-medium">Living Room</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-ac" class="sr-only peer" onchange="cmd('ac', this.checked)">
+                                <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-500"></div>
+                            </label>
+                        </div>
+                        <div class="px-2">
+                            <div class="flex justify-between text-sm font-bold text-slate-700 mb-3">
+                                <span>16°</span>
+                                <span class="text-blue-600 text-lg" id="lbl-ac-temp">22°</span>
+                                <span>30°</span>
+                            </div>
+                            <input type="range" id="slider-ac" min="16" max="30" step="0.5" class="w-full" onchange="cmd('ac_temp', this.value)">
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="glass-panel p-4 rounded-xl mt-4">
-                <h3 class="font-bold mb-2">Event Log</h3>
-                <div id="event-log"
-                    class="h-32 overflow-y-auto font-mono text-xs space-y-1 text-slate-600 bg-slate-50 p-2 rounded">
+                    <!-- Fan -->
+                    <div class="glass-card p-5 rounded-3xl transition-colors" id="card-fan">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors" id="iconbg-fan">
+                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors" id="icon-fan"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">Ceiling Fan</h3>
+                                    <p class="text-xs text-slate-500 font-medium">Living Room</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-fan" class="sr-only peer" onchange="cmd('fan', this.checked)">
+                                <div class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyan-500"></div>
+                            </label>
+                        </div>
+                        <div class="px-2">
+                            <div class="flex justify-between text-sm font-bold text-slate-700 mb-3">
+                                <span>1</span>
+                                <span class="text-cyan-600 text-lg">Speed <span id="lbl-fan-speed">3</span></span>
+                                <span>5</span>
+                            </div>
+                            <input type="range" id="slider-fan" min="1" max="5" step="1" class="w-full" onchange="cmd('fan_speed', this.value)">
+                        </div>
+                    </div>
+
                 </div>
-            </div>
+            </section>
+
+            <!-- Debug Logs -->
+            <section class="opacity-50 hover:opacity-100 transition-opacity pt-4">
+                <p class="text-xs font-bold text-slate-400 uppercase mb-2 ml-2">Console</p>
+                <div id="event-log" class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-500 bg-white/50 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-inner">
+                </div>
+            </section>
+
         </main>
     </div>
 
@@ -230,15 +323,28 @@
         };
 
         let authToken = localStorage.getItem('homeAuthToken');
+        let appStateCache = JSON.parse(localStorage.getItem('homeStateCache') || '{}');
         let streams = [];
 
-        window.onload = () => { if (authToken) showDashboard(); };
+        // Set dynamic greeting
+        const hour = new Date().getHours();
+        document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
+
+        window.onload = () => { 
+            if (authToken) showDashboard(); 
+        };
+
+        function updateCache(data) {
+            appStateCache = { ...appStateCache, ...data };
+            localStorage.setItem('homeStateCache', JSON.stringify(appStateCache));
+        }
 
         function addLog(msg) {
             const log = document.getElementById('event-log');
             const div = document.createElement('div');
             div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            log.appendChild(div); log.scrollTop = log.scrollHeight;
+            log.appendChild(div); 
+            log.scrollTop = log.scrollHeight;
         }
 
         async function handleLogin(e) {
@@ -254,17 +360,24 @@
                 });
                 const data = await res.json();
                 if (data.success && data.token) {
-                    authToken = data.token; localStorage.setItem('homeAuthToken', authToken); showDashboard();
+                    authToken = data.token; 
+                    localStorage.setItem('homeAuthToken', authToken); 
+                    showDashboard();
                 } else throw new Error(data.message || 'Login failed');
             } catch (error) {
-                err.innerText = error.message; err.classList.remove('hidden');
+                err.innerText = error.message; 
+                err.classList.remove('hidden');
             } finally {
-                btn.textContent = 'Sign In'; btn.disabled = false;
+                btn.textContent = 'Continue'; 
+                btn.disabled = false;
             }
         }
 
         function logout() {
-            localStorage.removeItem('homeAuthToken'); authToken = null;
+            localStorage.removeItem('homeAuthToken'); 
+            localStorage.removeItem('homeStateCache');
+            authToken = null;
+            appStateCache = {};
             streams.forEach(s => s.abort()); streams = [];
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('login-modal').classList.remove('hidden');
@@ -272,10 +385,15 @@
 
         function showDashboard() {
             if (PLATFORM_APP_ID.includes('REPLACE_WITH')) {
-                alert("Please replace PLATFORM_APP_ID and ROUTES with actual Application API values."); logout(); return;
+                alert("Please replace PLATFORM_APP_ID and ROUTES with actual Application API values."); 
+                logout(); return;
             }
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
+
+            // Instantly apply cached persistent state on load
+            processEnv(appStateCache);
+            processCtrl(appStateCache);
 
             connectSSE(ROUTES.env_telemetry, processEnv);
             connectSSE(ROUTES.ctrl_telemetry, processCtrl);
@@ -284,8 +402,9 @@
         async function connectSSE(route, callback) {
             const controller = new AbortController();
             streams.push(controller);
-            document.getElementById('connection-status').innerText = 'Connected via SSE';
-            document.getElementById('connection-status').className = 'text-xs font-bold px-3 py-1 rounded bg-green-100 text-green-700';
+            
+            const indicator = document.getElementById('connection-indicator');
+            indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
 
             try {
                 const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
@@ -293,6 +412,8 @@
                     signal: controller.signal
                 });
                 if (!res.ok) throw new Error("SSE connection failed");
+
+                indicator.className = 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)] transition-colors';
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
@@ -319,6 +440,7 @@
             } catch (err) {
                 if (err.name !== 'AbortError') {
                     addLog("SSE Disconnected, reconnecting...");
+                    indicator.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
                     setTimeout(() => connectSSE(route, callback), 3000);
                 }
             }
@@ -326,6 +448,7 @@
 
         function processEnv(data) {
             if (!data) return;
+            updateCache(data);
             if (data.temperature !== undefined) document.getElementById('val-temp').innerText = data.temperature;
             if (data.humidity !== undefined) document.getElementById('val-hum').innerText = data.humidity;
             if (data.air_quality !== undefined) document.getElementById('val-aqi').innerText = data.air_quality;
@@ -335,32 +458,107 @@
 
         function processCtrl(data) {
             if (!data) return;
-            if (data.main_light !== undefined && document.activeElement !== document.getElementById('toggle-mlight')) document.getElementById('toggle-mlight').checked = data.main_light;
-            if (data.bedroom_light !== undefined && document.activeElement !== document.getElementById('toggle-blight')) document.getElementById('toggle-blight').checked = data.bedroom_light;
-            if (data.ac !== undefined && document.activeElement !== document.getElementById('toggle-ac')) document.getElementById('toggle-ac').checked = data.ac;
-            if (data.fan !== undefined && document.activeElement !== document.getElementById('toggle-fan')) document.getElementById('toggle-fan').checked = data.fan;
-            if (data.ac_temp !== undefined && document.activeElement !== document.getElementById('slider-ac')) { document.getElementById('slider-ac').value = data.ac_temp; document.getElementById('lbl-ac-temp').innerText = data.ac_temp; }
-            if (data.fan_speed !== undefined && document.activeElement !== document.getElementById('slider-fan')) { document.getElementById('slider-fan').value = data.fan_speed; document.getElementById('lbl-fan-speed').innerText = data.fan_speed; }
+            updateCache(data);
+            
+            // Helper for dynamic styling
+            const applyStyle = (id, isActive, activeColor) => {
+                const iconBg = document.getElementById(`iconbg-${id}`);
+                const icon = document.getElementById(`icon-${id}`);
+                const card = document.getElementById(`card-${id}`);
+                if (!iconBg || !icon || !card) return;
+                
+                if (isActive) {
+                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
+                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-${activeColor}-500`;
+                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors border-${activeColor}-200 bg-white`;
+                } else {
+                    iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
+                    icon.className = `fa-solid ${icon.dataset.icon || icon.className.match(/fa-[a-z-]+/)[0]} text-xl transition-colors text-slate-400`;
+                    card.className = `glass-card p-5 rounded-3xl flex items-center justify-between transition-colors`;
+                }
+            };
+
+            if (data.main_light !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-mlight')) document.getElementById('toggle-mlight').checked = data.main_light;
+                applyStyle('mlight', data.main_light, 'indigo');
+            }
+            if (data.bedroom_light !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-blight')) document.getElementById('toggle-blight').checked = data.bedroom_light;
+                applyStyle('blight', data.bedroom_light, 'purple');
+            }
+            if (data.ac !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-ac')) document.getElementById('toggle-ac').checked = data.ac;
+                applyStyle('ac', data.ac, 'blue');
+            }
+            if (data.fan !== undefined) {
+                if(document.activeElement !== document.getElementById('toggle-fan')) document.getElementById('toggle-fan').checked = data.fan;
+                applyStyle('fan', data.fan, 'cyan');
+                
+                // Spin animation
+                const icon = document.getElementById('icon-fan');
+                if (data.fan && data.fan_speed > 0) {
+                    icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
+                } else {
+                    icon.style.animation = 'none';
+                }
+            }
+            if (data.ac_temp !== undefined) {
+                if(document.activeElement !== document.getElementById('slider-ac')) {
+                    document.getElementById('slider-ac').value = data.ac_temp;
+                }
+                document.getElementById('lbl-ac-temp').innerText = data.ac_temp + '°';
+            }
+            if (data.fan_speed !== undefined) {
+                if(document.activeElement !== document.getElementById('slider-fan')) {
+                    document.getElementById('slider-fan').value = data.fan_speed;
+                }
+                document.getElementById('lbl-fan-speed').innerText = data.fan_speed;
+                
+                // Update spin speed dynamically if fan is on
+                if (appStateCache.fan) {
+                    const icon = document.getElementById('icon-fan');
+                    icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
+                }
+            }
 
             if (data.door_lock !== undefined) {
                 const doorBtn = document.getElementById('btn-door');
                 doorBtn.dataset.locked = data.door_lock;
-                if (data.door_lock) { doorBtn.innerText = 'LOCKED'; doorBtn.className = 'px-5 py-2 bg-green-500 text-white font-bold rounded-lg transition-colors'; }
-                else { doorBtn.innerText = 'UNLOCKED'; doorBtn.className = 'px-5 py-2 bg-red-500 text-white font-bold rounded-lg transition-colors'; }
+                document.getElementById('lbl-door-status').innerText = data.door_lock ? 'Locked' : 'Unlocked';
+                
+                if (data.door_lock) { 
+                    doorBtn.innerText = 'UNLOCK'; 
+                    doorBtn.className = 'px-5 py-2.5 bg-slate-900 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
+                    applyStyle('door', true, 'slate');
+                } else { 
+                    doorBtn.innerText = 'LOCK'; 
+                    doorBtn.className = 'px-5 py-2.5 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-2xl transition-all shadow-sm text-sm';
+                    applyStyle('door', false, 'red'); // no style
+                }
             }
         }
 
         async function cmd(type, val) {
             let actualVal = typeof val === 'string' ? parseFloat(val) : val;
-            addLog(`Command: ${type} -> ${actualVal}`);
+            addLog(`Cmd: ${type} → ${actualVal}`);
+            
+            // Optimistic Update & Persistence
+            const updateObj = { [type]: actualVal };
+            processCtrl(updateObj); // This updates the UI and Cache instantly
+
             try {
                 await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: { [type]: actualVal } })
+                    body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
                 });
             } catch (e) { addLog("Cmd Failed: " + e.message); }
         }
+        
+        // Setup spin animation keyframe programmatically for the fan
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
     </script>
 </body>
 
