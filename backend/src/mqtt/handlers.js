@@ -90,12 +90,12 @@ const handleData = async (topicDeviceId, payload) => {
     const nestedPayload = nestify(namespacedData);
     await SensorData.insert(topicDeviceId, nestedPayload);
 
-    // Emit live telemetry to SSE (using namespaced keys so UI groups correctly)
+    // Emit live telemetry to SSE (using nested keys so filtering matches hydration logic)
     if (device && device.workspace_id) {
         sseEmitter.emitTelemetry(device.workspace_id, {
             deviceId: topicDeviceId,
             timestamp: new Date().toISOString(),
-            data: namespacedData
+            data: nestedPayload
         });
     }
 
