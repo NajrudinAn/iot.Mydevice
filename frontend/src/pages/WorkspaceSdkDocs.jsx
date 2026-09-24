@@ -102,8 +102,8 @@ Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
                 <h4 className="font-bold text-gray-900 text-lg mb-1">{title}</h4>
                 <p className="text-sm text-gray-500">{desc}</p>
             </div>
-            <div className="p-5 border-b border-gray-100">
-                <code className="text-sm font-mono text-blue-700 bg-blue-50 px-3 py-2 rounded-lg block overflow-x-auto border border-blue-100">
+            <div className="p-5 border-b border-gray-100 bg-gray-900">
+                <code className="text-sm font-mono text-gray-100 bg-gray-900 rounded-lg block overflow-x-auto whitespace-pre-wrap leading-relaxed">
                     {code}
                 </code>
             </div>
