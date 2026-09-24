@@ -361,8 +361,8 @@ export default function WorkspaceDevices() {
                           </td>
                           <td className="text-muted font-medium">{device.device_type || 'Unknown'}</td>
                           <td>
-                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
-                              <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-500' : 'bg-red-500'}`}></span>
                               {device.status?.toUpperCase() === 'ONLINE' ? 'Online' : 'Offline'}
                             </span>
                           </td>
@@ -390,8 +390,8 @@ export default function WorkspaceDevices() {
                             <div className="font-bold text-main text-lg mb-1">{device.name}</div>
                             <span className="font-mono text-[13px] text-slate-700 bg-slate-100/80 px-3 py-1.5 rounded-md font-medium tracking-wide shadow-sm">{device.device_id}</span>
                           </div>
-                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-sm ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full mr-2 ${device.status?.toUpperCase() === 'ONLINE' ? 'bg-green-500' : 'bg-red-500'}`}></span>
                             {device.status?.toUpperCase() === 'ONLINE' ? 'Online' : 'Offline'}
                           </span>
                        </div>

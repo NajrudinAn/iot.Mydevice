@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, CheckCircle2, Download, Terminal, Settings2, Code, Cpu, Bot, FileCode2, Info, ChevronRight, Hash, Type, AlignLeft, List } from 'lucide-react';
+import { Copy, CheckCircle2, Download, Terminal, Settings2, Code, Cpu, Bot, FileCode2, Info, ChevronRight, Hash, Type, AlignLeft, List, LayoutDashboard } from 'lucide-react';
 
 const WorkspaceSdkDocs = () => {
     const [activeTab, setActiveTab] = useState('python');
