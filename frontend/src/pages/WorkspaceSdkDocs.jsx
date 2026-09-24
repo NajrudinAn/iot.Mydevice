@@ -11,75 +11,63 @@ const WorkspaceSdkDocs = () => {
         setTimeout(() => setCopiedIndex(null), 2000);
     };
 
-    const hardwareAiPrompt = `I am using the MyDevice IoT Platform SDK to connect my hardware to a cloud dashboard. 
-Please integrate this SDK into my existing code.
+    const hardwareAiPrompt = `SYSTEM INSTRUCTION: You are an expert IoT developer. Your task is to integrate the MyDevice IoT Platform SDK into the user's provided hardware code.
 
-IMPORTANT RULES:
-1. Do NOT break my existing device functionality (motor control, display logic, etc.). 
-2. Only add the code needed to send telemetry data and receive commands via the SDK.
-3. My Device ID is "YOUR_DEVICE_ID" and Secret Key is "YOUR_SECRET_KEY".
+RULES:
+1. Do NOT break the user's existing device functionality. 
+2. Only inject the necessary SDK initialization and data-sending logic.
+3. The user will provide their Device ID and Secret Key separately; assume they are available as variables or macros.
 
 SDK CAPABILITIES & FULL API REFERENCE:
-The SDK uses a "Blueprint API". You define properties and actions, and the cloud auto-generates the UI.
+The SDK uses a "Blueprint API" where properties and actions auto-generate the cloud UI.
 
 1. INITIALIZATION:
-   - Python: \`device = MyDevice("ID", "SECRET")\`
-   - Node.js: \`const device = new MyDevice('ID', 'SECRET')\`
-   - Arduino: \`MyDevice device("ID", "SECRET", wifiClient)\`
+   - Python: \`device = MyDevice(DEVICE_ID, SECRET_KEY)\`
+   - Node.js: \`const device = new MyDevice(DEVICE_ID, SECRET_KEY)\`
+   - Arduino: \`MyDevice device(DEVICE_ID, SECRET_KEY, wifiClient)\`
 
-2. READ-ONLY TELEMETRY (Sensors, Status):
-   - \`add_reading(name, label, data_type="number", unit="")\`
-     Example: \`device.add_reading("temp", "Temperature", "number", "°C")\`
+2. READ-ONLY TELEMETRY:
+   - \`add_reading(name, label, data_type, unit)\`
 
 3. CONTROLLABLE COMPONENTS (Auto-generates Dashboard UI):
    - \`add_switch(name, label, on_change_callback)\`
-     Creates a toggle. Callback receives a boolean.
    - \`add_slider(name, label, min_val, max_val, on_change_callback)\`
-     Creates a slider. Callback receives a float/number.
-   - \`add_property(name, label, type, unit, min, max, options, writable, on_change)\`
-     Advanced generic property (e.g., string dropdowns if options=["A", "B"]).
 
-4. STATELESS ACTIONS (Buttons/Commands):
+4. STATELESS ACTIONS:
    - \`add_action(name, label, description, parameters_dict, on_execute_callback)\`
-     Creates a clickable button on the dashboard that triggers the callback.
 
 5. SENDING DATA:
-   - \`send(name, value)\` or \`update_property(name, value)\`
-     Push sensor data in your main loop. The SDK automatically deduplicates traffic.
+   - \`send(name, value)\`
+     Push sensor data in the main loop. The SDK automatically deduplicates traffic.
 
-6. CONNECTION:
-   - Python/Node: Call \`device.connect()\` once.
-   - Arduino: Call \`device.begin()\` in setup(), and \`device.loop()\` constantly in loop().
+Wait for the user to provide their specific hardware code and requirements, then output the updated code.`;
 
-Please analyze my code and provide the exact snippets to add. Provide full, copy-pastable code.`;
-
-    const frontendAiPrompt = `I want to build a custom HTML/JS frontend dashboard for my IoT devices. 
-Please generate a single HTML file containing the UI and the JavaScript logic.
+    const frontendAiPrompt = `SYSTEM INSTRUCTION: You are an expert frontend developer. Your task is to build a custom HTML/JS frontend dashboard for the user's IoT project.
 
 IMPORTANT PLATFORM RULES:
-1. Real-time data is streamed via Server-Sent Events (SSE) from the backend.
-2. Commands are sent via standard REST POST requests.
-3. The UI must be fully reactive and dynamically update when new SSE data arrives.
-4. I want an Optimistic UI: when a user toggles a switch, update the UI instantly, then send the API request.
+1. Real-time data must be streamed via Server-Sent Events (SSE) using the official MyDeviceFrontend JS SDK.
+2. Commands must be sent via the SDK's built-in \`sendCommand\` method.
+3. The UI must be fully reactive and dynamically update when new data arrives.
 
-MY API DETAILS:
-- Telemetry SSE Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
-- Command POST Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
-- History GET Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
-- Current Data GET Route: http://localhost:5001/api/v1/routes/YOUR_ROUTE_ID
-- Authorization Header: "Bearer YOUR_TOKEN"
+JAVASCRIPT SDK INTEGRATION GUIDE:
+1. Include the SDK via CDN:
+   \`<script src="https://mydevice.in/sdk/mydevice-frontend.js"></script>\`
+2. Initialize the client (The user will provide their specific URLs and Token):
+   \`\`\`javascript
+   const client = new MyDeviceFrontend({
+       token: 'Bearer YOUR_TOKEN',
+       telemetryRoute: 'YOUR_TELEMETRY_ROUTE_URL',
+       commandRoute: 'YOUR_COMMAND_ROUTE_URL'
+   });
+   \`\`\`
+3. Listen for data and update the DOM:
+   \`client.onData((data) => { /* Update UI based on data object keys */ })\`
+4. Start the stream:
+   \`client.connectRealtime();\`
+5. Send commands:
+   \`await client.sendCommand('property_name', value)\`
 
-JAVASCRIPT REQUIREMENTS:
-- Create an \`async function connectSSE()\` using the \`fetch\` API and \`ReadableStream\`.
-- Parse the SSE chunks (separated by \`\\n\\n\`) and handle \`event: device_data\`.
-- Parse the \`data: {...}\` payload. The hardware data is located in \`JSON.parse(dataStr).payload\`.
-- Use a \`try/catch\` block and \`setTimeout\` to automatically reconnect if the stream disconnects.
-- Create an \`async function sendCommand(propertyName, newValue)\` that sends a POST request with \`body: JSON.stringify({ type: \\\`SET_\${propertyName.toUpperCase()}\\\`, payload: { [propertyName]: newValue } })\`.
-- Create an \`async function fetchHistory()\` that fetches historical time-series data using \`?limit=100\` and renders a chart using Chart.js.
-
-Please provide a beautiful, modern UI using TailwindCSS via CDN that includes:
-- A card displaying "temperature" and "humidity".
-- A toggle switch for "main_light" (which triggers sendCommand).`;
+Wait for the user to describe their specific UI requirements and provide their API routes/tokens, then generate the full HTML file.`;
 
     const currentAiPrompt = activeTab === 'frontend' ? frontendAiPrompt : hardwareAiPrompt;
 
