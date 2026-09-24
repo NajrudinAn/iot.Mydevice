@@ -287,6 +287,23 @@
             connectSSE(ROUTES.m2_telemetry, (data) => processMachine('m2', data), 'm2');
         }
 
+        // --- Visibility Auto-Disconnect (Connection Limit Fix) ---
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                addLog("Tab hidden. Dropping connections to save limits...");
+                streams.forEach(s => s.abort());
+                streams = [];
+                document.getElementById('connection-status').innerText = 'PAUSED';
+            } else {
+                if (authToken && streams.length === 0 && !document.getElementById('dashboard').classList.contains('hidden')) {
+                    addLog("Tab active. Reconnecting...");
+                    connectSSE(ROUTES.env_telemetry, processEnv, 'env');
+                    connectSSE(ROUTES.m1_telemetry, (d) => processMachine('m1', d), 'm1');
+                    connectSSE(ROUTES.m2_telemetry, (d) => processMachine('m2', d), 'm2');
+                }
+            }
+        });
+
         async function connectSSE(route, callback, prefix) {
             const controller = new AbortController();
             streams.push(controller);
@@ -493,7 +510,7 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        type: `SET_${prop.toUpperCase()}`,
+                        type: `SET_${prop}`,
                         payload: { [prop]: newVal }
                     })
                 });

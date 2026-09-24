@@ -495,7 +495,23 @@
                     connectSSE(ROUTES.ctrl_telemetry, processCtrl);
                 }
 
-                async function connectSSE(route, callback) {
+                // --- Visibility Auto-Disconnect (Connection Limit Fix) ---
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                addLog("Tab hidden. Dropping connections to save limits...");
+                streams.forEach(s => s.abort());
+                streams = [];
+                document.getElementById('connection-text').innerText = 'Paused (Tab Hidden)';
+            } else {
+                if (authToken && streams.length === 0 && !document.getElementById('dashboard').classList.contains('hidden')) {
+                    addLog("Tab active. Reconnecting...");
+                    connectSSE(ROUTES.env_telemetry, processEnv);
+                    connectSSE(ROUTES.ctrl_telemetry, processCtrl);
+                }
+            }
+        });
+
+        async function connectSSE(route, callback) {
                     const controller = new AbortController();
                     streams.push(controller);
 
@@ -719,7 +735,7 @@
                         const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
-                            body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
+                            body: JSON.stringify({ type: `SET_${type}`, payload: updateObj })
                         });
 
                         const data = await response.json();
