@@ -245,7 +245,7 @@ const CreateApiModal = ({ workspaceId, onClose, onSuccess }) => {
                                     }
                                     return true;
                                 }).map(route => (
-                                    <label key={route.id} onClick={(e) => { e.preventDefault(); toggleRoute(route.id); }} className="cursor-pointer transition-colors group hover:bg-white" style={{ display: 'flex', alignItems: 'center', padding: '14px', backgroundColor: selectedRoutes.includes(route.id) ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
+                                    <label key={route.id} onClick={() => toggleRoute(route.id)} className="cursor-pointer transition-colors group hover:bg-white" style={{ display: 'flex', alignItems: 'center', padding: '14px', backgroundColor: selectedRoutes.includes(route.id) ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}>
                                         <div className="flex-shrink-0 pt-0.5">
                                             <div className="w-5 h-5 rounded-[6px] border-2 flex items-center justify-center shrink-0 transition-colors"
                                                  style={{
