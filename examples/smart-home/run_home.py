@@ -74,6 +74,7 @@ time.sleep(2)
 
 print("Starting simulation loop... Press Ctrl+C to stop.")
 try:
+    loop_count = 0
     while True:
         # Simulate realistic environment changes
         temp = 22.0 + (random.random() * 2.0 - 1.0)
@@ -92,7 +93,7 @@ try:
         if state["fan"]: power += (20 * state["fan_speed"])
         if state["ac"]: power += 1200
         
-        # Send telemetry (automatically deduplicated by SDK if no change)
+        # Send telemetry
         env_device.update_properties({
             "temperature": round(temp, 1),
             "humidity": round(hum, 1),
@@ -102,8 +103,15 @@ try:
         })
         
         # Sync control state back to platform
-        ctrl_device.update_properties(state)
-        
+        # We force send every 2nd loop (10s) so new UI clients sync up immediately even if state hasn't changed.
+        force = (loop_count % 2 == 0)
+        if force:
+            for k, v in state.items():
+                ctrl_device.send(k, v, force_send=True)
+        else:
+            ctrl_device.update_properties(state)
+            
+        loop_count += 1
         time.sleep(5)
 except KeyboardInterrupt:
     print("Shutting down...")
