@@ -309,8 +309,14 @@
                 </div>
             </section>
 
-        </main>
+    <!-- Offline Banner -->
+    <div id="offline-banner" class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm items-center gap-2 slide-up">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Device Offline</span>
     </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
 
     <script>
         const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://localhost:3000';
@@ -325,14 +331,37 @@
         let authToken = localStorage.getItem('homeAuthToken');
         let appStateCache = JSON.parse(localStorage.getItem('homeStateCache') || '{}');
         let streams = [];
+        let offlineDevices = new Set();
 
-        // Set dynamic greeting
         const hour = new Date().getHours();
         document.getElementById('greeting').innerText = hour < 12 ? 'Good Morning,' : hour < 18 ? 'Good Afternoon,' : 'Good Evening,';
 
         window.onload = () => { 
             if (authToken) showDashboard(); 
         };
+
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const isError = type === 'error';
+            toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${
+                isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-900 text-white'
+            }`;
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'} text-lg"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
 
         function updateCache(data) {
             appStateCache = { ...appStateCache, ...data };
@@ -432,8 +461,12 @@
                             if (line.startsWith('event: ')) eventType = line.slice(7).trim();
                             else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
                         }
-                        if (eventType === 'device_data' && dataStr) {
-                            try { callback(JSON.parse(dataStr).payload); } catch (e) { }
+                        if (dataStr) {
+                            if (eventType === 'device_data') {
+                                try { callback(JSON.parse(dataStr).payload); } catch (e) { }
+                            } else if (eventType === 'device_status') {
+                                try { processStatus(JSON.parse(dataStr)); } catch (e) { }
+                            }
                         }
                     }
                 }
@@ -443,6 +476,25 @@
                     indicator.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
                     setTimeout(() => connectSSE(route, callback), 3000);
                 }
+            }
+        }
+
+        function processStatus(data) {
+            if (!data || !data.deviceId) return;
+            const banner = document.getElementById('offline-banner');
+            
+            if (data.status === 'offline') {
+                offlineDevices.add(data.deviceId);
+            } else if (data.status === 'online') {
+                offlineDevices.delete(data.deviceId);
+            }
+            
+            if (offlineDevices.size > 0) {
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+            } else {
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
             }
         }
 
@@ -460,7 +512,6 @@
             if (!data) return;
             updateCache(data);
             
-            // Helper for dynamic styling
             const applyStyle = (id, isActive, activeColor) => {
                 const iconBg = document.getElementById(`iconbg-${id}`);
                 const icon = document.getElementById(`icon-${id}`);
@@ -494,7 +545,6 @@
                 if(document.activeElement !== document.getElementById('toggle-fan')) document.getElementById('toggle-fan').checked = data.fan;
                 applyStyle('fan', data.fan, 'cyan');
                 
-                // Spin animation
                 const icon = document.getElementById('icon-fan');
                 if (data.fan && data.fan_speed > 0) {
                     icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
@@ -514,7 +564,6 @@
                 }
                 document.getElementById('lbl-fan-speed').innerText = data.fan_speed;
                 
-                // Update spin speed dynamically if fan is on
                 if (appStateCache.fan) {
                     const icon = document.getElementById('icon-fan');
                     icon.style.animation = `spin ${1.5 / data.fan_speed}s linear infinite`;
@@ -533,7 +582,7 @@
                 } else { 
                     doorBtn.innerText = 'LOCK'; 
                     doorBtn.className = 'px-5 py-2.5 bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-2xl transition-all shadow-sm text-sm';
-                    applyStyle('door', false, 'red'); // no style
+                    applyStyle('door', false, 'red');
                 }
             }
         }
@@ -542,20 +591,37 @@
             let actualVal = typeof val === 'string' ? parseFloat(val) : val;
             addLog(`Cmd: ${type} → ${actualVal}`);
             
-            // Optimistic Update & Persistence
+            // Revert state helper
+            const previousVal = appStateCache[type];
+            
+            // Optimistic Update
             const updateObj = { [type]: actualVal };
-            processCtrl(updateObj); // This updates the UI and Cache instantly
+            processCtrl(updateObj); 
 
             try {
-                await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
+                const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.ctrl_commands}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
                     body: JSON.stringify({ type: `SET_${type.toUpperCase()}`, payload: updateObj })
                 });
-            } catch (e) { addLog("Cmd Failed: " + e.message); }
+                
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Command failed');
+                }
+                
+            } catch (e) { 
+                addLog("Cmd Failed: " + e.message); 
+                showToast(e.message, 'error');
+                
+                // Revert optimistic update
+                if (previousVal !== undefined) {
+                    processCtrl({ [type]: previousVal });
+                }
+            }
         }
         
-        // Setup spin animation keyframe programmatically for the fan
         const style = document.createElement('style');
         style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
         document.head.appendChild(style);
