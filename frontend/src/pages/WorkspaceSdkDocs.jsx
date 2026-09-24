@@ -8,39 +8,89 @@ const WorkspaceSdkDocs = () => {
     const handleCopy = (text, index) => {
         navigator.clipboard.writeText(text);
         setCopiedIndex(index);
-        setTimeout(() => setCopiedIndex(null), 2000);
-    };
-
-    const hardwareAiPrompt = `SYSTEM INSTRUCTION: You are an expert IoT developer. Your task is to integrate the MyDevice IoT Platform SDK into the user's provided hardware code.
+    const pythonAiPrompt = `SYSTEM INSTRUCTION: You are an expert Python IoT developer. Your task is to integrate the MyDevice IoT Platform SDK into the user's provided Python code (e.g. Raspberry Pi, Orange Pi, PC).
 
 RULES:
 1. Do NOT break the user's existing device functionality. 
-2. Only inject the necessary SDK initialization and data-sending logic.
-3. The user will provide their Device ID and Secret Key separately; assume they are available as variables or macros.
+2. Only inject the necessary SDK initialization, Blueprint declarations, and data-sending logic.
+3. The user will provide their Device ID and Secret Key separately.
 
-SDK CAPABILITIES & FULL API REFERENCE:
-The SDK uses a "Blueprint API" where properties and actions auto-generate the cloud UI.
+SDK ARCHITECTURE & BLUEPRINT API:
+The SDK uses a "Blueprint API". You define properties and actions in the code, and the cloud auto-generates the UI dashboard. 
+
+1. INSTALLATION & INITIALIZATION:
+   - Requires \`paho-mqtt\` package.
+   - \`device = MyDevice(DEVICE_ID, SECRET_KEY)\`
+
+2. READ-ONLY TELEMETRY (Sensors, Metrics):
+   - \`device.add_reading(name, label, data_type="number", unit="")\`
+     Example: \`device.add_reading("temp", "Temperature", "number", "°C")\`
+
+3. CONTROLLABLE COMPONENTS (Actuators, Settings):
+   - \`device.add_switch(name, label, on_change_callback)\`
+     Creates a toggle. The callback receives a boolean (\`True\`/\`False\`).
+   - \`device.add_slider(name, label, min_val, max_val, on_change_callback)\`
+     Creates a slider. The callback receives a float.
+   - \`device.add_property(name, label, property_type, unit, min_val, max_val, options, writable, on_change_callback)\`
+     For complex controls like Dropdowns (\`options=["A", "B"]\`).
+
+4. STATELESS ACTIONS (Buttons/Commands):
+   - \`device.add_action(name, label, description, parameters_dict, on_execute_callback)\`
+     Example: \`device.add_action("reboot", "Reboot Device", "Restarts system", {}, perform_reboot)\`
+
+5. THREADING & CONNECTION (CRITICAL):
+   - \`device.connect()\` spawns a background thread to handle all MQTT traffic asynchronously. 
+   - DO NOT put \`device.connect()\` inside a \`while True\` loop. Call it ONCE before the main loop.
+
+6. SENDING TELEMETRY DATA:
+   - \`device.send(name, value)\`
+   Push sensor data in the main application loop. The SDK automatically deduplicates traffic and only sends changes over the network.
+
+YOUR BEHAVIOR:
+Wait for the user to provide their Python code and explain what they are trying to monitor/control. Once provided, inject the Blueprint declarations and \`device.send()\` logic cleanly into their codebase.`;
+
+    const arduinoAiPrompt = `SYSTEM INSTRUCTION: You are an expert C++/Arduino IoT developer. Your task is to integrate the MyDevice IoT Platform SDK into the user's provided ESP32/ESP8266/Arduino code.
+
+RULES:
+1. Do NOT break the user's existing device functionality. 
+2. Only inject the necessary SDK initialization, Blueprint declarations, and data-sending logic.
+3. Memory management is critical. Use standard C++ best practices.
+4. The user will provide their Device ID and Secret Key separately.
+
+SDK ARCHITECTURE & BLUEPRINT API:
+The SDK uses a "Blueprint API". You define properties and actions in the code, and the cloud auto-generates the UI dashboard.
 
 1. INITIALIZATION:
-   - Python: \`device = MyDevice(DEVICE_ID, SECRET_KEY)\`
-   - Node.js: \`const device = new MyDevice(DEVICE_ID, SECRET_KEY)\`
-   - Arduino: \`MyDevice device(DEVICE_ID, SECRET_KEY, wifiClient)\`
+   - Requires a valid WiFiClient object.
+   - \`MyDevice device(DEVICE_ID, SECRET_KEY, wifiClient);\` (Usually declared globally)
 
-2. READ-ONLY TELEMETRY:
-   - \`add_reading(name, label, data_type, unit)\`
+2. READ-ONLY TELEMETRY (Sensors, Metrics):
+   - \`device.add_reading(name, label, data_type, unit)\`
 
-3. CONTROLLABLE COMPONENTS (Auto-generates Dashboard UI):
-   - \`add_switch(name, label, on_change_callback)\`
-   - \`add_slider(name, label, min_val, max_val, on_change_callback)\`
+3. CONTROLLABLE COMPONENTS (Actuators, Settings):
+   - \`device.add_switch(name, label, on_change_callback)\`
+     Creates a toggle. The callback receives a \`bool\`.
+   - \`device.add_slider(name, label, min_val, max_val, on_change_callback)\`
+     Creates a slider. The callback receives a \`float\`.
 
-4. STATELESS ACTIONS:
-   - \`add_action(name, label, description, parameters_dict, on_execute_callback)\`
+4. STATELESS ACTIONS (Buttons/Commands):
+   - \`device.add_action(name, label, description, parameters_dict, on_execute_callback)\`
+     Example: \`device.add_action("reboot", "Reboot Device", "Restarts system", "", perform_reboot)\`
 
-5. SENDING DATA:
-   - \`send(name, value)\`
-     Push sensor data in the main loop. The SDK automatically deduplicates traffic.
+5. CONNECTION & LOOPING (CRITICAL):
+   - Unlike Python, C++ does NOT spawn a background thread.
+   - You MUST call \`device.begin();\` inside the \`setup()\` function.
+   - You MUST call \`device.loop();\` at the top of the \`loop()\` function. This processes incoming MQTT messages and handles automatic reconnects.
+   - Do NOT use heavy \`delay()\` in the loop, as it will block \`device.loop()\` and drop the MQTT connection! Use non-blocking \`millis()\` timers.
 
-Wait for the user to provide their specific hardware code and requirements, then output the updated code.`;
+6. SENDING TELEMETRY DATA:
+   - \`device.send(name, value)\`
+   Push sensor data in the main loop using non-blocking timers. The SDK automatically deduplicates traffic.
+
+YOUR BEHAVIOR:
+Wait for the user to provide their Arduino/C++ code and explain what they are trying to monitor/control. Once provided, inject the Blueprint declarations cleanly into \`setup()\` and the polling logic into \`loop()\`.`;
+
+    const nodeAiPrompt = pythonAiPrompt.replace('Python', 'Node.js').replace('device = MyDevice', 'const device = new MyDevice').replace('paho-mqtt', 'mqtt').replace('True/False', 'true/false');
 
     const frontendAiPrompt = `SYSTEM INSTRUCTION: You are an expert frontend developer. Your task is to build a custom HTML/JS frontend dashboard for the user's IoT project.
 
@@ -111,7 +161,7 @@ The user's platform provides a CDN-hosted JavaScript SDK that abstracts all conn
 YOUR BEHAVIOR:
 Wait for the user to describe their specific UI requirements and provide their API routes/tokens. Once provided, generate a complete, single-file HTML dashboard integrating this SDK.`;
 
-    const currentAiPrompt = activeTab === 'frontend' ? frontendAiPrompt : hardwareAiPrompt;
+    const currentAiPrompt = activeTab === 'frontend' ? frontendAiPrompt : activeTab === 'arduino' ? arduinoAiPrompt : activeTab === 'node' ? nodeAiPrompt : pythonAiPrompt;
 
     const ParamRow = ({ name, type, req, desc }) => (
         <div className="flex flex-col sm:flex-row sm:items-start py-3 border-b border-gray-100 last:border-0 gap-2 sm:gap-4">
