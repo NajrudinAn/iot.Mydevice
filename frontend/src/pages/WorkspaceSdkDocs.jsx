@@ -539,7 +539,7 @@ setInterval(() => {
                                 Complete Implementation Example
                             </h3>
                             <CodeBlock code={`#include <WiFi.h>
-#include "MyDevice.h"
+#include <MyDevice.h>
 
 // 1. Initialize Network and Device
 WiFiClient wifiClient;

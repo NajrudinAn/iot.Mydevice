@@ -365,7 +365,7 @@ except KeyboardInterrupt:
 `;
 
           const arduinoExample = `#include <WiFi.h>          // Use <ESP8266WiFi.h> for ESP8266
-#include "MyDevice.h"      // Place MyDevice.h in sketch folder
+#include <MyDevice.h>      // Installed via Sketch -> Include Library -> Add .ZIP Library
 
 const char* WIFI_SSID  = "YOUR_WIFI_SSID";
 const char* WIFI_PASS  = "YOUR_WIFI_PASSWORD";
@@ -483,13 +483,13 @@ setInterval(() => {
               icon: Cpu,
               code: arduinoExample,
               exampleFilename: `example_${did.toLowerCase()}.ino`,
-              libraryFilename: 'MyDevice.h',
-              libraryUrl: '/sdk/MyDevice.h',
+              libraryFilename: 'MyDevice.zip',
+              libraryUrl: '/sdk/MyDevice.zip',
               install: 'PubSubClient + ArduinoJson (via Library Manager)',
               run: 'Flash via Arduino IDE or PlatformIO',
-              importLine: '#include "MyDevice.h"',
+              importLine: '#include <MyDevice.h>',
               notes: [
-                'Download MyDevice.h and place in sketch folder or Arduino/libraries/MyDevice/.',
+                'Download MyDevice.zip and add via Sketch -> Include Library -> Add .ZIP Library.',
                 'Install PubSubClient + ArduinoJson via Arduino Library Manager.',
                 'Works on ESP32 and ESP8266 (change WiFi.h to ESP8266WiFi.h).',
                 'Replace WiFi credentials and YOUR_SECRET_KEY before flashing.',
