@@ -11,9 +11,10 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #0f172a;
             /* slate-100 */
             -webkit-tap-highlight-color: transparent;
+            color: #f8fafc;
         }
 
         /* Hide scrollbar for clean app feel */
@@ -23,9 +24,9 @@
         }
 
         .glass-card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
         }
 
@@ -66,7 +67,7 @@
             height: 24px;
             width: 24px;
             border-radius: 50%;
-            background: #ffffff;
+            background: #f8fafc;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
             cursor: pointer;
             margin-top: -8px;
@@ -76,25 +77,25 @@
             width: 100%;
             height: 8px;
             cursor: pointer;
-            background: #e2e8f0;
+            background: #334155;
             border-radius: 4px;
         }
     </style>
 </head>
 
-<body class="text-slate-800 antialiased selection:bg-blue-200">
+<body class="text-slate-100 antialiased selection:bg-blue-200">
 
     <!-- Login Screen -->
     <div id="login-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        class="fixed inset-0 bg-indigo-600/60 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
         <div
-            class="bg-white/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
+            class="bg-slate-800/90 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-2xl max-w-sm w-full slide-up border border-white/20">
             <div class="text-center mb-10">
                 <div
                     class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/30">
                     <i class="fa-solid fa-house-signal text-3xl text-white"></i>
                 </div>
-                <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">Smart Home</h2>
+                <h2 class="text-3xl font-extrabold text-slate-100 tracking-tight">Smart Home</h2>
                 <p class="text-sm text-slate-500 mt-2 font-medium">Sign in to control your devices</p>
             </div>
 
@@ -102,18 +103,18 @@
                 <div class="space-y-4">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fa-regular fa-envelope text-slate-400"></i>
+                            <i class="fa-regular fa-envelope text-slate-500"></i>
                         </div>
                         <input type="email" id="email" required
-                            class="w-full bg-slate-100/50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
+                            class="w-full bg-indigo-600/50 border border-slate-700 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-slate-800 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
                             placeholder="Email address">
                     </div>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="fa-solid fa-lock text-slate-400"></i>
+                            <i class="fa-solid fa-lock text-slate-500"></i>
                         </div>
                         <input type="password" id="password" required
-                            class="w-full bg-slate-100/50 border border-slate-200 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
+                            class="w-full bg-indigo-600/50 border border-slate-700 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-slate-800 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all font-medium placeholder:font-normal"
                             placeholder="Password">
                     </div>
                 </div>
@@ -122,7 +123,7 @@
                     class="hidden text-sm text-red-500 font-semibold text-center bg-red-50 py-2 rounded-lg"></div>
 
                 <button type="submit" id="login-btn"
-                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-900/20 active:scale-[0.98] mt-4">
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-indigo-900/20 active:scale-[0.98] mt-4">
                     Continue
                 </button>
             </form>
@@ -133,22 +134,22 @@
     <div id="dashboard" class="hidden min-h-screen pb-24">
 
         <!-- App Header -->
-        <header class="pt-12 pb-6 px-6 sticky top-0 z-40 bg-[#f3f4f6]/90 backdrop-blur-xl">
+        <header class="pt-12 pb-6 px-6 sticky top-0 z-40 bg-[#0f172a]/90 backdrop-blur-xl">
             <div class="max-w-md mx-auto w-full flex justify-between items-center">
                 <div>
                     <p class="text-sm font-semibold text-slate-500 mb-1" id="greeting">Good Morning,</p>
-                    <h1 class="text-2xl font-bold text-slate-900">My Home</h1>
+                    <h1 class="text-2xl font-bold text-white">My Home</h1>
                 </div>
                 <div class="flex items-center gap-3">
                     <div
-                        class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-600">
+                        class="flex items-center gap-2 bg-slate-800 px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-300">
                         <div id="connection-indicator"
                             class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors">
                         </div>
                         <span id="connection-text">Connecting...</span>
                     </div>
                     <button onclick="logout()"
-                        class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
+                        class="w-10 h-10 rounded-full bg-slate-800 shadow-sm flex items-center justify-center text-slate-300 hover:bg-slate-800 transition-colors">
                         <i class="fa-solid fa-user"></i>
                     </button>
                 </div>
@@ -160,7 +161,7 @@
             <!-- Quick Environment Overview -->
             <section>
                 <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-lg font-bold text-slate-800">Environment</h2>
+                    <h2 class="text-lg font-bold text-slate-100">Environment</h2>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <!-- Temp -->
@@ -170,7 +171,7 @@
                         </div>
                         <div class="text-orange-500"><i class="fa-solid fa-temperature-half text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                            <p class="text-3xl font-extrabold text-slate-100 tracking-tight"><span
                                     id="val-temp">--</span>°</p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Temperature
                             </p>
@@ -182,7 +183,7 @@
                         </div>
                         <div class="text-blue-500"><i class="fa-solid fa-droplet text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                            <p class="text-3xl font-extrabold text-slate-100 tracking-tight"><span
                                     id="val-hum">--</span>%</p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Humidity</p>
                         </div>
@@ -193,7 +194,7 @@
                         </div>
                         <div class="text-teal-500"><i class="fa-solid fa-wind text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                            <p class="text-3xl font-extrabold text-slate-100 tracking-tight"><span
                                     id="val-aqi">--</span></p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Air Quality
                             </p>
@@ -205,7 +206,7 @@
                         </div>
                         <div class="text-purple-500"><i class="fa-solid fa-bolt-lightning text-xl"></i></div>
                         <div>
-                            <p class="text-3xl font-extrabold text-slate-800 tracking-tight"><span
+                            <p class="text-3xl font-extrabold text-slate-100 tracking-tight"><span
                                     id="val-power">--</span><span class="text-lg">w</span></p>
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mt-1">Usage</p>
                         </div>
@@ -216,7 +217,7 @@
             <!-- Accessories / Controls -->
             <section>
                 <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-lg font-bold text-slate-800">Accessories</h2>
+                    <h2 class="text-lg font-bold text-slate-100">Accessories</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -226,11 +227,11 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-mlight">
-                                <i class="fa-solid fa-lightbulb text-xl text-slate-400 transition-colors"
+                                <i class="fa-solid fa-lightbulb text-xl text-slate-500 transition-colors"
                                     data-icon="fa-lightbulb" id="icon-mlight"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-slate-800">Main Light</h3>
+                                <h3 class="font-bold text-slate-100">Main Light</h3>
                                 <p class="text-xs text-slate-500 font-medium">Living Room</p>
                             </div>
                         </div>
@@ -238,7 +239,7 @@
                             <input type="checkbox" id="toggle-mlight" class="sr-only peer"
                                 onchange="cmd('main_light', this.checked)">
                             <div
-                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500">
+                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-800 after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-500">
                             </div>
                         </label>
                     </div>
@@ -249,11 +250,11 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-blight">
-                                <i class="fa-solid fa-bed text-lg text-slate-400 transition-colors" data-icon="fa-bed"
+                                <i class="fa-solid fa-bed text-lg text-slate-500 transition-colors" data-icon="fa-bed"
                                     id="icon-blight"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-slate-800">Bed Light</h3>
+                                <h3 class="font-bold text-slate-100">Bed Light</h3>
                                 <p class="text-xs text-slate-500 font-medium">Bedroom</p>
                             </div>
                         </div>
@@ -261,7 +262,7 @@
                             <input type="checkbox" id="toggle-blight" class="sr-only peer"
                                 onchange="cmd('bedroom_light', this.checked)">
                             <div
-                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500">
+                                class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-800 after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-500">
                             </div>
                         </label>
                     </div>
@@ -272,11 +273,11 @@
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                 id="iconbg-door">
-                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-400 transition-colors"
+                                <i class="fa-solid fa-unlock-keyhole text-lg text-slate-500 transition-colors"
                                     data-icon="fa-unlock-keyhole" id="icon-door"></i>
                             </div>
                             <div>
-                                <h3 class="font-bold text-slate-800">Front Door</h3>
+                                <h3 class="font-bold text-slate-100">Front Door</h3>
                                 <p class="text-xs text-slate-500 font-medium" id="lbl-door-status">Unlocked</p>
                             </div>
                         </div>
@@ -294,7 +295,7 @@
             <!-- Climate Controls -->
             <section>
                 <div class="flex justify-between items-end mb-4">
-                    <h2 class="text-lg font-bold text-slate-800">Climate</h2>
+                    <h2 class="text-lg font-bold text-slate-100">Climate</h2>
                 </div>
                 <div class="space-y-4">
 
@@ -304,11 +305,11 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                     id="iconbg-ac">
-                                    <i class="fa-solid fa-snowflake text-xl text-slate-400 transition-colors"
+                                    <i class="fa-solid fa-snowflake text-xl text-slate-500 transition-colors"
                                         data-icon="fa-snowflake" id="icon-ac"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-800">Air Conditioner</h3>
+                                    <h3 class="font-bold text-slate-100">Air Conditioner</h3>
                                     <p class="text-xs text-slate-500 font-medium">Living Room</p>
                                 </div>
                             </div>
@@ -316,7 +317,7 @@
                                 <input type="checkbox" id="toggle-ac" class="sr-only peer"
                                     onchange="cmd('ac', this.checked)">
                                 <div
-                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-500">
+                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-800 after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-500">
                                 </div>
                             </label>
                         </div>
@@ -337,11 +338,11 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center transition-colors"
                                     id="iconbg-fan">
-                                    <i class="fa-solid fa-fan text-xl text-slate-400 transition-colors"
+                                    <i class="fa-solid fa-fan text-xl text-slate-500 transition-colors"
                                         data-icon="fa-fan" id="icon-fan"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-800">Ceiling Fan</h3>
+                                    <h3 class="font-bold text-slate-100">Ceiling Fan</h3>
                                     <p class="text-xs text-slate-500 font-medium">Living Room</p>
                                 </div>
                             </div>
@@ -349,7 +350,7 @@
                                 <input type="checkbox" id="toggle-fan" class="sr-only peer"
                                     onchange="cmd('fan', this.checked)">
                                 <div
-                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyan-500">
+                                    class="w-14 h-8 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-800 after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-cyan-500">
                                 </div>
                             </label>
                         </div>
@@ -369,9 +370,9 @@
 
             <!-- Debug Logs -->
             <section class="opacity-50 hover:opacity-100 transition-opacity pt-4">
-                <p class="text-xs font-bold text-slate-400 uppercase mb-2 ml-2">Console</p>
+                <p class="text-xs font-bold text-slate-500 uppercase mb-2 ml-2">Console</p>
                 <div id="event-log"
-                    class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-500 bg-white/50 backdrop-blur border border-slate-200 p-3 rounded-2xl shadow-inner">
+                    class="h-24 overflow-y-auto font-mono text-[10px] space-y-1 text-slate-500 bg-slate-800/50 backdrop-blur border border-slate-700 p-3 rounded-2xl shadow-inner">
                 </div>
             </section>
 
@@ -413,7 +414,7 @@
                     const toast = document.createElement('div');
 
                     const isError = type === 'error';
-                    toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-slate-900 text-white'
+                    toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-indigo-600 text-white'
                         }`;
 
                     toast.innerHTML = `
@@ -643,11 +644,11 @@
                         if (isActive) {
                             iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-${activeColor}-100`;
                             icon.className = `fa-solid ${iconName} text-xl transition-colors text-${activeColor}-500`;
-                            card.classList.add(`border-${activeColor}-200`, 'bg-white');
+                            card.classList.add(`border-${activeColor}-200`, 'bg-slate-800');
                         } else {
                             iconBg.className = `w-12 h-12 rounded-full flex items-center justify-center transition-colors bg-slate-100`;
-                            icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-400`;
-                            card.classList.remove('border-indigo-200', 'border-purple-200', 'border-blue-200', 'border-cyan-200', 'border-slate-200', 'border-red-200', 'bg-white');
+                            icon.className = `fa-solid ${iconName} text-xl transition-colors text-slate-500`;
+                            card.classList.remove('border-indigo-200', 'border-purple-200', 'border-blue-200', 'border-cyan-200', 'border-slate-700', 'border-red-200', 'bg-slate-800');
                         }
                     };
 
@@ -700,7 +701,7 @@
                         const doorIcon = document.getElementById('icon-door');
                         if (data.door_lock) {
                             doorBtn.innerText = 'UNLOCK';
-                            doorBtn.className = 'px-5 py-2.5 bg-slate-900 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
+                            doorBtn.className = 'px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-2xl transition-all shadow-md text-sm';
                             doorIcon.dataset.icon = 'fa-lock';
                             applyStyle('door', true, 'slate');
                         } else {
