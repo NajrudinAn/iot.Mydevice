@@ -8,6 +8,9 @@ const WorkspaceSdkDocs = () => {
     const handleCopy = (text, index) => {
         navigator.clipboard.writeText(text);
         setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+    };
+
     const pythonAiPrompt = `SYSTEM INSTRUCTION: You are an expert Python IoT developer. Your task is to integrate the MyDevice IoT Platform SDK into the user's provided Python code.
 
 RULES:
