@@ -1,0 +1,28 @@
+#######################################
+# Syntax Coloring Map For MyDevice
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+MyDevice	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+addProperty	KEYWORD2
+addReading	KEYWORD2
+addSwitch	KEYWORD2
+addSlider	KEYWORD2
+updateProperty	KEYWORD2
+send	KEYWORD2
+addAction	KEYWORD2
+addActionParam	KEYWORD2
+begin	KEYWORD2
+loop	KEYWORD2
+isConnected	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+MYDEVICE_VERSION	LITERAL1

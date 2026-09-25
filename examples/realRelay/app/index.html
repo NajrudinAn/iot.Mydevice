@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Real Relay Dashboard - MyDevice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            /* slate-900 */
+            -webkit-tap-highlight-color: transparent;
+            color: #f8fafc;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Custom Toggle Switch (Industrial Style) */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #10b981;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .industrial-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-emerald-500/30">
+
+    <!-- Login Screen -->
+    <div id="login-modal"
+        class="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="industrial-card p-8 sm:p-10 rounded-[2rem] max-w-sm w-full slide-up">
+            <div class="text-center mb-10">
+                <div
+                    class="w-20 h-20 bg-slate-800 border border-slate-700 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner shadow-black/50">
+                    <i class="fa-solid fa-power-off text-3xl text-emerald-500"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Smart Relay</h2>
+                <p class="text-sm text-slate-400 mt-2 font-medium">Authentication Required</p>
+            </div>
+
+            <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+                <div class="space-y-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-regular fa-envelope text-slate-500"></i>
+                        </div>
+                        <input type="email" id="email" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-slate-800 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all font-medium placeholder:text-slate-600 text-white"
+                            placeholder="Email address">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-lock text-slate-500"></i>
+                        </div>
+                        <input type="password" id="password" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-2xl py-3.5 pl-11 pr-4 focus:bg-slate-800 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all font-medium placeholder:text-slate-600 text-white"
+                            placeholder="Password">
+                    </div>
+                </div>
+
+                <div id="login-error"
+                    class="hidden text-sm text-red-400 font-semibold text-center bg-red-900/20 border border-red-900 py-2 rounded-lg">
+                </div>
+
+                <button type="submit" id="login-btn"
+                    class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-[0.98] mt-4">
+                    CONNECT
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App UI -->
+    <div id="dashboard" class="hidden min-h-screen pb-24">
+
+        <!-- App Header -->
+        <header class="pt-12 pb-6 px-6 sticky top-0 z-40 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800">
+            <div class="max-w-md mx-auto w-full flex justify-between items-center">
+                <div>
+                    <p class="text-sm font-semibold text-emerald-500 mb-1 tracking-widest uppercase" id="greeting">
+                        System Live</p>
+                    <h1 class="text-2xl font-bold text-white">Relay Controller</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full shadow-sm text-xs font-bold text-slate-300">
+                        <div id="connection-indicator"
+                            class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors">
+                        </div>
+                        <span id="connection-text">Connecting...</span>
+                    </div>
+                    <button onclick="logout()"
+                        class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-slate-700 hover:text-white transition-colors">
+                        <i class="fa-solid fa-power-off"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-md mx-auto w-full px-6 space-y-8 slide-up mt-8">
+
+            <!-- Offline Banner -->
+            <div id="offline-banner"
+                class="hidden bg-red-500/10 border border-red-500/30 text-red-400 px-6 py-4 rounded-2xl font-bold text-sm items-center justify-center gap-3 w-full shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                <span class="tracking-wide">HARDWARE OFFLINE</span>
+            </div>
+
+            <!-- Device Card -->
+            <section>
+                <div class="industrial-card p-6 rounded-3xl transition-all" id="card-relay">
+
+                    <div class="flex justify-between items-center mb-8">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center transition-colors"
+                                id="iconbg-relay">
+                                <i class="fa-solid fa-plug text-2xl text-slate-500 transition-colors"
+                                    id="icon-relay"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg tracking-wide uppercase">Main Relay</h3>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span id="relay-status-badge"
+                                        class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">UNKNOWN</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Huge Toggle Switch -->
+                    <div
+                        class="bg-slate-900 rounded-2xl p-6 border border-slate-800 flex justify-center mb-6 shadow-inner">
+                        <label class="relative inline-flex items-center cursor-pointer scale-150 my-2">
+                            <input type="checkbox" id="toggle-relay" class="sr-only peer"
+                                onchange="cmd('relay', this.checked)">
+                            <div
+                                class="toggle-label w-14 h-8 bg-slate-800 border-2 border-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-slate-300 after:border-slate-500 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600 peer-checked:border-emerald-500 shadow-inner shadow-black">
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button id="btn-toggle-action" onclick="action('toggle_relay')"
+                        class="w-full px-5 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-bold tracking-widest uppercase rounded-xl transition-all active:scale-95 shadow-lg flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-bolt text-emerald-400"></i>
+                        <span>Fire Action (Toggle)</span>
+                    </button>
+
+                </div>
+            </section>
+
+            <!-- Debug Logs -->
+            <section class="opacity-30 hover:opacity-100 transition-opacity pt-4">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 ml-2">Hardware Telemetry
+                    Log</p>
+                <div id="event-log"
+                    class="h-32 overflow-y-auto font-mono text-[10px] space-y-1.5 text-emerald-500/70 bg-black/50 border border-slate-800 p-4 rounded-2xl shadow-inner">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <script>
+        // Use placeholders that the backend/platform replaces, or run locally.
+        const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://localhost:3000';
+        const PLATFORM_APP_ID = window.PLATFORM_APP_ID || 'REPLACE_WITH_APP_ID';
+
+        const ROUTES = {
+            telemetry: `/api/v1/routes/relay-module-realtime-data-3aa2ce`,
+            commands: `/api/v1/routes/relay-module-command-1da020`
+        };
+
+        let authToken = localStorage.getItem('relayAuthToken');
+        let streams = [];
+        let isDeviceOffline = false;
+
+        window.onload = () => {
+            if (authToken) showDashboard();
+        };
+
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            toast.className = `slide-up px-5 py-3 rounded-2xl shadow-2xl font-bold tracking-wide text-xs flex items-center gap-3 ${isError ? 'bg-red-900/90 text-red-200 border border-red-700' : 'bg-emerald-900/90 text-emerald-200 border border-emerald-700'}`;
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-triangle-exclamation' : 'fa-check'} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function addLog(msg) {
+            const log = document.getElementById('event-log');
+            const div = document.createElement('div');
+            div.textContent = `> ${msg}`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+            btn.textContent = 'CONNECTING...'; btn.disabled = true; err.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}/api/applications/${PLATFORM_APP_ID}/auth/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+                });
+                const data = await res.json();
+                if (data.success && data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('relayAuthToken', authToken);
+                    showDashboard();
+                } else throw new Error(data.message || 'Authentication failed');
+            } catch (error) {
+                // If backend is not available, mock auth for development testing
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    console.warn("Backend unavailable. Mocking auth for UI testing.");
+                    authToken = "mock_token";
+                    localStorage.setItem('relayAuthToken', authToken);
+                    showDashboard();
+                } else {
+                    err.innerText = error.message;
+                    err.classList.remove('hidden');
+                }
+            } finally {
+                btn.textContent = 'CONNECT';
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('relayAuthToken');
+            authToken = null;
+            streams.forEach(s => s.abort()); streams = [];
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            connectSSE();
+        }
+
+        async function connectSSE() {
+            const controller = new AbortController();
+            streams.push(controller);
+
+            const indicator = document.getElementById('connection-indicator');
+            const connText = document.getElementById('connection-text');
+
+            indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors';
+            connText.innerText = 'Connecting...';
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}${ROUTES.telemetry}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'text/event-stream' },
+                    signal: controller.signal
+                });
+
+                if (!res.ok) throw new Error("SSE connection failed");
+
+                indicator.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] transition-colors';
+                connText.innerText = 'Connected';
+                addLog("Link established to message broker");
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const chunks = buffer.split('\n\n');
+                    buffer = chunks.pop();
+
+                    for (const chunk of chunks) {
+                        let eventType = 'message', dataStr = null;
+                        for (const line of chunk.split('\n')) {
+                            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+                            else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
+                        }
+                        if (dataStr) {
+                            if (eventType === 'device_data') {
+                                try { processData(JSON.parse(dataStr).payload); } catch (e) { }
+                            } else if (eventType === 'device_status') {
+                                try { processStatus(JSON.parse(dataStr)); } catch (e) { }
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    addLog(`Connection dropped. Retrying...`);
+                    indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
+                    connText.innerText = 'Disconnected';
+                    setTimeout(connectSSE, 3000);
+                }
+            }
+        }
+
+        function processStatus(data) {
+            if (!data) return;
+
+            const banner = document.getElementById('offline-banner');
+            const card = document.getElementById('card-relay');
+            const badge = document.getElementById('relay-status-badge');
+
+            const status = data.status.toLowerCase();
+
+            if (status === 'offline') {
+                isDeviceOffline = true;
+                banner.classList.remove('hidden');
+                banner.classList.add('flex');
+
+                card.classList.add('opacity-50', 'grayscale');
+                badge.innerText = 'OFFLINE';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700';
+
+                addLog("Hardware offline. Network link down.");
+            } else if (status === 'online') {
+                isDeviceOffline = false;
+                banner.classList.add('hidden');
+                banner.classList.remove('flex');
+
+                card.classList.remove('opacity-50', 'grayscale');
+                badge.innerText = 'ONLINE';
+                badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-900/30 text-emerald-400 border border-emerald-800/50';
+
+                addLog("Hardware online. Syncing state...");
+            }
+        }
+
+        function processData(data) {
+            if (!data) return;
+
+            // Process relay state if it exists
+            if (data.relay !== undefined) {
+                const val = !!data.relay;
+                document.getElementById('toggle-relay').checked = val;
+
+                const icon = document.getElementById('icon-relay');
+                const iconbg = document.getElementById('iconbg-relay');
+
+                if (val) {
+                    icon.classList.remove('text-slate-500');
+                    icon.classList.add('text-emerald-400');
+                    iconbg.classList.remove('bg-slate-800', 'border-slate-700');
+                    iconbg.classList.add('bg-emerald-900/20', 'border-emerald-800/50');
+                    addLog("State synced: Relay = ON");
+                } else {
+                    icon.classList.add('text-slate-500');
+                    icon.classList.remove('text-emerald-400');
+                    iconbg.classList.add('bg-slate-800', 'border-slate-700');
+                    iconbg.classList.remove('bg-emerald-900/20', 'border-emerald-800/50');
+                    addLog("State synced: Relay = OFF");
+                }
+
+                // If we get telemetry, the device is definitely online
+                if (isDeviceOffline) {
+                    processStatus({ deviceId: DEVICE_ID, status: 'online' });
+                }
+            }
+        }
+
+        async function cmd(property, value) {
+            if (isDeviceOffline) {
+                showToast("Cannot control hardware while offline", "error");
+                // Revert toggle visually
+                document.getElementById('toggle-relay').checked = !value;
+                return;
+            }
+
+            try {
+                const payload = {};
+                payload[property] = value;
+
+                addLog(`TX SET_${property.toUpperCase()} = ${value}`);
+
+                const res = await fetch(`${PLATFORM_BASE_URL}${ROUTES.commands}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        type: `SET_${property.toUpperCase()}`,
+                        payload: payload
+                    })
+                });
+
+                if (!res.ok) throw new Error("Command failed to send");
+                showToast(`Command sent: ${property}=${value}`, "success");
+            } catch (err) {
+                showToast(err.message, "error");
+                // Revert toggle
+                document.getElementById('toggle-relay').checked = !value;
+            }
+        }
+
+        async function action(actionName) {
+            if (isDeviceOffline) {
+                showToast("Cannot execute action while offline", "error");
+                return;
+            }
+
+            try {
+                addLog(`TX ACTION: ${actionName}`);
+                const res = await fetch(`${PLATFORM_BASE_URL}${ROUTES.commands}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        type: actionName,
+                        payload: {}
+                    })
+                });
+                if (!res.ok) throw new Error("Action failed to execute");
+                showToast(`Executed ${actionName}`, "success");
+            } catch (err) {
+                showToast(err.message, "error");
+            }
+        }
+    </script>
+</body>
+
+</html>
