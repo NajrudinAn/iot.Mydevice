@@ -1,4 +1,4 @@
-# MyDevice: A Highly Scalable, Multi-Tenant IoT Application Platform
+# A Secure, Modular IoT Backend-as-a-Service for Unified Device Connectivity, Declarative Capabilities, and Custom Application Integration
 ## Research Whitepaper & Architecture Analysis
 
 ### Abstract
