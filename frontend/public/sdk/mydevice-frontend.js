@@ -15,6 +15,37 @@ class MyDeviceFrontend {
         this._setupAutoDisconnect();
     }
 
+    /**
+     * Authenticate a user and retrieve a JWT token.
+     */
+    static async login(email, password, appId, baseUrl = 'https://mydevice.in') {
+        const res = await fetch(`${baseUrl}/api/applications/${appId}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Login failed');
+        return data.token;
+    }
+
+    /**
+     * Register a new user account.
+     */
+    static async signup(email, password, appId, deviceId = null, baseUrl = 'https://mydevice.in') {
+        const payload = { email, password };
+        if (deviceId) payload.deviceId = deviceId;
+        
+        const res = await fetch(`${baseUrl}/api/applications/${appId}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Signup failed');
+        return data.token;
+    }
+
     _setupAutoDisconnect() {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
@@ -94,19 +125,25 @@ class MyDeviceFrontend {
         }
     }
 
-    async sendCommand(property, value) {
+    async sendCommand(type, payload, deviceId = null) {
         if (!this.commandRoute) throw new Error("commandRoute not provided");
 
-        // Optimistic cache update
-        const previousValue = this.stateCache[property];
-        this.stateCache[property] = value;
-        if (this.onDataCallback) this.onDataCallback({ [property]: value }, 'optimistic');
+        // Optimistic cache update if payload is an object
+        let previousState = null;
+        if (typeof payload === 'object' && payload !== null) {
+            previousState = { ...this.stateCache };
+            this.stateCache = { ...this.stateCache, ...payload };
+            if (this.onDataCallback) this.onDataCallback(payload, deviceId || 'optimistic');
+        }
 
         try {
+            const bodyObj = { type, payload };
+            if (deviceId) bodyObj.device_id = deviceId; // Required for multi-device routes
+
             const response = await fetch(`${this.baseUrl}${this.commandRoute}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}` },
-                body: JSON.stringify({ type: `SET_${property}`, payload: { [property]: value } })
+                body: JSON.stringify(bodyObj)
             });
 
             const data = await response.json();
@@ -117,9 +154,9 @@ class MyDeviceFrontend {
         } catch (err) {
             console.error("MyDeviceFrontend Command Error:", err);
             // Revert optimistic update
-            if (previousValue !== undefined) {
-                this.stateCache[property] = previousValue;
-                if (this.onDataCallback) this.onDataCallback({ [property]: previousValue }, 'revert');
+            if (previousState !== null) {
+                this.stateCache = previousState;
+                if (this.onDataCallback) this.onDataCallback(this.stateCache, deviceId || 'revert');
             }
             throw err;
         }

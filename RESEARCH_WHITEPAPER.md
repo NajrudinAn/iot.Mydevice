@@ -95,7 +95,13 @@ This declarative approach automatically registers the device schema with the bac
 #### 6.2 Multi-Language Parity
 The exact same declarative API surface is guaranteed across Python (for Raspberry Pi/Edge Gateways) and Node.js. This ensures that a developer can seamlessly transition from prototyping on an Arduino to deploying industrial Python gateways using identical platform paradigms.
 
----
+#### 6.3 The Javascript Frontend SDK (`mydevice-frontend.js`)
+To compliment the hardware SDKs, MyDevice provides a frontend Javascript SDK that completely abstracts authentication, SSE streaming, and command routing. 
+The SDK features:
+- **Authentication**: Native `login(email, password, appId)` and `signup(...)` static methods for user management.
+- **Connection Resiliency**: Automatic cleanup and reconnection logic based on browser `visibilitychange` events (pausing streams when the tab is hidden to save battery/bandwidth).
+- **Multi-Device Routing**: The `sendCommand` method dynamically handles multi-device API routes by optionally accepting a `deviceId` parameter and mutating the payload seamlessly.
+- **Optimistic UI Updates**: The SDK temporarily caches UI state and triggers immediate frontend callbacks before waiting for network confirmation, falling back if the command fails.
 
 ### 7. Benchmarking and Demonstrations
 The MyDevice platform architecture has been successfully validated across three distinct, real-world demonstration domains:
@@ -112,3 +118,17 @@ All three domains run concurrently on the same MyDevice backend, proving the pla
 MyDevice represents a paradigm shift in IoT platform design. By abstracting the complexities of MQTT, state synchronization, and device management behind dynamic application routes and real-time SSE streams, it functions as a true IoT Backend-as-a-Service (BaaS). The introduction of zero-boilerplate SDKs empowers software developers to build complex, secure, and highly responsive IoT applications using standard web paradigms in record time.
 
 **Future directions** include the integration of Edge AI models for localized anomaly detection (reducing reliance on cloud compute) and expanding the SDK ecosystem to support Rust and Go for highly resource-constrained and concurrent industrial environments.
+
+---
+
+### 9. AI Prompt Reference
+As part of the system development process, Large Language Models (LLMs) were utilized to accelerate boilerplate generation, UI design, and simulation modeling. 
+The following is an example of an AI prompt used to generate the frontend interfaces based on the MyDevice API:
+
+> **System Prompt Example:**
+> "You are building a frontend application that interfaces with the MyDevice IoT backend. 
+> 1. Use the provided `MyDeviceFrontend` SDK (loaded from `https://mydevice.in/sdk/mydevice-frontend.js`).
+> 2. Initialize the SDK with the user's Bearer token and the API Routes (`telemetryRoute`, `commandRoute`).
+> 3. Use `sdk.onData((payload, deviceId) => { ... })` to listen for real-time telemetry changes.
+> 4. Use `sdk.sendCommand(type, payload, deviceId)` to trigger device capabilities. Ensure the command type is UPPERCASE (e.g., 'SET_SORT_WET') as required by the MyDevice schema discovery.
+> 5. Create a visually striking, premium dashboard using Tailwind CSS and FontAwesome, featuring glassmorphism and subtle animations."

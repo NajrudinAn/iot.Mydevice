@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Waste Bin - MyDevice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #064e3b;
+            -webkit-tap-highlight-color: transparent;
+            color: #f8fafc;
+            background-image: radial-gradient(circle at top right, #065f46, transparent 40%),
+                radial-gradient(circle at bottom left, #022c22, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .glass-card {
+            background: rgba(2, 44, 34, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 1.5rem;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .pulse-eco {
+            animation: pulse-eco 2s infinite;
+        }
+
+        @keyframes pulse-eco {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- Login Screen -->
+    <div id="login-modal"
+        class="fixed inset-0 bg-emerald-900/80 backdrop-blur-md flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="glass-card p-8 sm:p-10 max-w-sm w-full slide-up border border-emerald-400/20">
+            <div class="text-center mb-10">
+                <div
+                    class="w-20 h-20 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
+                    <i class="fa-solid fa-leaf text-3xl text-white"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Eco Bin</h2>
+                <p class="text-sm text-emerald-300 mt-2 font-medium">Sign in to monitor your bins</p>
+            </div>
+
+            <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+                <div class="space-y-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-regular fa-envelope text-emerald-500"></i>
+                        </div>
+                        <input type="email" id="email" required
+                            class="w-full bg-emerald-950/50 border border-emerald-500/30 text-white rounded-xl py-3.5 pl-11 pr-4 focus:bg-emerald-900 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all font-medium placeholder:font-normal placeholder-emerald-700"
+                            placeholder="Email address">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-lock text-emerald-500"></i>
+                        </div>
+                        <input type="password" id="password" required
+                            class="w-full bg-emerald-950/50 border border-emerald-500/30 text-white rounded-xl py-3.5 pl-11 pr-4 focus:bg-emerald-900 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all font-medium placeholder:font-normal placeholder-emerald-700"
+                            placeholder="Password">
+                    </div>
+                </div>
+
+                <div id="login-error"
+                    class="hidden text-sm text-red-400 font-semibold text-center bg-red-900/30 py-2 rounded-lg border border-red-500/20">
+                </div>
+
+                <button type="submit" id="login-btn"
+                    class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/30 active:scale-[0.98] mt-4">
+                    Continue
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen pb-20 slide-up">
+        <!-- Header -->
+        <header
+            class="pt-12 pb-6 px-6 sm:px-10 max-w-6xl mx-auto flex justify-between items-end sticky top-0 z-40 bg-[#064e3b]/90 backdrop-blur-xl">
+            <div>
+                <p class="text-emerald-400 font-semibold tracking-wider text-xs uppercase mb-1">Live Dashboard</p>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Smart Eco Bin Network</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex items-center gap-2 bg-emerald-900/60 px-3 py-1.5 rounded-full border border-emerald-500/30">
+                    <div id="connection-indicator"
+                        class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors pulse-eco">
+                    </div>
+                    <span class="text-xs font-semibold text-emerald-200" id="connected-count">Connecting...</span>
+                </div>
+                <button onclick="logout()"
+                    class="w-10 h-10 rounded-full bg-emerald-900/60 border border-emerald-500/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-800 transition-colors">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Devices Container -->
+        <main id="devices-container" class="px-6 sm:px-10 max-w-6xl mx-auto space-y-10 mt-6">
+            <!-- Dynamic Device Templates will be appended here -->
+        </main>
+    </div>
+
+    <!-- Offline Banner -->
+    <div id="offline-banner"
+        class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg font-bold text-sm items-center gap-2 slide-up">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>Some Bins Offline</span>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <!-- Template for a single device -->
+    <template id="device-template">
+        <div class="device-section border border-emerald-500/20 bg-emerald-950/30 rounded-3xl p-6 pb-10"
+            data-device-id="">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <i class="fa-solid fa-trash-can text-emerald-400"></i>
+                    <span class="device-name">Bin ID</span>
+                </h3>
+                <span
+                    class="device-status-badge text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">ONLINE</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Telemetry Card -->
+                <div class="glass-card p-6 md:col-span-2">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                            <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Segregation Stats</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-emerald-950/40 rounded-2xl p-4 border border-emerald-500/10 text-center">
+                            <p class="text-emerald-400 text-xs font-semibold uppercase mb-1">Total</p>
+                            <p class="text-3xl font-black text-white val-total">0</p>
+                        </div>
+                        <div class="bg-blue-900/20 rounded-2xl p-4 border border-blue-500/20 text-center">
+                            <p class="text-blue-400 text-xs font-semibold uppercase mb-1">Wet Waste</p>
+                            <p class="text-3xl font-black text-blue-200 val-wet">0</p>
+                        </div>
+                        <div class="bg-orange-900/20 rounded-2xl p-4 border border-orange-500/20 text-center">
+                            <p class="text-orange-400 text-xs font-semibold uppercase mb-1">Dry Waste</p>
+                            <p class="text-3xl font-black text-orange-200 val-dry">0</p>
+                        </div>
+                        <div
+                            class="bg-emerald-950/40 rounded-2xl p-4 border border-emerald-500/10 text-center relative overflow-hidden">
+                            <div class="absolute bottom-0 left-0 right-0 bg-emerald-500/20 transition-all duration-500 ease-out fill-bar"
+                                style="height: 0%;"></div>
+                            <p class="text-emerald-400 text-xs font-semibold uppercase mb-1 relative z-10">Fill Level
+                            </p>
+                            <p class="text-3xl font-black text-white relative z-10 val-fill">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
+                            <i class="fa-solid fa-microchip text-teal-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">System Status</h2>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div class="flex justify-between items-center pb-4 border-b border-emerald-500/10">
+                            <span class="text-emerald-200 font-medium">Current Action</span>
+                            <span
+                                class="font-bold text-white bg-emerald-500/20 px-3 py-1 rounded-lg val-action transition-all">IDLE</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-4 border-b border-emerald-500/10">
+                            <span class="text-emerald-200 font-medium">Last Command</span>
+                            <span class="font-bold text-white val-lastcmd">NONE</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-4 border-b border-emerald-500/10">
+                            <span class="text-emerald-200 font-medium">Servo Angle (Logical)</span>
+                            <span class="font-bold text-white val-angle">0°</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-4 border-b border-emerald-500/10">
+                            <span class="text-emerald-200 font-medium">Distance Sensor</span>
+                            <span class="font-bold text-white val-dist">0.0 cm</span>
+                        </div>
+                        <div class="flex justify-between items-center pb-4 border-b border-emerald-500/10">
+                            <span class="text-emerald-200 font-medium">AI Confidence</span>
+                            <span class="font-bold text-white val-conf">0.0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-emerald-200 font-medium">Wi-Fi Signal (RSSI)</span>
+                            <span class="font-bold text-white val-rssi">-0 dBm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Controls Card -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                            <i class="fa-solid fa-gamepad text-blue-400"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-white">Manual Override</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <button
+                                class="btn-sort-wet bg-blue-600/30 hover:bg-blue-500/40 border border-blue-500/50 text-blue-100 font-bold py-4 rounded-xl transition-all flex flex-col items-center gap-2">
+                                <i class="fa-solid fa-droplet text-2xl text-blue-400"></i>
+                                <span>Sort Wet</span>
+                            </button>
+                            <button
+                                class="btn-sort-dry bg-orange-600/30 hover:bg-orange-500/40 border border-orange-500/50 text-orange-100 font-bold py-4 rounded-xl transition-all flex flex-col items-center gap-2">
+                                <i class="fa-solid fa-box text-2xl text-orange-400"></i>
+                                <span>Sort Dry</span>
+                            </button>
+                        </div>
+                        <button
+                            class="btn-reset bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-200 font-bold py-4 rounded-xl transition-all flex justify-center items-center gap-2 mt-4 w-full">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            <span>Reset Counters</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const PLATFORM_BASE_URL = window.PLATFORM_BASE_URL || 'http://mydevice.in';
+        const PLATFORM_APP_ID = window.PLATFORM_APP_ID || '3a80e04c-c766-43f3-a1b3-37f9473b7acd';
+
+        // Target routes assigned by the user
+        const ROUTES = {
+            telemetry: '/api/v1/routes/realtime-data-52510e',
+            commands: '/api/v1/routes/command-7b50f9'
+        };
+
+        const BIN_DEPTH_CM = 50.0;
+        let authToken = localStorage.getItem('wasteAuthToken');
+        let streams = [];
+        const activeDevices = new Set();
+        const offlineDevices = new Set();
+
+        window.onload = () => {
+            if (authToken) showDashboard();
+        };
+
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const isError = type === 'error';
+            toast.className = `slide-up px-5 py-3 rounded-2xl shadow-xl font-medium text-sm flex items-center gap-3 ${isError ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-600 text-white'}`;
+            toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-xmark' : 'fa-circle-check'} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            if (PLATFORM_APP_ID === 'REPLACE_WITH_YOUR_WASTE_APP_ID') {
+                const err = document.getElementById('login-error');
+                err.innerText = "Please set PLATFORM_APP_ID in index.html to your actual application ID.";
+                err.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+            btn.textContent = 'Authenticating...'; btn.disabled = true; err.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}/api/applications/${PLATFORM_APP_ID}/auth/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+                });
+                const data = await res.json();
+                if (data.success && data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('wasteAuthToken', authToken);
+                    showDashboard();
+                } else throw new Error(data.message || 'Login failed');
+            } catch (error) {
+                err.innerText = error.message;
+                err.classList.remove('hidden');
+            } finally {
+                btn.textContent = 'Continue';
+                btn.disabled = false;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('wasteAuthToken');
+            authToken = null;
+            streams.forEach(s => s.abort()); streams = [];
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+            activeDevices.clear();
+            offlineDevices.clear();
+            document.getElementById('devices-container').innerHTML = '';
+        }
+
+        function showDashboard() {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            connectSSE(ROUTES.telemetry);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                streams.forEach(s => s.abort());
+                streams = [];
+                document.getElementById('connected-count').innerText = 'Paused (Tab Hidden)';
+                document.getElementById('connection-indicator').className = 'w-2 h-2 rounded-full bg-slate-500 shadow-none transition-colors';
+            } else {
+                if (authToken && streams.length === 0 && !document.getElementById('dashboard').classList.contains('hidden')) {
+                    connectSSE(ROUTES.telemetry);
+                }
+            }
+        });
+
+        function createDeviceUI(deviceId) {
+            if (activeDevices.has(deviceId)) return;
+            const template = document.getElementById('device-template');
+            const clone = template.content.cloneNode(true);
+            const section = clone.querySelector('.device-section');
+
+            section.dataset.deviceId = deviceId;
+            section.querySelector('.device-name').innerText = "Bin: " + deviceId;
+
+            section.querySelector('.btn-sort-wet').addEventListener('click', () => sendCommand(deviceId, 'SET_SORT_WET', { sort_wet: true }));
+            section.querySelector('.btn-sort-dry').addEventListener('click', () => sendCommand(deviceId, 'SET_SORT_DRY', { sort_dry: true }));
+            section.querySelector('.btn-reset').addEventListener('click', () => sendCommand(deviceId, 'SET_RESET_BIN', { reset_bin: true }));
+
+            document.getElementById('devices-container').appendChild(clone);
+            activeDevices.add(deviceId);
+        }
+
+        function updateDeviceStatusBadge(deviceId) {
+            const section = document.querySelector(`.device-section[data-device-id="${deviceId}"]`);
+            if (!section) return;
+            const badge = section.querySelector('.device-status-badge');
+
+            if (offlineDevices.has(deviceId)) {
+                badge.innerText = 'OFFLINE';
+                badge.className = 'device-status-badge text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 text-red-400 border border-red-500/30';
+                section.classList.add('opacity-60');
+            } else {
+                badge.innerText = 'ONLINE';
+                badge.className = 'device-status-badge text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+                section.classList.remove('opacity-60');
+            }
+        }
+
+        async function connectSSE(route) {
+            const controller = new AbortController();
+            streams.push(controller);
+
+            const indicator = document.getElementById('connection-indicator');
+            const connText = document.getElementById('connected-count');
+
+            indicator.className = 'w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-colors pulse-eco';
+            connText.innerText = 'Connecting...';
+
+            try {
+                const res = await fetch(`${PLATFORM_BASE_URL}${route}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}`, 'Accept': 'text/event-stream' },
+                    signal: controller.signal
+                });
+
+                if (!res.ok) throw new Error("SSE connection failed");
+
+                indicator.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] transition-colors';
+                connText.innerText = `${activeDevices.size - offlineDevices.size} Bins Online`;
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const chunks = buffer.split('\n\n');
+                    buffer = chunks.pop();
+
+                    for (const chunk of chunks) {
+                        let eventType = 'message', dataStr = null;
+                        for (const line of chunk.split('\n')) {
+                            if (line.startsWith('event: ')) eventType = line.slice(7).trim();
+                            else if (line.startsWith('data: ')) dataStr = line.slice(6).trim();
+                        }
+                        if (dataStr) {
+                            const parsed = JSON.parse(dataStr);
+                            if (!parsed.deviceId) continue;
+
+                            if (eventType === 'device_data') {
+                                createDeviceUI(parsed.deviceId);
+                                updateUI(parsed.deviceId, parsed.payload);
+                            } else if (eventType === 'device_status') {
+                                createDeviceUI(parsed.deviceId);
+                                const status = parsed.status.toLowerCase();
+                                if (status === 'offline') offlineDevices.add(parsed.deviceId);
+                                else offlineDevices.delete(parsed.deviceId);
+
+                                updateDeviceStatusBadge(parsed.deviceId);
+
+                                const onlineCount = activeDevices.size - offlineDevices.size;
+                                connText.innerText = `${onlineCount} Bin${onlineCount !== 1 ? 's' : ''} Online`;
+
+                                const banner = document.getElementById('offline-banner');
+                                if (offlineDevices.size > 0) {
+                                    banner.classList.remove('hidden'); banner.classList.add('flex');
+                                } else {
+                                    banner.classList.add('hidden'); banner.classList.remove('flex');
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    indicator.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] transition-colors';
+                    connText.innerText = 'Disconnected';
+                    setTimeout(() => connectSSE(route), 3000);
+                }
+            }
+        }
+
+        function updateUI(deviceId, data) {
+            if (!data) return;
+            const section = document.querySelector(`.device-section[data-device-id="${deviceId}"]`);
+            if (!section) return;
+
+            if (data.total_count !== undefined) section.querySelector('.val-total').innerText = data.total_count;
+            if (data.wet_count !== undefined) section.querySelector('.val-wet').innerText = data.wet_count;
+            if (data.dry_count !== undefined) section.querySelector('.val-dry').innerText = data.dry_count;
+
+            if (data.distance_cm !== undefined) {
+                section.querySelector('.val-dist').innerText = parseFloat(data.distance_cm).toFixed(1) + " cm";
+
+                let fillPercent = 0;
+                if (data.distance_cm <= 5) fillPercent = 100;
+                else if (data.distance_cm >= BIN_DEPTH_CM) fillPercent = 0;
+                else {
+                    fillPercent = 100 - ((data.distance_cm - 5) / (BIN_DEPTH_CM - 5) * 100);
+                }
+
+                fillPercent = Math.max(0, Math.min(100, Math.round(fillPercent)));
+                section.querySelector('.val-fill').innerText = fillPercent + "%";
+                const fillBar = section.querySelector('.fill-bar');
+                fillBar.style.height = fillPercent + "%";
+
+                if (fillPercent > 85) fillBar.style.backgroundColor = "rgba(239, 68, 68, 0.4)";
+                else if (fillPercent > 60) fillBar.style.backgroundColor = "rgba(245, 158, 11, 0.4)";
+                else fillBar.style.backgroundColor = "rgba(16, 185, 129, 0.4)";
+            }
+
+            if (data.current_action) {
+                const elAction = section.querySelector('.val-action');
+                elAction.innerText = data.current_action.toUpperCase();
+                if (data.current_action !== "IDLE") {
+                    elAction.className = "font-bold text-white bg-blue-500 px-3 py-1 rounded-lg animate-pulse val-action transition-all";
+                } else {
+                    elAction.className = "font-bold text-white bg-emerald-500/20 px-3 py-1 rounded-lg val-action transition-all";
+                }
+            }
+
+            if (data.last_command) section.querySelector('.val-lastcmd').innerText = data.last_command;
+            if (data.servo_angle_logical !== undefined) section.querySelector('.val-angle').innerText = data.servo_angle_logical + "°";
+            if (data.last_confidence !== undefined) section.querySelector('.val-conf').innerText = parseFloat(data.last_confidence).toFixed(1) + "%";
+            if (data.rssi !== undefined) section.querySelector('.val-rssi').innerText = data.rssi + " dBm";
+        }
+
+        async function sendCommand(deviceId, type, payload) {
+            if (offlineDevices.has(deviceId)) {
+                showToast("Bin is offline. Commands cannot be sent.", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${PLATFORM_BASE_URL}${ROUTES.commands}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+                    body: JSON.stringify({ type: type, payload: payload })
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Command failed');
+                }
+                showToast("Command sent to " + deviceId, "success");
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

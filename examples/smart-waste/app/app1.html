@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Waste (SDK Version)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="../../../frontend/public/sdk/mydevice-frontend.js"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            background-image: radial-gradient(circle at top right, #065f46, transparent 40%),
+                radial-gradient(circle at bottom left, #022c22, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(6, 78, 59, 0.4);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 1.5rem;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-6">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="glass-card p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <i class="fa-solid fa-leaf text-4xl text-emerald-400 mb-4"></i>
+            <h2 class="text-3xl font-bold text-white">Eco Bin Login</h2>
+        </div>
+        <input type="email" id="email" placeholder="Email"
+            class="w-full bg-emerald-950/50 border border-emerald-500/30 rounded-xl px-4 py-3 mb-4 text-white focus:outline-none focus:border-emerald-400">
+        <input type="password" id="password" placeholder="Password"
+            class="w-full bg-emerald-950/50 border border-emerald-500/30 rounded-xl px-4 py-3 mb-6 text-white focus:outline-none focus:border-emerald-400">
+        <button onclick="handleLogin()"
+            class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 rounded-xl transition-colors">Login</button>
+        <p id="login-error" class="text-red-400 text-center mt-4 hidden"></p>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="w-full max-w-5xl hidden flex-col gap-6">
+        <header
+            class="flex justify-between items-center bg-emerald-900/40 p-6 rounded-3xl border border-emerald-500/20 backdrop-blur-xl">
+            <h1 class="text-3xl font-bold text-white"><i class="fa-solid fa-recycle text-emerald-400 mr-3"></i>Smart Bin
+                Network</h1>
+            <div id="status-badge"
+                class="px-4 py-2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-sm font-bold">
+                Connecting...</div>
+        </header>
+
+        <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Devices will be cloned here -->
+        </div>
+    </div>
+
+    <!-- Template for a Device Card -->
+    <template id="device-template">
+        <div class="glass-card p-6 flex flex-col gap-6 device-card" data-device-id="">
+            <div class="flex justify-between items-center border-b border-emerald-500/20 pb-4">
+                <h3 class="text-xl font-bold text-white device-name">Bin</h3>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">ONLINE</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/10 text-center">
+                    <p class="text-xs text-emerald-400 uppercase font-semibold mb-1">Distance</p>
+                    <p class="text-2xl font-bold val-dist">0 cm</p>
+                </div>
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/10 text-center">
+                    <p class="text-xs text-blue-400 uppercase font-semibold mb-1">Wet Waste</p>
+                    <p class="text-2xl font-bold val-wet">0</p>
+                </div>
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/10 text-center">
+                    <p class="text-xs text-orange-400 uppercase font-semibold mb-1">Dry Waste</p>
+                    <p class="text-2xl font-bold val-dry">0</p>
+                </div>
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/10 text-center">
+                    <p class="text-xs text-emerald-400 uppercase font-semibold mb-1">AI Confidence</p>
+                    <p class="text-2xl font-bold val-conf">0%</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 mt-2">
+                <button
+                    class="btn-wet bg-blue-600/30 hover:bg-blue-500/40 border border-blue-500/50 py-3 rounded-lg text-blue-100 font-bold transition">Sort
+                    Wet</button>
+                <button
+                    class="btn-dry bg-orange-600/30 hover:bg-orange-500/40 border border-orange-500/50 py-3 rounded-lg text-orange-100 font-bold transition">Sort
+                    Dry</button>
+                <button
+                    class="btn-reset bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 py-3 rounded-lg text-red-200 font-bold transition">Reset</button>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        const APP_ID = window.PLATFORM_APP_ID || '3a80e04c-c766-43f3-a1b3-37f9473b7acd';
+        const BASE_URL = window.PLATFORM_BASE_URL || 'http://mydevice.in';
+
+        const ROUTES = {
+            telemetryRoute: '/api/v1/routes/realtime-data-52510e',
+            commandRoute: '/api/v1/routes/command-7b50f9'
+        };
+
+        let sdk = null;
+        const activeDevices = new Set();
+
+        // Check if already logged in
+        const existingToken = localStorage.getItem('wasteSdkToken');
+        if (existingToken) {
+            initApp(existingToken);
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('login-error');
+
+            try {
+                errorEl.classList.add('hidden');
+                // Use the new SDK Static Method
+                const token = await MyDeviceFrontend.login(email, password, APP_ID, BASE_URL);
+                localStorage.setItem('wasteSdkToken', token);
+                initApp(token);
+            } catch (err) {
+                errorEl.innerText = err.message;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function initApp(token) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('flex');
+
+            // Initialize the SDK
+            sdk = new MyDeviceFrontend({
+                token: token,
+                baseUrl: BASE_URL,
+                telemetryRoute: ROUTES.telemetryRoute,
+                commandRoute: ROUTES.commandRoute
+            });
+
+            // Handle Connection Status
+            sdk.onStatus((statusObj) => {
+                const badge = document.getElementById('status-badge');
+                if (statusObj.status === 'CONNECTED') {
+                    badge.innerText = 'Live Feed Connected';
+                    badge.className = 'px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-sm font-bold';
+                } else {
+                    badge.innerText = statusObj.status;
+                    badge.className = 'px-4 py-2 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-sm font-bold';
+                }
+            });
+
+            // Handle Incoming Telemetry
+            sdk.onData((payload, deviceId) => {
+                // If it's a single device route, deviceId might be undefined, so fallback to a default
+                const id = deviceId || 'BIN-PRIMARY';
+                createDeviceCard(id);
+                updateDeviceCard(id, payload);
+            });
+
+            // Start Realtime Stream
+            sdk.connectRealtime();
+        }
+
+        function createDeviceCard(deviceId) {
+            if (activeDevices.has(deviceId)) return;
+
+            const template = document.getElementById('device-template');
+            const clone = template.content.cloneNode(true);
+            const card = clone.querySelector('.device-card');
+
+            card.dataset.deviceId = deviceId;
+            card.querySelector('.device-name').innerText = "Smart Bin: " + deviceId;
+
+            // Wire up command buttons using the SDK
+            // We pass deviceId only if dealing with a multi-device route; the SDK handles it!
+            card.querySelector('.btn-wet').addEventListener('click', () =>
+                sdk.sendCommand('SET_SORT_WET', { sort_wet: true }, deviceId)
+            );
+            card.querySelector('.btn-dry').addEventListener('click', () =>
+                sdk.sendCommand('SET_SORT_DRY', { sort_dry: true }, deviceId)
+            );
+            card.querySelector('.btn-reset').addEventListener('click', () =>
+                sdk.sendCommand('SET_RESET_BIN', { reset_bin: true }, deviceId)
+            );
+
+            document.getElementById('devices-container').appendChild(clone);
+            activeDevices.add(deviceId);
+        }
+
+        function updateDeviceCard(deviceId, data) {
+            const card = document.querySelector(`.device-card[data-device-id="${deviceId}"]`);
+            if (!card) return;
+
+            if (data.distance_cm !== undefined) card.querySelector('.val-dist').innerText = parseFloat(data.distance_cm).toFixed(1) + " cm";
+            if (data.wet_count !== undefined) card.querySelector('.val-wet').innerText = data.wet_count;
+            if (data.dry_count !== undefined) card.querySelector('.val-dry').innerText = data.dry_count;
+            if (data.last_confidence !== undefined) card.querySelector('.val-conf').innerText = parseFloat(data.last_confidence).toFixed(1) + "%";
+        }
+    </script>
+</body>
+
+</html>
